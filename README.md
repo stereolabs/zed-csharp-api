@@ -20,7 +20,7 @@ This repository shows how to use the ZED SDK functionalities in C#.
 
 The C++ to C# is done the following way : 
 - A C interface to the ZED SDK is provided in the Resources folder (sl_zed_interface.dll)
-- A .NET wrapper Stereolabs.zed that import the function from the dll interface must be built. 
+- A .NET wrapper Stereolabs.zed that import the function from the dll interface (must be built) 
 - You can then use the functions of the .NET wrapper in your program.
 
 
