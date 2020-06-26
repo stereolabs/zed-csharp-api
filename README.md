@@ -12,7 +12,7 @@ This repository shows how to use the ZED SDK functionalities in C#.
 - **Windows** 10 64bits or later
 - Visual Studio 2017 with C# extensions
 - Cmake 3.8 at least (Support of C#)
-- [ZED SDK **3.1**](https://www.stereolabs.com/developers/release/) and its dependency ([CUDA](https://developer.nvidia.com/cuda-downloads))
+- [ZED SDK **3.2**](https://www.stereolabs.com/developers/release/) and its dependency ([CUDA](https://developer.nvidia.com/cuda-downloads))
 
 ## Instructions
 
