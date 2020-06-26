@@ -19,8 +19,11 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION 
 set(CMAKE_CSharp_FLAGS "/langversion:7")
 
 
-set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_REFERENCE_Stereolabs.zed "D:/SDK/ZED_SDK/zed-csharp/Stereolabs.zed/build/Release/Stereolabs.zed.dll")
- 
+SET(DIR_ZED_SDK_BINAIRIES $ENV{ZED_SDK_ROOT_DIR}/bin)	 
+set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_REFERENCE_Stereolabs.zed "${DIR_ZED_SDK_BINAIRIES}/Stereolabs.zed.dll")
+set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_REFERENCE_sl_zed_interface "${DIR_ZED_SDK_BINAIRIES}/sl_zed_interface.dll")
+
+
 set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_REFERENCES
         "Microsoft.CSharp"
         "PresentationCore"

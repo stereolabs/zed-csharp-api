@@ -34,7 +34,7 @@ namespace sl
 	{
 		MAX_CAMERA_PLUGIN = 4,
 		PLANE_DISTANCE = 10,
-        MAX_OBJECTS = 200
+        MAX_OBJECTS = 100
     };
 
     /// <summary>
@@ -1454,7 +1454,7 @@ namespace sl
     /// Object Scene data directly from the ZED SDK. Represents all detections given during a single image frame. 
     /// See DetectionFrame for an abstracted version with helper functions that make this data easier to use in Unity. 
     /// Contains the number of object in the scene and the objectData structure for each object.
-    /// Since the data is transmitted from C++ to C#, the size of the structure must be constant. Therefore, there is a limitation of 200 (MAX_OBJECT constant) objects in the image.
+    /// Since the data is transmitted from C++ to C#, the size of the structure must be constant. Therefore, there is a limitation of 100 (MAX_OBJECT constant) objects in the image.
     /// <c> This number cannot be changed.<c>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
