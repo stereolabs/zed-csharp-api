@@ -90,6 +90,9 @@
                             <a href="sl.BarometerData.html" title="BarometerData" class="">BarometerData</a>
                           </li>
                           <li class="">
+                            <a href="sl.BODY_PARTS.html" title="BODY_PARTS" class="">BODY_PARTS</a>
+                          </li>
+                          <li class="">
                             <a href="sl.CalibrationParameters.html" title="CalibrationParameters" class="">CalibrationParameters</a>
                           </li>
                           <li class="">
@@ -118,6 +121,9 @@
                           </li>
                           <li class="">
                             <a href="sl.DEPTH_MODE.html" title="DEPTH_MODE" class="">DEPTH_MODE</a>
+                          </li>
+                          <li class="">
+                            <a href="sl.DETECTION_MODEL.html" title="DETECTION_MODEL" class="">DETECTION_MODEL</a>
                           </li>
                           <li class="">
                             <a href="sl.dll_ObjectDetectionParameters.html" title="dll_ObjectDetectionParameters" class="">dll_ObjectDetectionParameters</a>
@@ -338,6 +344,54 @@ See DetectedObject for an abstracted version with helper functions that make thi
   </table>
   
   
+  <h4 id="sl_ObjectDataSDK_headBoundingBox" data-uid="sl.ObjectDataSDK.headBoundingBox">headBoundingBox</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Vector3[] headBoundingBox</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Numerics.Vector3</span>[]</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  
+  
+  <h4 id="sl_ObjectDataSDK_headWorldPosition" data-uid="sl.ObjectDataSDK.headWorldPosition">headWorldPosition</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Vector3 headWorldPosition</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Numerics.Vector3</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  
+  
   <h4 id="sl_ObjectDataSDK_id" data-uid="sl.ObjectDataSDK.id">id</h4>
   <div class="markdown level1 summary"></div>
   <div class="markdown level1 conceptual"></div>
@@ -414,12 +468,36 @@ image height to get the height relative to the bottom. </p>
   </table>
   
   
-  <h4 id="sl_ObjectDataSDK_obj_track_state" data-uid="sl.ObjectDataSDK.obj_track_state">obj_track_state</h4>
+  <h4 id="sl_ObjectDataSDK_objectClass" data-uid="sl.ObjectDataSDK.objectClass">objectClass</h4>
   <div class="markdown level1 summary"></div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public OBJECT_TRACK_STATE obj_track_state</code></pre>
+    <pre><code class="lang-csharp hljs">public OBJECT_CLASS objectClass</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="sl.OBJECT_CLASS.html">OBJECT_CLASS</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  
+  
+  <h4 id="sl_ObjectDataSDK_objectTrackingState" data-uid="sl.ObjectDataSDK.objectTrackingState">objectTrackingState</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public OBJECT_TRACK_STATE objectTrackingState</code></pre>
   </div>
   <h5 class="fieldValue">Field Value</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -438,12 +516,12 @@ image height to get the height relative to the bottom. </p>
   </table>
   
   
-  <h4 id="sl_ObjectDataSDK_obj_type" data-uid="sl.ObjectDataSDK.obj_type">obj_type</h4>
+  <h4 id="sl_ObjectDataSDK_position_covariance" data-uid="sl.ObjectDataSDK.position_covariance">position_covariance</h4>
   <div class="markdown level1 summary"></div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public OBJECT_CLASS obj_type</code></pre>
+    <pre><code class="lang-csharp hljs">public float[] position_covariance</code></pre>
   </div>
   <h5 class="fieldValue">Field Value</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -455,7 +533,7 @@ image height to get the height relative to the bottom. </p>
     </thead>
     <tbody>
       <tr>
-        <td><a class="xref" href="sl.OBJECT_CLASS.html">OBJECT_CLASS</a></td>
+        <td><span class="xref">System.Single</span>[]</td>
         <td></td>
       </tr>
     </tbody>
@@ -505,6 +583,31 @@ image height to get the height relative to the bottom. </p>
     <tbody>
       <tr>
         <td><span class="xref">System.Numerics.Vector3</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  
+  
+  <h4 id="sl_ObjectDataSDK_skeletonJointPosition" data-uid="sl.ObjectDataSDK.skeletonJointPosition">skeletonJointPosition</h4>
+  <div class="markdown level1 summary"><p>The 3D position of skeleton joints</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Vector3[] skeletonJointPosition</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Numerics.Vector3</span>[]</td>
         <td></td>
       </tr>
     </tbody>

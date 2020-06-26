@@ -90,6 +90,9 @@
                             <a href="sl.BarometerData.html" title="BarometerData" class="">BarometerData</a>
                           </li>
                           <li class="">
+                            <a href="sl.BODY_PARTS.html" title="BODY_PARTS" class="">BODY_PARTS</a>
+                          </li>
+                          <li class="">
                             <a href="sl.CalibrationParameters.html" title="CalibrationParameters" class="">CalibrationParameters</a>
                           </li>
                           <li class="">
@@ -118,6 +121,9 @@
                           </li>
                           <li class="">
                             <a href="sl.DEPTH_MODE.html" title="DEPTH_MODE" class="">DEPTH_MODE</a>
+                          </li>
+                          <li class="">
+                            <a href="sl.DETECTION_MODEL.html" title="DETECTION_MODEL" class="">DETECTION_MODEL</a>
                           </li>
                           <li class="">
                             <a href="sl.dll_ObjectDetectionParameters.html" title="dll_ObjectDetectionParameters" class="">dll_ObjectDetectionParameters</a>
@@ -1067,13 +1073,13 @@ Once destroyed, you need to recreate a camera instance to restart again.</p>
   
   
   <a id="sl_ZEDCamera_EnableRecording_" data-uid="sl.ZEDCamera.EnableRecording*"></a>
-  <h4 id="sl_ZEDCamera_EnableRecording_System_String_sl_SVO_COMPRESSION_MODE_" data-uid="sl.ZEDCamera.EnableRecording(System.String,sl.SVO_COMPRESSION_MODE)">EnableRecording(String, SVO_COMPRESSION_MODE)</h4>
+  <h4 id="sl_ZEDCamera_EnableRecording_System_String_sl_SVO_COMPRESSION_MODE_System_Int32_System_Int32_System_Boolean_" data-uid="sl.ZEDCamera.EnableRecording(System.String,sl.SVO_COMPRESSION_MODE,System.Int32,System.Int32,System.Boolean)">EnableRecording(String, SVO_COMPRESSION_MODE, Int32, Int32, Boolean)</h4>
   <div class="markdown level1 summary"><p>Creates a file for recording the ZED&apos;s output into a .SVO or .AVI video.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public ERROR_CODE EnableRecording(string videoFileName, SVO_COMPRESSION_MODE compressionMode = SVO_COMPRESSION_MODE.H264_BASED)</code></pre>
+    <pre><code class="lang-csharp hljs">public ERROR_CODE EnableRecording(string videoFileName, SVO_COMPRESSION_MODE compressionMode = SVO_COMPRESSION_MODE.H264_BASED, int bitrate = 0, int target_fps = 0, bool transcode = false)</code></pre>
   </div>
   <h5 class="parameters">Parameters</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -1097,6 +1103,24 @@ Once destroyed, you need to recreate a camera instance to restart again.</p>
         <td><p>How much compression to use</p>
 </td>
       </tr>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><span class="parametername">bitrate</span></td>
+        <td><p>Override default bitrate with a custom bitrate (Kbits/s)</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><span class="parametername">target_fps</span></td>
+        <td><p>Use another fps than camera fps. Must respect camera_fps%target_fps == 0</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">transcode</span></td>
+        <td><p>If input is in streaming mode, dump directly into SVO file (transcode=false) or decode/encode (transcode=true)</p>
+</td>
+      </tr>
     </tbody>
   </table>
   <h5 class="returns">Returns</h5>
@@ -1115,7 +1139,7 @@ Once destroyed, you need to recreate a camera instance to restart again.</p>
       </tr>
     </tbody>
   </table>
-  <h5 id="sl_ZEDCamera_EnableRecording_System_String_sl_SVO_COMPRESSION_MODE__remarks">Remarks</h5>
+  <h5 id="sl_ZEDCamera_EnableRecording_System_String_sl_SVO_COMPRESSION_MODE_System_Int32_System_Int32_System_Boolean__remarks">Remarks</h5>
   <div class="markdown level1 remarks"><p>An SVO is Stereolabs&apos; own format designed for the ZED. It holds the video feed with timestamps
 as well as info about the camera used to record it.</p>
 </div>
@@ -1178,13 +1202,13 @@ as well as info about the camera used to record it.</p>
   
   
   <a id="sl_ZEDCamera_EnableStreaming_" data-uid="sl.ZEDCamera.EnableStreaming*"></a>
-  <h4 id="sl_ZEDCamera_EnableStreaming_sl_STREAMING_CODEC_System_UInt32_System_UInt16_System_Int32_System_Boolean_System_Int32_" data-uid="sl.ZEDCamera.EnableStreaming(sl.STREAMING_CODEC,System.UInt32,System.UInt16,System.Int32,System.Boolean,System.Int32)">EnableStreaming(STREAMING_CODEC, UInt32, UInt16, Int32, Boolean, Int32)</h4>
+  <h4 id="sl_ZEDCamera_EnableStreaming_sl_STREAMING_CODEC_System_UInt32_System_UInt16_System_Int32_System_Boolean_System_Int32_System_Int32_" data-uid="sl.ZEDCamera.EnableStreaming(sl.STREAMING_CODEC,System.UInt32,System.UInt16,System.Int32,System.Boolean,System.Int32,System.Int32)">EnableStreaming(STREAMING_CODEC, UInt32, UInt16, Int32, Boolean, Int32, Int32)</h4>
   <div class="markdown level1 summary"><p>Creates an streaming pipeline.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public ERROR_CODE EnableStreaming(STREAMING_CODEC codec = STREAMING_CODEC.AVCHD_BASED, uint bitrate = 8000U, ushort port = 30000, int gopSize = -1, bool adaptativeBitrate = false, int chunk_size = 32768)</code></pre>
+    <pre><code class="lang-csharp hljs">public ERROR_CODE EnableStreaming(STREAMING_CODEC codec = STREAMING_CODEC.AVCHD_BASED, uint bitrate = 8000U, ushort port = 30000, int gopSize = -1, bool adaptativeBitrate = false, int chunk_size = 8096, int target_fps = 0)</code></pre>
   </div>
   <h5 class="parameters">Parameters</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -1224,6 +1248,11 @@ as well as info about the camera used to record it.</p>
       <tr>
         <td><span class="xref">System.Int32</span></td>
         <td><span class="parametername">chunk_size</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><span class="parametername">target_fps</span></td>
         <td></td>
       </tr>
     </tbody>
