@@ -807,8 +807,9 @@ namespace sl
         }
 
 
-        public ZEDCamera()
+        public ZEDCamera(int id)
         {
+            CameraID = id;
         }
         /// <summary>
         /// Checks if the ZED camera is plugged in and  opens it.

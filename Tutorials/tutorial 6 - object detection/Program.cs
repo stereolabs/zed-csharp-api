@@ -16,7 +16,7 @@ namespace sl
             init_params.coordinateSystem = COORDINATE_SYSTEM.RIGHT_HANDED_Y_UP;
             init_params.depthMode = DEPTH_MODE.PERFORMANCE;
 
-            ZEDCamera zedCamera = new ZEDCamera();
+            ZEDCamera zedCamera = new ZEDCamera(0);
             // Open the camera
             ERROR_CODE err = zedCamera.Init(ref init_params);
             if (err != ERROR_CODE.SUCCESS)

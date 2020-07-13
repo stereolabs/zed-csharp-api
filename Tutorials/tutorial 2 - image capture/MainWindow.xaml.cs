@@ -28,7 +28,7 @@ namespace Image_capture
         private CancellationTokenSource tokenSource = new CancellationTokenSource();
         private VIEW view = VIEW.LEFT;
         private RuntimeParameters runtimeParameters = new RuntimeParameters();
-        private ZEDCamera zedCamera = new ZEDCamera();
+        private ZEDCamera zedCamera = new ZEDCamera(0);
         bool isRunning = false;
 
         private void control_Closing(object sender, System.ComponentModel.CancelEventArgs e)
