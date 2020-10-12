@@ -31,7 +31,7 @@ namespace sl
 
             // Enable Object Detection
             dll_ObjectDetectionParameters object_detection_parameters = new dll_ObjectDetectionParameters();
-            object_detection_parameters.detectionModel = sl.DETECTION_MODEL.MULTI_CLASS_BOX;
+            object_detection_parameters.detectionModel = sl.DETECTION_MODEL.MULTI_CLASS_BOX_ACCURATE;
             object_detection_parameters.enableObjectTracking = true;
             err = zedCamera.EnableObjectsDetection(ref object_detection_parameters);
             if (err != ERROR_CODE.SUCCESS)
@@ -42,9 +42,20 @@ namespace sl
 
             // Create Object Detection frame handle (contains all the objects data)
             sl.ObjectsFrameSDK object_frame = new sl.ObjectsFrameSDK();
+
             // Create object detection runtime parameters (confidence, ...)
             dll_ObjectDetectionRuntimeParameters obj_runtime_parameters = new dll_ObjectDetectionRuntimeParameters();
-            obj_runtime_parameters.detectionConfidenceThreshold = 50;
+            // To select a set of specific object classes:
+            /*obj_runtime_parameters.objectClassFilter = new int[(int)OBJECT_CLASS.LAST];
+            obj_runtime_parameters.objectClassFilter[(int)sl.OBJECT_CLASS.PERSON] = Convert.ToInt32(true);
+            obj_runtime_parameters.objectClassFilter[(int)sl.OBJECT_CLASS.VEHICLE] = Convert.ToInt32(true);*/
+
+            // default detection threshold, apply to all object class
+            obj_runtime_parameters.detectionConfidenceThreshold = 20;
+            // To set a specific threshold
+            obj_runtime_parameters.object_confidence_threshold = new int[(int)OBJECT_CLASS.LAST];
+            obj_runtime_parameters.object_confidence_threshold[(int)sl.OBJECT_CLASS.PERSON] = 20;
+            obj_runtime_parameters.object_confidence_threshold[(int)sl.OBJECT_CLASS.VEHICLE] = 40;
 
 
             int i = 0;

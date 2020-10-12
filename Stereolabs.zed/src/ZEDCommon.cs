@@ -2,6 +2,7 @@
 
 using System.Runtime.InteropServices;
 using System.Numerics;
+using System;
 
 namespace sl
 {
@@ -45,6 +46,17 @@ namespace sl
 	{
 		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 9)]
 		public float[] m; //3x3 matrix.
+
+        public float3 multiply(float3 a)
+        {
+            float3 result = new float3();
+
+            result.x = m[0] * a.x + m[1] * a.y + m[2] * a.z;
+            result.y = m[3] * a.x + m[4] * a.y + m[5] * a.z;
+            result.z = m[6] * a.x + m[7] * a.y + m[8] * a.z;
+
+            return result;
+        }
 	};
 
     /// <summary>
@@ -180,11 +192,11 @@ namespace sl
         public ulong timestamp;
         /// <summary>
         /// Magnetic field calibrated values in uT
-        /// </summary>     
+        /// </summary>
         public Vector3 magneticField;
         /// <summary>
         /// Magnetic field raw values in uT
-        /// </summary>        
+        /// </summary>
         public Vector3 magneticFieldUncalibrated;
      };
 
@@ -573,7 +585,7 @@ namespace sl
         /// <summary>
         /// an error occur while tracking objects
         /// </summary>
-        AI_UNKNOWN_ERROR, 
+        AI_UNKNOWN_ERROR,
         /// <summary>
         /// End of ERROR_CODE
         /// </summary>
@@ -764,7 +776,7 @@ namespace sl
         /// </summary>
         EXPOSURE,
         /// <summary>
-        /// Auto-exposure and auto gain. Setting this to true switches on both. Assigning a specifc value to GAIN or EXPOSURE will set this to 0. 
+        /// Auto-exposure and auto gain. Setting this to true switches on both. Assigning a specifc value to GAIN or EXPOSURE will set this to 0.
         /// </summary>
         AEC_AGC,
         /// <summary>
@@ -1060,7 +1072,7 @@ namespace sl
     /// Struct containing all parameters passed to the SDK when initializing the ZED.
     /// These parameters will be fixed for the whole execution life time of the camera.
     /// <remarks>For more details, see the InitParameters class in the SDK API documentation:
-    /// https://www.stereolabs.com/developers/documentation/API/v2.5.1/structsl_1_1InitParameters.html 
+    /// https://www.stereolabs.com/developers/documentation/API/v2.5.1/structsl_1_1InitParameters.html
     /// </remarks>
     /// </summary>
     public class InitParameters
@@ -1112,7 +1124,7 @@ namespace sl
         /// <summary>
         ///  Defines if images are horizontally flipped.
         /// </summary>
-        public bool cameraImageFlip;
+        public FLIP_MODE cameraImageFlip;
         /// <summary>
         /// Defines if measures relative to the right sensor should be computed (needed for MEASURE_<XXX>_RIGHT).
         /// </summary>
@@ -1155,7 +1167,7 @@ namespace sl
         /// </summary>
         public ushort portStream = 30000;
         /// <summary>
-        /// Whether to enable improved color/gamma curves added in ZED SDK 3.0. 
+        /// Whether to enable improved color/gamma curves added in ZED SDK 3.0.
         /// </summary>
         public bool enableImageEnhancement = true;
 
@@ -1175,7 +1187,7 @@ namespace sl
             this.depthMode = DEPTH_MODE.PERFORMANCE;
             this.depthMinimumDistance = -1;
             this.depthMaximumDistance = -1;
-            this.cameraImageFlip = false;
+            this.cameraImageFlip = FLIP_MODE.AUTO;
             this.cameraDisableSelfCalib = false;
             this.sdkVerbose = false;
             this.sdkGPUId = -1;
@@ -1216,7 +1228,12 @@ namespace sl
         /// <summary>
         /// Left-Handed with Z axis pointing up and X forward. Used in Unreal Engine.
         /// </summary>
-        LEFT_HANDED_Z_UP
+        LEFT_HANDED_Z_UP,
+        /// <summary>
+        /// Right-Handed with Z pointing up and X forward. Used in ROS (REP 103)
+        /// </summary>
+        RIGHT_HANDED_Z_UP_X_FWD
+
     }
 
     /// <summary>
@@ -1274,7 +1291,7 @@ namespace sl
         /// </summary>
         public int confidenceThreshold;
         /// <summary>
-        /// Defines texture confidence threshold for the depth. Based on textureness confidence. 
+        /// Defines texture confidence threshold for the depth. Based on textureness confidence.
         /// </summary>
         public int textureConfidenceThreshold;
 
@@ -1330,7 +1347,15 @@ namespace sl
 		USB_DEVICE_STEREOLABS
 	};
 
-
+    /// <summary>
+    ///brief Lists available compression modes for SVO recording.
+    /// </summary>
+    public enum FLIP_MODE
+    {
+        OFF = 0,  ///  default behavior.
+        ON = 1,   /// Images and camera sensors data are flipped, useful when your camera is mounted upside down.
+        AUTO = 2, /// in live mode: use the camera orientation (if an IMU is available) to set the flip mode, in SVO mode, read the state of this enum when recorded
+    };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////  Object Detection /////////////////////////////////////////////
@@ -1349,14 +1374,16 @@ namespace sl
         [MarshalAs(UnmanagedType.U1)]
         public bool enableObjectTracking;
         /// <summary>
-        /// Defines if the SDK will calculate 2D masks for each object. Requires more performance, so don't enable if you don't need these masks. 
+        /// Defines if the SDK will calculate 2D masks for each object. Requires more performance, so don't enable if you don't need these masks.
         /// </summary>
         [MarshalAs(UnmanagedType.U1)]
         public bool enable2DMask;
         /// <summary>
-        /// Defines the AI model used for detection 
+        /// Defines the AI model used for detection
         /// </summary>
         public sl.DETECTION_MODEL detectionModel;
+
+        public bool enable_body_fitting;
     };
 
 
@@ -1373,177 +1400,229 @@ namespace sl
         /// <summary>
         ///  
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst =2)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = (int)sl.OBJECT_CLASS.LAST)]
         public int[] objectClassFilter;
+
+        /// <summary>
+        ///  
+        /// </summary>
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = (int)sl.OBJECT_CLASS.LAST)]
+        public int[] object_confidence_threshold;
     };
 
+		/// <summary>
+		/// Object data structure directly from the SDK. Represents a single object detection.
+		/// See DetectedObject for an abstracted version with helper functions that make this data easier to use in Unity.
+		/// </summary>
+		[StructLayout(LayoutKind.Sequential)]
+		public struct ObjectDataSDK
+		{
+		    //public int valid; //is Data Valid
+		    public int id; //person ID
+		    public sl.OBJECT_CLASS objectClass;
+            public sl.OBJECT_SUBCLASS objectSubClass;
+		    public sl.OBJECT_TRACK_STATE objectTrackingState;
+		    public sl.OBJECT_ACTION_STATE actionState;
+		    public float confidence;
+
+		    public System.IntPtr mask;
+
+		    /// <summary>
+		    /// Image data.
+		    /// Note that Y in these values is relative from the top of the image, whereas the opposite is true
+		    /// in most related Unity functions. If using this raw value, subtract Y from the
+		    /// image height to get the height relative to the bottom.
+		    /// </summary>
+		    ///  0 ------- 1
+		    ///  |   obj   |
+		    ///  3-------- 2
+		    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+		    public Vector2[] imageBoundingBox;
+
+
+		    /// <summary>
+		    /// 3D space data (Camera Frame since this is what we used in Unity)
+		    /// </summary>
+		    public Vector3 rootWorldPosition; //object root position
+		    public Vector3 headWorldPosition; //object head position (only for HUMAN detectionModel)
+		    public Vector3 rootWorldVelocity; //object root velocity
+
+
+		    /// <summary>
+		    /// The 3D space bounding box. given as array of vertices
+		    /// </summary>
+		    ///   1 ---------2
+		    ///  /|         /|
+		    /// 0 |--------3 |
+		    /// | |        | |
+		    /// | 5--------|-6
+		    /// |/         |/
+		    /// 4 ---------7
+		    ///
+		    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+		    public Vector3[] worldBoundingBox; // 3D Bounding Box of object
+		    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+		    public Vector3[] headBoundingBox;// 3D Bounding Box of head (only for HUMAN detectionModel)
+
+
+
+		    /// <summary>
+		    /// The 3D position of skeleton joints
+		    /// </summary>
+
+		    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 18)]
+		    public Vector3[] skeletonJointPosition;// 3D position of the joints of the skeleton
+
+
+		    // Full covariance matrix for position (3x3). Only 6 values are necessary
+		    // [p0, p1, p2]
+		    // [p1, p3, p4]
+		    // [p2, p4, p5]
+		    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
+		    public float[] position_covariance;// covariance matrix of the 3d position, represented by its upper triangular matrix value
+		};
+
+
+
+		/// <summary>
+		/// Object Scene data directly from the ZED SDK. Represents all detections given during a single image frame.
+		/// See DetectionFrame for an abstracted version with helper functions that make this data easier to use in Unity.
+		/// Contains the number of object in the scene and the objectData structure for each object.
+		/// Since the data is transmitted from C++ to C#, the size of the structure must be constant. Therefore, there is a limitation of 200 (MAX_OBJECT constant) objects in the image.
+		/// <c> This number cannot be changed.<c>
+		/// </summary>
+		[StructLayout(LayoutKind.Sequential)]
+		public struct ObjectsFrameSDK
+		{
+		    /// <summary>
+		    /// How many objects were detected this frame. Use this to iterate through the top of objectData; objects with indexes greater than numObject are empty.
+		    /// </summary>
+		    public int numObject;
+		    /// <summary>
+		    /// Timestamp of the image where these objects were detected.
+		    /// </summary>
+		    public ulong timestamp;
+		    /// <summary>
+		    /// Defines if the object frame is new (new timestamp)
+		    /// </summary>
+		    public int isNew;
+		    /// <summary>
+		    /// Defines if the object is tracked
+		    /// </summary>
+		    public int isTracked;
+		    /// <summary>
+		    /// Current detection model used.
+		    /// </summary>
+		    public sl.DETECTION_MODEL detectionModel;
+		    /// <summary>
+		    /// Array of objects
+		    /// </summary>
+		    [MarshalAs(UnmanagedType.ByValArray, SizeConst = (int)(Constant.MAX_OBJECTS))]
+		    public ObjectDataSDK[] objectData;
+		};
+
     /// <summary>
-    /// Object data structure directly from the SDK. Represents a single object detection. 
-    /// See DetectedObject for an abstracted version with helper functions that make this data easier to use in Unity. 
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    public struct ObjectDataSDK
-    {
-        //public int valid; //is Data Valid
-        public int id; //person ID
-        public sl.OBJECT_CLASS objectClass;
-        public sl.OBJECT_TRACK_STATE objectTrackingState;
-        public float confidence;
-
-        public System.IntPtr mask;
-
-        /// <summary>
-        /// Image data.
-        /// Note that Y in these values is relative from the top of the image, whereas the opposite is true 
-        /// in most related Unity functions. If using this raw value, subtract Y from the 
-        /// image height to get the height relative to the bottom. 
-        /// </summary>
-        ///  0 ------- 1
-        ///  |   obj   |
-        ///  3-------- 2
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-        public Vector2[] imageBoundingBox;
-
-
-        /// <summary>
-        /// 3D space data (Camera Frame since this is what we used in Unity)
-        /// </summary>
-        public Vector3 rootWorldPosition; //object root position
-        public Vector3 headWorldPosition; //object head position (only for HUMAN detectionModel)
-        public Vector3 rootWorldVelocity; //object root velocity
-
-
-        /// <summary>
-        /// The 3D space bounding box. given as array of vertices
-        /// </summary>
-        ///   1 ---------2  
-        ///  /|         /|
-        /// 0 |--------3 |
-        /// | |        | |
-        /// | 5--------|-6
-        /// |/         |/
-        /// 4 ---------7
-        /// 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-        public Vector3[] worldBoundingBox; // 3D Bounding Box of object
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-        public Vector3[] headBoundingBox;// 3D Bounding Box of head (only for HUMAN detectionModel)
-
-
-
-        /// <summary>
-        /// The 3D position of skeleton joints
-        /// </summary>
-
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 18)]
-        public Vector3[] skeletonJointPosition;// 3D position of the joints of the skeleton
-
-
-        // Full covariance matrix for position (3x3). Only 6 values are necessary
-        // [p0, p1, p2]
-        // [p1, p3, p4]
-        // [p2, p4, p5]
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
-        public float[] position_covariance;// covariance matrix of the 3d position, represented by its upper triangular matrix value
-
-
-    };
-
-
-    /// <summary>
-    /// Object Scene data directly from the ZED SDK. Represents all detections given during a single image frame. 
-    /// See DetectionFrame for an abstracted version with helper functions that make this data easier to use in Unity. 
-    /// Contains the number of object in the scene and the objectData structure for each object.
-    /// Since the data is transmitted from C++ to C#, the size of the structure must be constant. Therefore, there is a limitation of 100 (MAX_OBJECT constant) objects in the image.
-    /// <c> This number cannot be changed.<c>
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    public struct ObjectsFrameSDK
-    {
-        /// <summary>
-        /// How many objects were detected this frame. Use this to iterate through the top of objectData; objects with indexes greater than numObject are empty. 
-        /// </summary>
-        public int numObject;
-        /// <summary>
-        /// Timestamp of the image where these objects were detected.
-        /// </summary>
-        public ulong timestamp;
-        /// <summary>
-        /// Defines if the object frame is new (new timestamp)
-        /// </summary>
-        public int isNew;
-        /// <summary>
-        /// Defines if the object is tracked
-        /// </summary>
-        public int isTracked;
-        /// <summary>
-        /// Current detection model used.
-        /// </summary>
-        public sl.DETECTION_MODEL detectionModel;
-        /// <summary>
-        /// Array of objects 
-        /// </summary>
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = (int)(Constant.MAX_OBJECTS))]
-        public ObjectDataSDK[] objectData;
-    };
-
-    /// <summary>
-    /// Types of detected objects.
+    /// Lists available object class
     /// </summary>
     public enum OBJECT_CLASS
     {
-         PERSON = 0,
-         VEHICLE = 1,
-         LAST = 2
+        PERSON = 0,
+        VEHICLE = 1,
+        BAG = 2,
+        ANIMAL = 3,
+        ELECTRONICS = 4,
+        FRUIT_VEGETABLE = 5,
+        LAST = 6
     };
 
+    /// <summary>
+    /// Lists available object subclass.
+    /// </summary>
+    public enum OBJECT_SUBCLASS
+    {
+        PERSON = 0,
+        // VEHICLES
+        BICYCLE = 1,
+        CAR = 2,
+        MOTORBIKE = 3,
+        BUS = 4,
+        TRUCK = 5,
+        BOAT = 6,
+        // BAGS
+        BACKPACK = 7,
+        HANDBAG = 8,
+        SUITCASE = 9,
+        // ANIMALS
+        BIRD = 10,
+        CAT = 11,
+        DOG = 12,
+        HORSE = 13,
+        SHEEP = 14,
+        COW = 15,
+        // ELECTRONICS
+        CELLPHONE = 16,
+        LAPTOP = 17,
+        // FRUITS/VEGETABLES
+        BANANA = 18,
+        APPLE = 19,
+        ORANGE = 20,
+        CARROT = 21,
+        LAST = 22
+    };
 
     /// <summary>
-    /// Tracking state of an individual object. 
+    /// Tracking state of an individual object.
     /// </summary>
     public enum OBJECT_TRACK_STATE
-    {
-        OFF, /**< The tracking is not yet initialized, the object ID is not usable */
-        OK, /**< The object is tracked */
-        SEARCHING,/**< The object couldn't be detected in the image and is potentially occluded, the trajectory is estimated */
-        TERMINATE/**< This is the last searching state of the track, the track will be deleted in the next retreiveObject */
-    };
+		{
+		    OFF, /**< The tracking is not yet initialized, the object ID is not usable */
+		    OK, /**< The object is tracked */
+		    SEARCHING,/**< The object couldn't be detected in the image and is potentially occluded, the trajectory is estimated */
+		    TERMINATE/**< This is the last searching state of the track, the track will be deleted in the next retreiveObject */
+		};
+
+		public enum OBJECT_ACTION_STATE
+		{
+		    IDLE = 0, /**< The object is staying static. */
+		    MOVING = 1, /**< The object is moving. */
+		    LAST = 2
+		};
+
+		/// <summary>
+		/// List available models for detection
+		/// </summary>
+		public enum DETECTION_MODEL {
+		    MULTI_CLASS_BOX, /**< Any objects, bounding box based */
+            MULTI_CLASS_BOX_ACCURATE, /**< Any objects, bounding box based */
+            HUMAN_BODY_FAST, /**<  Keypoints based, specific to human skeleton, real time performance even on Jetson or low end GPU cards */
+		    HUMAN_BODY_ACCURATE /**<  Keypoints based, specific to human skeleton, state of the art accuracy, requires powerful GPU */
+		};
 
 
-    /// <summary>
-    /// List available models for detection
-    /// </summary>
-    public enum DETECTION_MODEL
-    {
-        MULTI_CLASS_BOX, /**< Any objects, bounding box based */
-        HUMAN_BODY_FAST, /**<  Keypoints based, specific to human skeleton, real time performance even on Jetson or low end GPU cards */
-        HUMAN_BODY_ACCURATE /**<  Keypoints based, specific to human skeleton, state of the art accuracy, requires powerful GPU */
-    };
+		/// <summary>
+		/// semantic and order of human body keypoints.
+		/// </summary>
+		public enum BODY_PARTS {
+		    NOSE = 0,
+		    NECK = 1,
+		    RIGHT_SHOULDER = 2,
+		    RIGHT_ELBOW= 3,
+		    RIGHT_WRIST = 4,
+		    LEFT_SHOULDER = 5,
+		    LEFT_ELBOW = 6,
+		    LEFT_WRIST = 7,
+		    RIGHT_HIP = 8,
+		    RIGHT_KNEE = 9,
+		    RIGHT_ANKLE = 10,
+		    LEFT_HIP = 11,
+		    LEFT_KNEE = 12,
+		    LEFT_ANKLE = 13,
+		    RIGHT_EYE = 14,
+		    LEFT_EYE = 15,
+		    RIGHT_EAR = 16,
+		    LEFT_EAR = 17,
+		    LAST = 18
+		};
+  
 
-
-    /// <summary>
-    /// semantic and order of human body keypoints.
-    /// </summary>
-    public enum BODY_PARTS
-    {
-        NOSE = 0,
-        NECK = 1,
-        RIGHT_SHOULDER = 2,
-        RIGHT_ELBOW = 3,
-        RIGHT_WRIST = 4,
-        LEFT_SHOULDER = 5,
-        LEFT_ELBOW = 6,
-        LEFT_WRIST = 7,
-        RIGHT_HIP = 8,
-        RIGHT_KNEE = 9,
-        RIGHT_ANKLE = 10,
-        LEFT_HIP = 11,
-        LEFT_KNEE = 12,
-        LEFT_ANKLE = 13,
-        RIGHT_EYE = 14,
-        LEFT_EYE = 15,
-        RIGHT_EAR = 16,
-        LEFT_EAR = 17,
-        LAST = 18
-    };
 }// end namespace sl

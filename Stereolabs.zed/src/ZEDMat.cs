@@ -54,6 +54,22 @@ namespace sl
     {
         public float x;
         public float y;
+
+        public float2(float m_x, float m_y)
+        {
+            x = m_x;
+            y = m_y;
+        }
+
+        public float2 add(float2 b)
+        {
+            return new float2(x + b.x, y + b.y);
+        }
+
+        public float2 sub(float2 b)
+        {
+            return new float2(x - b.x, y - b.y);
+        }
     }
     /// <summary>
     /// Represents a 3D vector of floats for use on both the CPU and GPU. 
@@ -64,6 +80,52 @@ namespace sl
         public float x;
         public float y;
         public float z;
+
+        public float3(float m_x, float m_y, float m_z)
+        {
+            x = m_x;
+            y = m_y;
+            z = m_z;
+        }
+
+        public float3 add(float3 b)
+        {
+            return new float3(x + b.x, y + b.y, z + b.z);
+        }
+
+        public float3 sub(float3 b)
+        {
+            return new float3(x - b.x, y - b.y, z - b.z);
+        }
+
+        public void divide(float a)
+        {
+            x /= a;
+            y /= a;
+            z /= a;
+        }
+
+        public float3 multiply(float a)
+        {
+            return new float3(x * a, y * a, z * a);
+        }
+
+        public float norm() { return ((float)Math.Sqrt(x * x + y * y + z * z)); }
+
+        public float dot(float3 b)
+        {
+            return (x * b.x + y * b.y + z * b.z);
+        }
+        public float3 cross(float3 b)
+        {
+            float3 result = new float3();
+            result.x = y * b.z - z * b.y;
+            result.y = z * b.x - x * b.z;
+            result.z = x * b.y - y * b.x;
+
+            return result;
+        }
+
     }
     /// <summary>
     /// Represents a 4D vector of floats for use on both the CPU and GPU. 

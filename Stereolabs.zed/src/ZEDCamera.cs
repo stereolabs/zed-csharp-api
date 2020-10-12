@@ -79,7 +79,7 @@ namespace sl
         /// Current ZED resolution setting. Set at initialization.
         /// </summary>
         private RESOLUTION currentResolution;
-
+        
         /// <summary>
         /// Callback for c++ debugging. Should not be used in C#.
         /// </summary>
@@ -675,8 +675,7 @@ namespace sl
             /// <summary>
             /// True to flip images horizontally.
             /// </summary>
-            [MarshalAs(UnmanagedType.U1)]
-            public bool cameraImageFlip;
+            public int cameraImageFlip;
             /// <summary>
             /// True to disable self-calibration, using unoptimized optional calibration parameters.
             /// False is recommended for optimized calibration.
@@ -752,7 +751,7 @@ namespace sl
                 depthMode = init.depthMode;
                 depthMinimumDistance = init.depthMinimumDistance;
                 depthMaximumDistance = init.depthMaximumDistance;
-                cameraImageFlip = init.cameraImageFlip;
+                cameraImageFlip = (int)init.cameraImageFlip;
                 enableRightSideMeasure = init.enableRightSideMeasure;
                 cameraDisableSelfCalib = init.cameraDisableSelfCalib;
                 sdkVerbose = init.sdkVerbose;
@@ -829,7 +828,7 @@ namespace sl
             }
 
             dll_initParameters initP = new dll_initParameters(initParameters); //DLL-friendly version of InitParameters.
-            initP.coordinateSystem = COORDINATE_SYSTEM.LEFT_HANDED_Y_UP; //Left-hand
+            initP.coordinateSystem = initParameters.coordinateSystem; //Left-hand
             int v = dllz_open(CameraID, ref initP,
                 new System.Text.StringBuilder(initParameters.pathSVO, initParameters.pathSVO.Length),
                 new System.Text.StringBuilder(initParameters.ipStream, initParameters.ipStream.Length),
