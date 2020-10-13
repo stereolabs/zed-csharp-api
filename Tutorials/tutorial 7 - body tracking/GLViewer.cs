@@ -312,10 +312,6 @@ namespace sl
             Gl.UseProgram(0);
         }
 
-        public void setResolution(Resolution res)
-        {
-            resolution = res;   
-        }
         public void close()
         {
             Gl.DeleteTextures(imageTex);
@@ -740,7 +736,6 @@ namespace sl
                 normal = a.cross(b);
                 normal.divide(normal.norm());
 
-                //Console.WriteLine(normal.x + " / " + normal.y + " / " + normal.z);
                 addPoint(v1, clr);
                 addPoint(v2, clr);
                 addPoint(v4, clr);
@@ -821,6 +816,7 @@ namespace sl
                     vaoID_ = Gl.GenVertexArray();
                     Gl.GenBuffers(vboID_);
                 }
+
                 Gl.ShadeModel(ShadingModel.Smooth);
                 if (vertices_.Count() > 0)
                 {

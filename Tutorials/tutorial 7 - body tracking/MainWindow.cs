@@ -28,9 +28,9 @@ namespace sl
             init_params.coordinateUnit = UNIT.METER;
             init_params.coordinateSystem = COORDINATE_SYSTEM.RIGHT_HANDED_Y_UP;
             init_params.depthMaximumDistance = 15f;
-
+            
             // Open the camera
-            zedCamera = new ZEDCamera(1);
+            zedCamera = new ZEDCamera(0);
             ERROR_CODE err = zedCamera.Init(ref init_params);
 
             if (err != ERROR_CODE.SUCCESS)
@@ -51,10 +51,10 @@ namespace sl
 
             // Enable the Objects detection module
             dll_ObjectDetectionParameters obj_det_params = new dll_ObjectDetectionParameters();
-            obj_det_params.enableObjectTracking = true;
+            obj_det_params.enableObjectTracking = true; // the object detection will track objects across multiple images, instead of an image-by-image basis
             obj_det_params.enable2DMask = false;
-            obj_det_params.enable_body_fitting = true;
-            obj_det_params.imageSync = true;
+            obj_det_params.enable_body_fitting = true; // smooth skeletons moves
+            obj_det_params.imageSync = true; // the object detection is synchronized to the image
             obj_det_params.detectionModel = sl.DETECTION_MODEL.HUMAN_BODY_ACCURATE;
 
             zedCamera.EnableObjectsDetection(ref obj_det_params);
@@ -79,14 +79,14 @@ namespace sl
 
             // To set a specific threshold
             obj_runtime_parameters.object_confidence_threshold = new int[(int)OBJECT_CLASS.LAST];
-            obj_runtime_parameters.object_confidence_threshold[(int)sl.OBJECT_CLASS.PERSON] = 20;
+            obj_runtime_parameters.object_confidence_threshold[(int)sl.OBJECT_CLASS.PERSON] = 50;
 
-            // Start Body Tracking Sample
-            StartSample();
+            // Create OpenGL window
+            CreateWindow();
         }
 
         // Create Window
-        public void StartSample()
+        public void CreateWindow()
         {
             using (NativeWindow nativeWindow = NativeWindow.Create())
             {
@@ -108,8 +108,8 @@ namespace sl
                 };
 
                 nativeWindow.Animation = false;
-                nativeWindow.CursorVisible = false;
-                nativeWindow.Create(0, 0, (uint)zedCamera.ImageWidth, (uint)zedCamera.ImageHeight, NativeWindowStyle.Overlapped);
+                nativeWindow.MultisampleBits = 4;
+                nativeWindow.Create((int)(zedCamera.ImageWidth * 0.05f), (int)(zedCamera.ImageHeight * 0.05f), (uint)(zedCamera.ImageWidth), (uint)(zedCamera.ImageHeight), NativeWindowStyle.Resizeable);
                 nativeWindow.Show();
                 nativeWindow.Run();
             }
@@ -121,8 +121,7 @@ namespace sl
             NativeWindow nativeWindow = (NativeWindow)sender;
 
             Gl.ReadBuffer(ReadBufferMode.Back);
-
-            Gl.ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            Gl.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
             Gl.Enable(EnableCap.Blend);
             Gl.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
@@ -133,13 +132,12 @@ namespace sl
             viewer.init(zedCamera.GetCalibrationParameters().leftCam);
         }
 
-        // Render image
+        // Render loop
         private void NativeWindow_Render(object sender, NativeWindowEventArgs e)
         {
             NativeWindow nativeWindow = (NativeWindow)sender;
             Gl.Viewport(0, 0, (int)nativeWindow.Width, (int)nativeWindow.Height);
             Gl.Clear(ClearBufferMask.ColorBufferBit);
-
 
             ERROR_CODE err = ERROR_CODE.FAILURE;
             if (zedCamera.Grab(ref runtimeParameters) == ERROR_CODE.SUCCESS)
@@ -156,6 +154,7 @@ namespace sl
                         //Update GL View
                         viewer.update(zedMat, object_frame);
                         viewer.render();
+
 
                     }
                 }

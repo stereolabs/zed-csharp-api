@@ -54,8 +54,8 @@ namespace sl
             obj_runtime_parameters.detectionConfidenceThreshold = 20;
             // To set a specific threshold
             obj_runtime_parameters.object_confidence_threshold = new int[(int)OBJECT_CLASS.LAST];
-            obj_runtime_parameters.object_confidence_threshold[(int)sl.OBJECT_CLASS.PERSON] = 20;
-            obj_runtime_parameters.object_confidence_threshold[(int)sl.OBJECT_CLASS.VEHICLE] = 40;
+            obj_runtime_parameters.object_confidence_threshold[(int)sl.OBJECT_CLASS.PERSON] = 35;
+            obj_runtime_parameters.object_confidence_threshold[(int)sl.OBJECT_CLASS.VEHICLE] = 35;
 
 
             int i = 0;
