@@ -70,7 +70,6 @@ namespace sl
 
             if (Keyboard.IsKeyDown(Key.B)) showbbox = !showbbox;
 
-            //joints.addSphere(new float3(0, 0, -1), color);
             // For each object
             foreach (ObjectDataSDK obj in objects.objectData)
             {
@@ -237,10 +236,8 @@ namespace sl
 
         ImageHandler image_handler;
 
-        //ShaderData shader;
         ShaderData shaderSK;
         ShaderData shaderBbox;
-        //List<ObjectClassName> objectsName;
 
         Simple3DObject BBox_obj;
         Simple3DObject bones;
@@ -257,7 +254,7 @@ namespace sl
             resolution = res;
         }
 
-        // Initialize Opengl and Cuda buffers
+        // Initialize Opengl buffers
         public void initialize()
         {
             shaderImage.it = new Shader(Shader.IMAGE_VERTEX_SHADER, Shader.IMAGE_FRAGMENT_SHADER);
@@ -290,6 +287,7 @@ namespace sl
 
         public void pushNewImage(ZEDMat zedImage)
         {
+            // Update Texture with current zedImage
             Gl.TexSubImage2D(TextureTarget.Texture2d, 0, 0, 0, zedImage.GetWidth(), zedImage.GetHeight(), PixelFormat.Rgba, PixelType.UnsignedByte, zedImage.GetPtr());
         }
 
@@ -324,14 +322,6 @@ namespace sl
         private Resolution resolution;
         private uint quad_vb;
 
-    };
-
-    struct ObjectClassName
-    {
-        float3 position;
-        string name_lineA;
-        string name_lineB;
-        float4 color;
     };
 
     class Shader
@@ -396,7 +386,6 @@ namespace sl
             "	vec3 lightDir = normalize(lightPosition - b_position);\n",
             "	float diffuse = (1 - ambientStrength) * max(dot(b_normal, lightDir), 0.0);\n",
             "   out_Color = vec4(b_color.rgb * (diffuse + ambient), 1);\n",
-            // "   out_Color = vec4(1,0,0, 1);\n",
             "}"
         };
 
@@ -562,24 +551,6 @@ namespace sl
             normals_.Add(normal.z);
         }
 
-        public void addPoints(List<float3> pts, float4 base_clr)
-        {
-            for (int k = 0; k < pts.Count(); k++)
-            {
-                float3 pt = pts[k];
-                vertices_.Add(pt.x);
-                vertices_.Add(pt.y);
-                vertices_.Add(pt.z);
-                colors_.Add(base_clr.x);
-                colors_.Add(base_clr.y);
-                colors_.Add(base_clr.z);
-                colors_.Add(1.0f);
-                int current_size_index = (vertices_.Count() / 3 - 1);
-                indices_.Add((uint)current_size_index);
-                indices_.Add((uint)current_size_index + 1);
-            }
-        }
-
         public void addBoundingBox(List<Vector3> bbox, float4 base_clr)
         {
             uint start_id = (uint)vertices_.Count / 3;
@@ -638,39 +609,20 @@ namespace sl
             }
         }
 
-    public void addPoint(float3 pt, float4 clr)
+        public void addPoint(float3 pt, float4 clr)
         {
             addPt(pt);
             addClr(clr);
             indices_.Add((uint)indices_.Count());
         }
 
-        public void addLine(float3 p1, float3 p2, float3 clr)
-        {
-            vertices_.Add(p1.x);
-            vertices_.Add(p1.y);
-            vertices_.Add(p1.z);
-
-            vertices_.Add(p2.x);
-            vertices_.Add(p2.y);
-            vertices_.Add(p2.z);
-
-            colors_.Add(clr.x);
-            colors_.Add(clr.y);
-            colors_.Add(clr.z);
-            colors_.Add(1.0f);
-
-            colors_.Add(clr.x);
-            colors_.Add(clr.y);
-            colors_.Add(clr.z);
-            colors_.Add(1.0f);
-
-            indices_.Add((uint)indices_.Count());
-            indices_.Add((uint)indices_.Count());
-        }
-
         public void addCylinder(float3 startPosition, float3 endPosition, float4 clr)
         {
+
+            /////////////////////////////
+            /// Compute Rotation Matrix
+            /////////////////////////////
+
             const float PI = 3.1415926f;
 
             float m_radius = 0.010f;
@@ -712,11 +664,13 @@ namespace sl
             }
 
             /////////////////////////////
+            /// Create Cylinder
+            /////////////////////////////
+
             Matrix3x3 rotationMatrix = new Matrix3x3();
             float[] data = new float[9] { rotation.M11, rotation.M12, rotation.M13, rotation.M21, rotation.M22, rotation.M23, rotation.M31, rotation.M32, rotation.M33 };
             rotationMatrix.m = data;
 
-            //Console.WriteLine(rotation);
             float3 v1;
             float3 v2;
             float3 v3;
