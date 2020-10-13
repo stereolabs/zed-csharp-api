@@ -8,9 +8,9 @@ namespace sl
     class Program
     {
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
-            MainWindow window = new MainWindow();
+            MainWindow window = new MainWindow(args);
         }
     }
 }
