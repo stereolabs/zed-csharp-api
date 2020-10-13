@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Numerics;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using OpenGL;
 using OpenGL.CoreUI;
 
@@ -22,7 +23,7 @@ namespace sl
         {
             // Set configuration parameters
             InitParameters init_params = new InitParameters();
-            init_params.resolution = RESOLUTION.HD720;
+            init_params.resolution = RESOLUTION.HD1080;
             init_params.cameraFPS = 60;
             init_params.depthMode = DEPTH_MODE.ULTRA;
             init_params.coordinateUnit = UNIT.METER;
@@ -88,7 +89,7 @@ namespace sl
         // Create Window
         public void CreateWindow()
         {
-            using (NativeWindow nativeWindow = NativeWindow.Create())
+            using (OpenGL.CoreUI.NativeWindow nativeWindow = OpenGL.CoreUI.NativeWindow.Create())
             {
                 nativeWindow.ContextCreated += NativeWindow_ContextCreated;
                 nativeWindow.Render += NativeWindow_Render;
@@ -109,7 +110,20 @@ namespace sl
 
                 nativeWindow.Animation = false;
                 nativeWindow.MultisampleBits = 4;
-                nativeWindow.Create((int)(zedCamera.ImageWidth * 0.05f), (int)(zedCamera.ImageHeight * 0.05f), (uint)(zedCamera.ImageWidth), (uint)(zedCamera.ImageHeight), NativeWindowStyle.Resizeable);
+
+                int wnd_h = Screen.PrimaryScreen.Bounds.Height;
+                int wnd_w = Screen.PrimaryScreen.Bounds.Width;
+
+                int height = (int)(wnd_h * 0.9f);
+                int width  = (int)(wnd_w * 0.9f);
+
+                if (width > zedCamera.ImageWidth && height > zedCamera.ImageWidth)
+                {
+                    width = zedCamera.ImageWidth;
+                    height = zedCamera.ImageHeight;
+                }
+
+                nativeWindow.Create((int)(zedCamera.ImageWidth * 0.05f), (int)(zedCamera.ImageHeight * 0.05f), (uint)width, (uint)height, NativeWindowStyle.Resizeable);
                 nativeWindow.Show();
                 nativeWindow.Run();
             }
@@ -118,7 +132,7 @@ namespace sl
         // Init Window
         private void NativeWindow_ContextCreated(object sender, NativeWindowEventArgs e)
         {
-            NativeWindow nativeWindow = (NativeWindow)sender;
+            OpenGL.CoreUI.NativeWindow nativeWindow = (OpenGL.CoreUI.NativeWindow)sender;
 
             Gl.ReadBuffer(ReadBufferMode.Back);
             Gl.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -135,7 +149,7 @@ namespace sl
         // Render loop
         private void NativeWindow_Render(object sender, NativeWindowEventArgs e)
         {
-            NativeWindow nativeWindow = (NativeWindow)sender;
+            OpenGL.CoreUI.NativeWindow nativeWindow = (OpenGL.CoreUI.NativeWindow)sender;
             Gl.Viewport(0, 0, (int)nativeWindow.Width, (int)nativeWindow.Height);
             Gl.Clear(ClearBufferMask.ColorBufferBit);
 

@@ -32,13 +32,14 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_REFERENCES
         "PresentationCore"
         "PresentationFramework"
         "System"
-		"System.Xaml"
-		"System.Data"
-		"System.Linq"
-		"System.Windows"
+	"System.Xaml"
+	"System.Data"
+	"System.Linq"
+	"System.Windows"
+	"System.Windows.Forms"
         "System.Numerics"
-		"System.Drawing"
-		"WindowsBase"
+	"System.Drawing"
+	"WindowsBase"
 )
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY VS_PACKAGE_REFERENCES 
