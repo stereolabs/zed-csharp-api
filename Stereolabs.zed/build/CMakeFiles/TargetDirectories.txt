@@ -1,0 +1,4 @@
+C:/SDK/zed-csharp-api/Stereolabs.zed/build/CMakeFiles/INSTALL.dir
+C:/SDK/zed-csharp-api/Stereolabs.zed/build/CMakeFiles/Stereolabs.zed.dir
+C:/SDK/zed-csharp-api/Stereolabs.zed/build/CMakeFiles/ALL_BUILD.dir
+C:/SDK/zed-csharp-api/Stereolabs.zed/build/CMakeFiles/ZERO_CHECK.dir

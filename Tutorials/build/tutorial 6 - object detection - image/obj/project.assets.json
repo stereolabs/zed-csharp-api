@@ -1,0 +1,263 @@
+{
+  "version": 3,
+  "targets": {
+    ".NETFramework,Version=v4.6.1": {
+      "OpenGL.Net/0.8.4": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "System.Xml"
+        ],
+        "compile": {
+          "lib/net461/OpenGL.Net.dll": {}
+        },
+        "runtime": {
+          "lib/net461/OpenGL.Net.dll": {}
+        }
+      },
+      "OpenGL.Net.CoreUI/0.8.4": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "System.Xml"
+        ],
+        "compile": {
+          "lib/net461/OpenGL.Net.CoreUI.dll": {}
+        },
+        "runtime": {
+          "lib/net461/OpenGL.Net.CoreUI.dll": {}
+        }
+      },
+      "ZERO_CHECK/1.0.0": {
+        "type": "project",
+        "compile": {
+          "bin/placeholder/ZERO_CHECK.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/ZERO_CHECK.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.6.1/win": {
+      "OpenGL.Net/0.8.4": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "System.Xml"
+        ],
+        "compile": {
+          "lib/net461/OpenGL.Net.dll": {}
+        },
+        "runtime": {
+          "lib/net461/OpenGL.Net.dll": {}
+        }
+      },
+      "OpenGL.Net.CoreUI/0.8.4": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "System.Xml"
+        ],
+        "compile": {
+          "lib/net461/OpenGL.Net.CoreUI.dll": {}
+        },
+        "runtime": {
+          "lib/net461/OpenGL.Net.CoreUI.dll": {}
+        }
+      },
+      "ZERO_CHECK/1.0.0": {
+        "type": "project",
+        "compile": {
+          "bin/placeholder/ZERO_CHECK.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/ZERO_CHECK.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.6.1/win-x64": {
+      "OpenGL.Net/0.8.4": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "System.Xml"
+        ],
+        "compile": {
+          "lib/net461/OpenGL.Net.dll": {}
+        },
+        "runtime": {
+          "lib/net461/OpenGL.Net.dll": {}
+        }
+      },
+      "OpenGL.Net.CoreUI/0.8.4": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "System.Xml"
+        ],
+        "compile": {
+          "lib/net461/OpenGL.Net.CoreUI.dll": {}
+        },
+        "runtime": {
+          "lib/net461/OpenGL.Net.CoreUI.dll": {}
+        }
+      },
+      "ZERO_CHECK/1.0.0": {
+        "type": "project",
+        "compile": {
+          "bin/placeholder/ZERO_CHECK.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/ZERO_CHECK.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.6.1/win-x86": {
+      "OpenGL.Net/0.8.4": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "System.Xml"
+        ],
+        "compile": {
+          "lib/net461/OpenGL.Net.dll": {}
+        },
+        "runtime": {
+          "lib/net461/OpenGL.Net.dll": {}
+        }
+      },
+      "OpenGL.Net.CoreUI/0.8.4": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System",
+          "System.Xml"
+        ],
+        "compile": {
+          "lib/net461/OpenGL.Net.CoreUI.dll": {}
+        },
+        "runtime": {
+          "lib/net461/OpenGL.Net.CoreUI.dll": {}
+        }
+      },
+      "ZERO_CHECK/1.0.0": {
+        "type": "project",
+        "compile": {
+          "bin/placeholder/ZERO_CHECK.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/ZERO_CHECK.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "OpenGL.Net/0.8.4": {
+      "sha512": "F7o2KkIrz9rrtBY7+VRgPKnf2mV8pt3h4/o/CWPt86oIocjzKTQFNo2qH4zVYSWyy/T9rS0xBpu9t75MS6wM8Q==",
+      "type": "package",
+      "path": "opengl.net/0.8.4",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/monoandroid/OpenGL.Net.dll",
+        "lib/monoandroid/OpenGL.Net.xml",
+        "lib/net35/OpenGL.Net.dll",
+        "lib/net35/OpenGL.Net.pdb",
+        "lib/net35/OpenGL.Net.xml",
+        "lib/net461/OpenGL.Net.dll",
+        "lib/net461/OpenGL.Net.pdb",
+        "lib/net461/OpenGL.Net.xml",
+        "opengl.net.0.8.4.nupkg.sha512",
+        "opengl.net.nuspec"
+      ]
+    },
+    "OpenGL.Net.CoreUI/0.8.4": {
+      "sha512": "0CTYI2c89TcbzpH+SWH+iz6xUkcyP2YLrs9n/puyP2JD7ed1OKYbFkrCu9ruQhU02rimIO5zx9zCILc6tmHb9Q==",
+      "type": "package",
+      "path": "opengl.net.coreui/0.8.4",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net35/OpenGL.Net.CoreUI.dll",
+        "lib/net35/OpenGL.Net.CoreUI.pdb",
+        "lib/net35/OpenGL.Net.CoreUI.xml",
+        "lib/net461/OpenGL.Net.CoreUI.dll",
+        "lib/net461/OpenGL.Net.CoreUI.pdb",
+        "lib/net461/OpenGL.Net.CoreUI.xml",
+        "opengl.net.coreui.0.8.4.nupkg.sha512",
+        "opengl.net.coreui.nuspec"
+      ]
+    },
+    "ZERO_CHECK/1.0.0": {
+      "type": "project",
+      "path": "../ZERO_CHECK.vcxproj",
+      "msbuildProject": "../ZERO_CHECK.vcxproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    ".NETFramework,Version=v4.6.1": [
+      "OpenGL.Net >= 0.8.4",
+      "OpenGL.Net.CoreUI >= 0.8.4",
+      "ZERO_CHECK >= 1.0.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\Benjamin\\.nuget\\packages\\": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "C:\\SDK\\zed-csharp-api\\Tutorials\\build\\tutorial 6 - object detection - image\\Object_detection_image.csproj",
+      "projectName": "Object_detection_image",
+      "projectPath": "C:\\SDK\\zed-csharp-api\\Tutorials\\build\\tutorial 6 - object detection - image\\Object_detection_image.csproj",
+      "packagesPath": "C:\\Users\\Benjamin\\.nuget\\packages\\",
+      "outputPath": "C:\\SDK\\zed-csharp-api\\Tutorials\\build\\tutorial 6 - object detection - image\\obj\\",
+      "projectStyle": "PackageReference",
+      "skipContentFileWrite": true,
+      "configFilePaths": [
+        "C:\\Users\\Benjamin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net461"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net461": {
+          "projectReferences": {
+            "C:\\SDK\\zed-csharp-api\\Tutorials\\build\\ZERO_CHECK.vcxproj": {
+              "projectPath": "C:\\SDK\\zed-csharp-api\\Tutorials\\build\\ZERO_CHECK.vcxproj"
+            }
+          }
+        }
+      }
+    },
+    "frameworks": {
+      "net461": {
+        "dependencies": {
+          "OpenGL.Net": {
+            "target": "Package",
+            "version": "[0.8.4, )"
+          },
+          "OpenGL.Net.CoreUI": {
+            "target": "Package",
+            "version": "[0.8.4, )"
+          }
+        }
+      }
+    },
+    "runtimes": {
+      "win": {
+        "#import": []
+      },
+      "win-x64": {
+        "#import": []
+      },
+      "win-x86": {
+        "#import": []
+      }
+    }
+  }
+}

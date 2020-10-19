@@ -1,0 +1,7 @@
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 5 - sensors data\Release\Sensors_Data.exe.config
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 5 - sensors data\Release\Sensors_Data.exe
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 5 - sensors data\Release\Stereolabs.zed.dll
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 5 - sensors data\obj\x64\Release\Sensors_Data.csprojAssemblyReference.cache
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 5 - sensors data\obj\x64\Release\Sensors_Data.csproj.CoreCompileInputs.cache
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 5 - sensors data\obj\x64\Release\Sensors_Data.csproj.CopyComplete
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 5 - sensors data\obj\x64\Release\Sensors_Data.exe

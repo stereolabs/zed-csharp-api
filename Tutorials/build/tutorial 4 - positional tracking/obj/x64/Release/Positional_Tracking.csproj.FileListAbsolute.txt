@@ -1,0 +1,7 @@
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 4 - positional tracking\Release\Positional_Tracking.exe.config
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 4 - positional tracking\Release\Positional_Tracking.exe
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 4 - positional tracking\Release\Stereolabs.zed.dll
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 4 - positional tracking\obj\x64\Release\Positional_Tracking.csprojAssemblyReference.cache
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 4 - positional tracking\obj\x64\Release\Positional_Tracking.csproj.CoreCompileInputs.cache
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 4 - positional tracking\obj\x64\Release\Positional_Tracking.csproj.CopyComplete
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 4 - positional tracking\obj\x64\Release\Positional_Tracking.exe

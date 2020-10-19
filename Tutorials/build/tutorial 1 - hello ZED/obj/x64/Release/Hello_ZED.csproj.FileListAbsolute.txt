@@ -1,0 +1,7 @@
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 1 - hello ZED\Release\Hello_ZED.exe.config
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 1 - hello ZED\Release\Hello_ZED.exe
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 1 - hello ZED\Release\Stereolabs.zed.dll
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 1 - hello ZED\obj\x64\Release\Hello_ZED.csprojAssemblyReference.cache
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 1 - hello ZED\obj\x64\Release\Hello_ZED.csproj.CoreCompileInputs.cache
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 1 - hello ZED\obj\x64\Release\Hello_ZED.csproj.CopyComplete
+C:\SDK\zed-csharp-api\Tutorials\build\tutorial 1 - hello ZED\obj\x64\Release\Hello_ZED.exe
