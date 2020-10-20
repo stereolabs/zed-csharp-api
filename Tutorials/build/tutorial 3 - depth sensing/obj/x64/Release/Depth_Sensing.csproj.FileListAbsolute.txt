@@ -1,7 +1,0 @@
-C:\SDK\zed-csharp-api\Tutorials\build\tutorial 3 - depth sensing\Release\Depth_Sensing.exe.config
-C:\SDK\zed-csharp-api\Tutorials\build\tutorial 3 - depth sensing\Release\Depth_Sensing.exe
-C:\SDK\zed-csharp-api\Tutorials\build\tutorial 3 - depth sensing\Release\Stereolabs.zed.dll
-C:\SDK\zed-csharp-api\Tutorials\build\tutorial 3 - depth sensing\obj\x64\Release\Depth_Sensing.csprojAssemblyReference.cache
-C:\SDK\zed-csharp-api\Tutorials\build\tutorial 3 - depth sensing\obj\x64\Release\Depth_Sensing.csproj.CoreCompileInputs.cache
-C:\SDK\zed-csharp-api\Tutorials\build\tutorial 3 - depth sensing\obj\x64\Release\Depth_Sensing.csproj.CopyComplete
-C:\SDK\zed-csharp-api\Tutorials\build\tutorial 3 - depth sensing\obj\x64\Release\Depth_Sensing.exe

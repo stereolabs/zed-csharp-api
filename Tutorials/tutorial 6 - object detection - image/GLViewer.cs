@@ -549,6 +549,7 @@ namespace sl
 
         public void addFullEdges(List<Vector3> pts, float4 clr)
         {
+            clr.w = 0.4f;
             int start_id = vertices_.Count / 3;
 
             for (int i = 0; i < pts.Count; i++)
@@ -588,7 +589,7 @@ namespace sl
             for (int i = 0; i<current_pts.Count; i++)
             {
                 addPt(new float3(current_pts[i].X, current_pts[i].Y, current_pts[i].Z));
-                clr.w = (i == 2 || i == 3) ? 0.0f : 0.75f;
+                clr.w = (i == 2 || i == 3) ? 0.0f : 0.4f;
                 addClr(clr);
             }
 
@@ -611,7 +612,7 @@ namespace sl
 
         public void addTopFace(List<Vector3> pts, float4 clr)
         {
-            clr.w = 0.3f;
+            clr.w = 0.2f;
             foreach (Vector3 it in pts)
                 addPoint(new float3(it.X, it.Y, it.Z), clr);
         }
@@ -656,37 +657,50 @@ namespace sl
             float alpha = 0.3f;
 
             foreach (int[] quad in quads) {
-                // Top full quad
+
+                // Top quads
                 List<Vector3> quad_pts_1 = new List<Vector3> {
                     pts[quad[0]],
                     pts[quad[1]],
+                    ((grid_size - 0.5f) * pts[quad[1]] +  0.5f * pts[quad[2]]) / grid_size,
+                    ((grid_size - 0.5f) * pts[quad[0]] + 0.5f * pts[quad[3]]) / grid_size };
+                addQuad(quad_pts_1, alpha, 2 * alpha / 3, clr);
+
+                List<Vector3> quad_pts_15 = new List<Vector3> {
+                    ((grid_size - 0.5f) * pts[quad[0]] + 0.5f * pts[quad[3]]) / grid_size,
+                    ((grid_size - 0.5f) * pts[quad[1]] +  0.5f * pts[quad[2]]) / grid_size,
                     ((grid_size - 1.0f) * pts[quad[1]] + pts[quad[2]]) / grid_size,
                     ((grid_size - 1.0f) * pts[quad[0]] + pts[quad[3]]) / grid_size};
-                addQuad(quad_pts_1, alpha, alpha, clr);
+                addQuad(quad_pts_15, 2 * alpha / 3, alpha / 3, clr);
 
-                // Top faded quad
                 List<Vector3> quad_pts_2 = new List<Vector3> {
                     ((grid_size - 1.0f) * pts[quad[0]] + pts[quad[3]]) / grid_size,
                     ((grid_size - 1.0f) * pts[quad[1]] + pts[quad[2]]) / grid_size,
                     ((grid_size - 2.0f) * pts[quad[1]] + 2.0f * pts[quad[2]]) / grid_size,
                     ((grid_size - 2.0f) * pts[quad[0]] + 2.0f * pts[quad[3]]) / grid_size};
-                addQuad(quad_pts_2, alpha, 0.0f, clr);
+                addQuad(quad_pts_2, alpha / 3, 0.0f, clr);
 
-                // Bottom faded quad
+                // Bottom quads
                 List<Vector3> quad_pts_3 = new List<Vector3> {
-                    (2.0f * pts[quad[0]] + (grid_size - 2.0f) * pts[quad[3]]) / grid_size,
-                    (2.0f * pts[quad[1]] + (grid_size - 2.0f) * pts[quad[2]]) / grid_size,
-                    (pts[quad[1]] + (grid_size - 1.0f) * pts[quad[2]]) / grid_size,
-                    (pts[quad[0]] + (grid_size - 1.0f) * pts[quad[3]]) / grid_size};
-                addQuad(quad_pts_3, 0.0f, alpha, clr);
+                    (pts[quad[1]] * 2.0f + (grid_size - 2.0f) * pts[quad[2]]) / grid_size,
+                    (pts[quad[0]] * 2.0f + (grid_size - 2.0f) * pts[quad[3]]) / grid_size,
+                    (pts[quad[0]]+ (grid_size - 1.0f) * pts[quad[3]]) / grid_size,
+                    (pts[quad[1]]+ (grid_size - 1.0f) * pts[quad[2]]) / grid_size };
+                addQuad(quad_pts_3, 0.0f, alpha / 3, clr);
 
-                // Bottom full quad
-                List<Vector3> quad_pts_4 = new List<Vector3> {
-                    (pts[quad[0]] + (grid_size - 1.0f) * pts[quad[3]]) / grid_size,
+                List<Vector3> quad_pts_35 = new List<Vector3> {
                     (pts[quad[1]] + (grid_size - 1.0f) * pts[quad[2]]) / grid_size,
+                    (pts[quad[0]] + (grid_size - 1.0f) * pts[quad[3]]) / grid_size,
+                    (pts[quad[0]] * 0.5f + (grid_size - 0.5f) * pts[quad[3]]) / grid_size,
+                    (pts[quad[1]] * 0.5f + (grid_size - 0.5f) * pts[quad[2]]) / grid_size};
+                addQuad(quad_pts_35, alpha / 3,  2 * alpha / 3, clr);
+
+                List<Vector3> quad_pts_4 = new List<Vector3> {
+                    (pts[quad[0]] * 0.5f + (grid_size - 0.5f) * pts[quad[3]]) / grid_size,
+                    (pts[quad[1]] * 0.5f + (grid_size - 0.5f) * pts[quad[2]]) / grid_size,
                     pts[quad[2]],
                     pts[quad[3]]};
-                addQuad(quad_pts_4, alpha, alpha, clr);
+                addQuad(quad_pts_4, 2 * alpha / 3, alpha, clr);
             }
         }
 
@@ -752,7 +766,7 @@ namespace sl
             }
         }
 
-        public float grid_size = 8.0f;
+        public float grid_size = 10.0f;
 
         private List<float> vertices_;
         private List<float> colors_;

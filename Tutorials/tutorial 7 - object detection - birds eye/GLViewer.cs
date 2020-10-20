@@ -73,9 +73,9 @@ class GLViewer
 
         float limit = 20;
         float4 clr_grid = new float4();
-        clr_grid.x = 0.53f;
-        clr_grid.y = 0.48f;
-        clr_grid.z = 0.43f;
+        clr_grid.x = 0.35f;
+        clr_grid.y = 0.35f;
+        clr_grid.z = 0.35f;
         clr_grid.w = 1f;
 
         float height = -3;
@@ -97,11 +97,7 @@ class GLViewer
         pointCloud.pushNewPC(image);
 
         cam_pose = Matrix4x4.Identity;
-        //cam_pose.Translation = pose.translation;
-        cam_pose.Translation = new Vector3(0, 0, 0);
-        cam_pose = Matrix4x4.Transpose(cam_pose);
         cam_pose = Matrix4x4.Transform(cam_pose, pose.rotation);
-
         cam_pose = Matrix4x4.Transpose(cam_pose);
 
         BBox_faces.clear();
@@ -165,19 +161,6 @@ class GLViewer
 
     public void render()
     {
-        if (Keyboard.IsKeyDown(Key.R))
-        {
-            camera_.setPosition(new Vector3(0, 0, 1.5f));
-            camera_.setDirection(new Vector3(0, 0, 1), Vector3.UnitY);
-        }
-        if (Keyboard.IsKeyDown(Key.T))
-        {
-            camera_.setPosition(new Vector3(0, 1.5f, 1.5f));
-            camera_.setOffsetFromPosition(new Vector3(0, 0, 6));
-            camera_.translate(new Vector3(0, 1.5f, - 4));
-            camera_.setDirection(new Vector3(0, -1, 0), Vector3.UnitY);
-        }
-
         camera_.update();
             
         BBox_edges.pushToGPU();
@@ -188,27 +171,35 @@ class GLViewer
         //clearInputs();
     }
 
+    public void keyEventFunction(NativeWindowKeyEventArgs e)
+    {
+        if (e.Key == KeyCode.R)
+        {
+            camera_.setPosition(new Vector3(0, 0, 1.5f));
+            camera_.setDirection(new Vector3(0, 0, - 1), Vector3.UnitY);
+        }
+        if (e.Key == KeyCode.T)
+        {
+            camera_.setPosition(new Vector3(0, 0.0f, 1.5f));
+            camera_.setOffsetFromPosition(new Vector3(0, 0, 6));
+            camera_.translate(new Vector3(0, 1.5f, -4));
+            camera_.setDirection(new Vector3(0, -1, 0), Vector3.UnitY);
+        }
+    }
+
     public void mouseEventFunction(NativeWindowMouseEventArgs e)
     {
         // Rotate camera with mouse
         if (e.Buttons == OpenGL.CoreUI.MouseButton.Left)
         {
             camera_.rotate(Quaternion.CreateFromAxisAngle(camera_.getRight(), (float)mouseMotion_[1] * MOUSE_R_SENSITIVITY));
-            camera_.rotate(Quaternion.CreateFromAxisAngle(camera_.getVertical() * -1.0f, (float)mouseMotion_[0] * MOUSE_R_SENSITIVITY));
+            camera_.rotate(Quaternion.CreateFromAxisAngle(camera_.getVertical() * -1f, (float)mouseMotion_[0] * MOUSE_R_SENSITIVITY));
         }
         if (e.Buttons == OpenGL.CoreUI.MouseButton.Right)
         {
             camera_.translate(camera_.getUp() * (float)mouseMotion_[1] * MOUSE_T_SENSITIVITY);
             camera_.translate(camera_.getRight() * (float)mouseMotion_[0] * MOUSE_T_SENSITIVITY);
         }
-    }
-
-    public void computeMouseMotion(int x, int y)
-    {
-        currentInstance.mouseMotion_[0] = x - currentInstance.previousMouseMotion_[0];
-        currentInstance.mouseMotion_[1] = currentInstance.previousMouseMotion_[1] - y; 
-        currentInstance.previousMouseMotion_[0] = x;
-        currentInstance.previousMouseMotion_[1] = y;
     }
 
     public void resizeCallback(int width, int height)
@@ -218,6 +209,14 @@ class GLViewer
         float vfov = (180.0f / (float)Math.PI) * (float)(2.0f * Math.Atan(height / (2.0f * 500)));
 
         camera_.setProjection(hfov, vfov, camera_.getZNear(), camera_.getZFar());
+    }
+
+    public void computeMouseMotion(int x, int y)
+    {
+        currentInstance.mouseMotion_[0] = x - currentInstance.previousMouseMotion_[0];
+        currentInstance.mouseMotion_[1] = currentInstance.previousMouseMotion_[1] - y;
+        currentInstance.previousMouseMotion_[0] = x;
+        currentInstance.previousMouseMotion_[1] = y;
     }
 
     public void draw()
@@ -596,7 +595,10 @@ class CameraGL
         float cos_theta = Vector3.Dot(Vector3.Normalize(tr1), Vector3.Normalize(tr2));
         float angle = 0.5f * (float)Math.Acos(cos_theta);
         Vector3 w = Vector3.Cross(tr1, tr2);
-        if (Vector3.Zero != w) w = Vector3.Normalize(w);
+        if (Vector3.Zero != w) {
+
+            w = Vector3.Normalize(w);
+        }
 
         float half_sin = (float)Math.Sin(angle);
         rotation_.W = (float)Math.Cos(angle);
@@ -638,9 +640,7 @@ class CameraGL
 
     public Vector3 getPosition() { return position_; }
 
-    public Vector3 getForward() {
-            Console.WriteLine("rota : " + rotation_);
-            return forward_; }
+    public Vector3 getForward() { return forward_; }
 
     public Vector3 getRight() { return right_; }
 
@@ -662,9 +662,11 @@ class CameraGL
     void updateView()
     {
         Matrix4x4 transformation = Matrix4x4.Identity;
+
+        transformation = Matrix4x4.Transform(transformation, rotation_);
         transformation.Translation = Vector3.Transform(offset_, rotation_) + position_;
         transformation = Matrix4x4.Transpose(transformation);
-        transformation = Matrix4x4.Transform(transformation, rotation_);
+
         Matrix4x4.Invert(transformation, out view_);
     }
 
@@ -948,6 +950,7 @@ class Simple3DObject
 
     public void addFullEdges(List<Vector3> pts, float4 clr)
     {
+        clr.w = 0.4f;
         int start_id = vertices_.Count / 3;
 
         for (int i = 0; i < pts.Count; i++)
@@ -987,7 +990,7 @@ class Simple3DObject
         for (int i = 0; i < current_pts.Count; i++)
         {
             addPt(new float3(current_pts[i].X, current_pts[i].Y, current_pts[i].Z));
-            clr.w = (i == 2 || i == 3) ? 0.0f : 0.75f;
+            clr.w = (i == 2 || i == 3) ? 0.0f : 0.4f;
             addClr(clr);
         }
 

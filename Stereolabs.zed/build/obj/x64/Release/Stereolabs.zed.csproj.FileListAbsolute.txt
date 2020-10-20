@@ -1,7 +1,0 @@
-C:\SDK\zed-csharp-api\Stereolabs.zed\build\Release\Stereolabs.zed.dll
-C:\SDK\zed-csharp-api\Stereolabs.zed\build\obj\x64\Release\Stereolabs.zed.csproj.CoreCompileInputs.cache
-C:\SDK\zed-csharp-api\Stereolabs.zed\build\obj\x64\Release\Stereolabs.zed.dll
-C:\SDK\zed-csharp-api\Stereolabs.zed\build\obj\x64\Release\Stereolabs.zed.csprojAssemblyReference.cache
-C:\Users\Benjamin\Documents\zed-csharp-api\Stereolabs.zed\build\obj\x64\Release\Stereolabs.zed.csprojAssemblyReference.cache
-C:\Users\Benjamin\Documents\zed-csharp-api\Stereolabs.zed\build\obj\x64\Release\Stereolabs.zed.csproj.CoreCompileInputs.cache
-C:\Users\Benjamin\Documents\zed-csharp-api\Stereolabs.zed\build\obj\x64\Release\Stereolabs.zed.dll

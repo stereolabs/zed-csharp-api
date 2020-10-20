@@ -115,9 +115,11 @@ namespace sl
                             nativeWindow.Fullscreen = !nativeWindow.Fullscreen;
                             break;
                     }
+
+                    viewer.keyEventFunction(e);
                 };
 
-                nativeWindow.MultisampleBits = 4;
+                //nativeWindow.MultisampleBits = 4;
 
                 int wnd_h = Screen.PrimaryScreen.Bounds.Height;
                 int wnd_w = Screen.PrimaryScreen.Bounds.Width;
@@ -156,7 +158,7 @@ namespace sl
             OpenGL.CoreUI.NativeWindow nativeWindow = (OpenGL.CoreUI.NativeWindow)sender;
 
             Gl.ReadBuffer(ReadBufferMode.Back);
-            Gl.ClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            Gl.ClearColor(0.2f, 0.19f, 0.2f, 1.0f);
 
             Gl.Enable(EnableCap.DepthTest);
 
