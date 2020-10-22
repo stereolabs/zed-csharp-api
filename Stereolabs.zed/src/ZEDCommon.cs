@@ -7,10 +7,19 @@ using System;
 namespace sl
 {
 
+    public struct ZEDSpatialMappingHelper
+    {
+        public static int nbSubMeshMax = 1000;
+        public static int[] nbVerticesInSubmesh = new int[nbSubMeshMax];
+        public static int[] nbTrianglesInSubmesh = new int[nbSubMeshMax];
+        public static int[] updatedIndices = new int[nbSubMeshMax];
+    }
+
 	public class ZEDCommon
 	{
 		public const string NameDLL = "sl_zed_interface.dll";
-	}
+
+    }
 
 	public enum ZED_CAMERA_ID
 	{
@@ -1131,6 +1140,61 @@ namespace sl
     }
 
     /// <summary>
+    /// Spatial mapping depth resolution presets.
+    /// </summary>
+    public enum MAPPING_RESOLUTION
+    {
+        /// <summary>
+        /// Create detailed geometry. Requires lots of memory.
+        /// </summary>
+        HIGH,
+        /// <summary>
+        /// Small variations in the geometry will disappear. Useful for large objects.
+        /// </summary>
+        ///
+        MEDIUM,
+        /// <summary>
+        /// Keeps only large variations of the geometry. Useful for outdoors.
+        /// </summary>
+        LOW
+    }
+
+    /// <summary>
+    ///  Spatial mapping depth range presets.
+    /// </summary>
+    public enum MAPPING_RANGE
+    {
+        /// <summary>
+        /// Geometry within 3.5 meters of the camera will be mapped. 
+        /// </summary>
+        NEAR,
+        /// <summary>
+        /// Geometry within 5 meters of the camera will be mapped. 
+        /// </summary>
+        MEDIUM,
+        /// <summary>
+        /// Objects as far as 10 meters away are mapped. Useful for outdoors.
+        /// </summary>
+        FAR
+    }
+
+    /// <summary>
+    /// Spatial Mapping type (default is mesh)
+    /// </summary>
+    public enum SPATIAL_MAP_TYPE
+    {
+        /// <summary>
+        /// Represent a surface with faces, 3D points are linked by edges, no color information
+        /// </summary>
+        MESH,
+        /// <summary>
+        ///  Geometry is represented by a set of 3D colored points.
+        /// </summary>
+        FUSED_POINT_CLOUD
+    };
+
+
+    /// <summary>
     /// Mesh formats that can be saved/loaded with spatial mapping.
     /// </summary>
     public enum MESH_FILE_FORMAT
@@ -1223,6 +1287,30 @@ namespace sl
         /// </summary>
         FOOT
     }
+
+    /// <summary>
+    /// Type of the plane, determined by its orientation and whether detected by ZEDPlaneDetectionManager's
+    /// DetectFloorPlane() or DetectPlaneAtHit().
+    /// </summary>
+    public enum PLANE_TYPE
+    {
+        /// <summary>
+        /// Floor plane of a scene. Retrieved by ZEDPlaneDetectionManager.DetectFloorPlane().
+        /// </summary>
+        FLOOR,
+        /// <summary>
+        /// Horizontal plane, such as a tabletop, floor, etc. Detected with DetectPlaneAtHit() using screen-space coordinates. 
+        /// </summary>
+        HIT_HORIZONTAL,
+        /// <summary>
+        /// Vertical plane, such as a wall. Detected with DetectPlaneAtHit() using screen-space coordinates. 
+        /// </summary>
+        HIT_VERTICAL,
+        /// <summary>
+        /// Plane at an angle neither parallel nor perpendicular to the floor. Detected with DetectPlaneAtHit() using screen-space coordinates. 
+        /// </summary>
+        HIT_UNKNOWN
+    };
 
     /// <summary>
     /// Struct containing all parameters passed to the SDK when initializing the ZED.
@@ -1389,7 +1477,54 @@ namespace sl
         /// Right-Handed with Z pointing up and X forward. Used in ROS (REP 103)
         /// </summary>
         RIGHT_HANDED_Z_UP_X_FWD
+    }
 
+    /// <summary>
+    /// Structure that defines a new plane, holding information directly from the ZED SDK.
+    /// Data within is relative to the camera; use ZEDPlaneGameObject's public fields for world-space values. 
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct PlaneData
+    {
+        /// <summary>
+        /// Error code returned by the ZED SDK when the plane detection was attempted. 
+        /// </summary>
+        public sl.ERROR_CODE ErrorCode;
+        /// <summary>
+        /// Type of the plane (floor, hit_vertical, etc.) 
+        /// </summary>
+        public PLANE_TYPE Type;
+        /// <summary>
+        /// Normalized vector of the direction the plane is facing. 
+        /// </summary>
+        public Vector3 PlaneNormal;
+        /// <summary>
+        /// Camera-space position of the center of the plane. 
+        /// </summary>
+        public Vector3 PlaneCenter;
+        /// <summary>
+        /// Camera-space position of the center of the plane. 
+        /// </summary>
+        public Vector3 PlaneTransformPosition;
+        /// <summary>
+        /// Camera-space rotation/orientation of the plane. 
+        /// </summary>
+        public Quaternion PlaneTransformOrientation;
+        /// <summary>
+        /// The mathematical Vector4 equation of the plane. 
+        /// </summary>
+        public Vector4 PlaneEquation;
+        /// <summary>
+        /// How wide and long/tall the plane is in meters. 
+        /// </summary>
+        public Vector2 Extents;
+        /// <summary>
+        /// How many points make up the plane's bounds, eg. the array length of Bounds. 
+        /// </summary>
+        public int BoundsSize;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+        ///Positions of the points that make up the edges of the plane's mesh. 
+        public Vector3[] Bounds; //max 256 points
     }
 
     /// <summary>

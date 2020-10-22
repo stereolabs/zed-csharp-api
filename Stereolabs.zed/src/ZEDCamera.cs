@@ -456,7 +456,7 @@ namespace sl
         * Spatial Mapping functions.
         */
         [DllImport(nameDll, EntryPoint = "dllz_enable_spatial_mapping")]
-        private static extern int dllz_enable_spatial_mapping(int cameraID, float resolution_meter, float max_range_meter, int saveTexture);
+        private static extern int dllz_enable_spatial_mapping(int cameraID, int type, float resolution_meter, float max_range_meter, int saveTexture, int max_memory_usage);
 
         [DllImport(nameDll, EntryPoint = "dllz_disable_spatial_mapping")]
         private static extern void dllz_disable_spatial_mapping(int cameraID);
@@ -473,8 +473,8 @@ namespace sl
         [DllImport(nameDll, EntryPoint = "dllz_update_mesh")]
         private static extern int dllz_update_mesh(int cameraID, int[] nbVerticesInSubemeshes, int[] nbTrianglesInSubemeshes, ref int nbSubmeshes, int[] updatedIndices, ref int nbVertices, ref int nbTriangles, int nbSubmesh);
 
-        /* [DllImport(nameDll, EntryPoint = "dllz_retrieve_mesh")]
-         private static extern int dllz_retrieve_mesh(int cameraID, Vector3[] vertices, int[] triangles, int nbSubmesh, Vector2[] uvs, IntPtr textures);*/
+        [DllImport(nameDll, EntryPoint = "dllz_retrieve_mesh")]
+        private static extern int dllz_retrieve_mesh(int cameraID, Vector3[] vertices, int[] triangles, int nbSubmesh, Vector2[] uvs, IntPtr textures);
         [DllImport(nameDll, EntryPoint = "dllz_extract_whole_spatial_map")]
         private static extern int dllz_extract_whole_spatial_map(int cameraID);
 
@@ -503,7 +503,7 @@ namespace sl
          * Plane Detection functions (starting v2.4)
          */
         [DllImport(nameDll, EntryPoint = "dllz_find_floor_plane")]
-        private static extern IntPtr dllz_find_floor_plane(int cameraID, out Quaternion rotation, out Vector3 translation, Vector3 priorQuaternion, Vector3 priorTranslation);
+        private static extern IntPtr dllz_find_floor_plane(int cameraID, out Quaternion rotation, out Vector3 translation, Quaternion priorQuaternion, Vector3 priorTranslation);
 
         [DllImport(nameDll, EntryPoint = "dllz_find_plane_at_hit")]
         private static extern IntPtr dllz_find_plane_at_hit(int cameraID, Vector2 HitPixel, bool refine);
@@ -1520,6 +1520,49 @@ namespace sl
             return r;
         }
 
+        ///////////////////////////// SPATIAL MAPPING ////////////////////////////////
+
+        /// <summary>
+        /// Updates the range to match the specified preset.
+        /// </summary>
+        static public float ConvertRangePreset(MAPPING_RANGE rangePreset)
+        {
+
+            if (rangePreset == MAPPING_RANGE.NEAR)
+            {
+                return 3.5f;
+            }
+            else if (rangePreset == MAPPING_RANGE.MEDIUM)
+            {
+                return 5.0f;
+            }
+            if (rangePreset == MAPPING_RANGE.FAR)
+            {
+                return 10.0f;
+            }
+            return 5.0f;
+        }
+
+        /// <summary>
+        /// Updates the resolution to match the specified preset.
+        /// </summary>
+        static public float ConvertResolutionPreset(MAPPING_RESOLUTION resolutionPreset)
+        {
+            if (resolutionPreset == MAPPING_RESOLUTION.HIGH)
+            {
+                return 0.05f;
+            }
+            else if (resolutionPreset == MAPPING_RESOLUTION.MEDIUM)
+            {
+                return 0.10f;
+            }
+            if (resolutionPreset == MAPPING_RESOLUTION.LOW)
+            {
+                return 0.15f;
+            }
+            return 0.10f;
+        }
+
         /// <summary>
         /// Initializes and begins the spatial mapping processes.
         /// </summary>
@@ -1527,14 +1570,26 @@ namespace sl
         /// <param name="max_range_meter">Maximum scanning range in meters.</param>
         /// <param name="saveTexture">True to scan surface textures in addition to geometry.</param>
         /// <returns></returns>
-        public sl.ERROR_CODE EnableSpatialMapping(float resolution_meter, float max_range_meter, bool saveTexture = false)
+        public sl.ERROR_CODE EnableSpatialMapping(SPATIAL_MAP_TYPE type, float resolution_meter, float max_range_meter, bool saveTexture = false)
         {
             sl.ERROR_CODE spatialMappingStatus = ERROR_CODE.FAILURE;
             lock (grabLock)
             {
-                spatialMappingStatus = (sl.ERROR_CODE)dllz_enable_spatial_mapping(CameraID, resolution_meter, max_range_meter, System.Convert.ToInt32(saveTexture));
+                spatialMappingStatus = (sl.ERROR_CODE)dllz_enable_spatial_mapping(CameraID, (int)type, resolution_meter, max_range_meter, System.Convert.ToInt32(saveTexture), 2048);
             }
             return spatialMappingStatus;
+        }
+
+        /// <summary>
+        /// Initializes and begins the spatial mapping processes.
+        /// </summary>
+        /// <param name="resolution_meter">Spatial mapping resolution in meters.</param>
+        /// <param name="max_range_meter">Maximum scanning range in meters.</param>
+        /// <param name="saveTexture">True to scan surface textures in addition to geometry.</param>
+        /// <returns></returns>
+        public sl.ERROR_CODE EnableSpatialMapping(SPATIAL_MAP_TYPE type, MAPPING_RESOLUTION mapping_resolution, MAPPING_RANGE mapping_range, bool saveTexture = false)
+        {
+            return EnableSpatialMapping(type, ConvertResolutionPreset(mapping_resolution), ConvertRangePreset(mapping_range), saveTexture);
         }
 
         /// <summary>
@@ -1574,10 +1629,10 @@ namespace sl
         /// <param name="triangles">Triangles, formatted as the index of each triangle's three vertices in the vertices array.</param>
         /// <param name="nbSubmeshMax">Maximum number of submeshes that can be handled.</param>
         /// <returns>Error code indicating if the retrieval was successful, and why it wasn't otherwise.</returns>
-       /* public sl.ERROR_CODE RetrieveMesh(Vector3[] vertices, int[] triangles, int nbSubmeshMax, Vector2[] uvs, IntPtr textures)
+        public sl.ERROR_CODE RetrieveMesh(Vector3[] vertices, int[] triangles, int nbSubmeshMax, Vector2[] uvs, IntPtr textures)
         {
             return (sl.ERROR_CODE)dllz_retrieve_mesh(CameraID, vertices, triangles, nbSubmeshMax, uvs, textures);
-        }*/
+        }
 
         ///Extracts the current spatial map from the spatial mapping process.
         ///If the object to be filled already contains a previous version of the mesh, only changes will be updated, optimizing performance.
@@ -1655,9 +1710,9 @@ namespace sl
         /// <param name="nbVertices">Total number of updated vertices in all submeshes.</param>
         /// <param name="nbTriangles">Total number of updated triangles in all submeshes.</param>
         /// <param name="nbSubmeshMax">Maximum number of submeshes that can be handled.</param>
-        public bool FilterMesh(FILTER filterParameters, int[] nbVerticesInSubemeshes, int[] nbTrianglesInSubemeshes, ref int nbSubmeshes, int[] updatedIndices, ref int nbVertices, ref int nbTriangles, int nbSubmeshMax)
+        public bool FilterMesh(FILTER filterParameters, int[] nbVerticesInSubmeshes, int[] nbTrianglesInSubmeshes, ref int nbSubmeshes, int[] updatedIndices, ref int nbVertices, ref int nbTriangles, int nbSubmeshMax)
         {
-            return dllz_filter_mesh(CameraID, filterParameters, nbVerticesInSubemeshes, nbTrianglesInSubemeshes, ref nbSubmeshes, updatedIndices, ref nbVertices, ref nbTriangles, nbSubmeshMax);
+            return dllz_filter_mesh(CameraID, filterParameters, nbVerticesInSubmeshes, nbTrianglesInSubmeshes, ref nbSubmeshes, updatedIndices, ref nbVertices, ref nbTriangles, nbSubmeshMax);
         }
 
         /// <summary>
@@ -1755,6 +1810,92 @@ namespace sl
         public sl.ERROR_CODE RetrieveImage(sl.ZEDMat mat, sl.VIEW view, sl.MEM mem = sl.MEM.MEM_CPU, sl.Resolution resolution = new sl.Resolution())
         {
             return (sl.ERROR_CODE)(dllz_retrieve_image(CameraID, mat.MatPtr, (int)view, (int)mem, resolution));
+        }
+
+        ////////////////////////
+        /// Plane Detection  ///
+        ////////////////////////
+
+
+        /// <summary>
+        /// Looks for a plane in the visible area that is likely to represent the floor.
+        /// Use ZEDPlaneDetectionManager.DetectFloorPlane for a higher-level version that turns planes into GameObjects.
+        /// </summary>
+        /// <param name="plane">Data on the detected plane.</param>
+        /// <param name="playerHeight">Height of the camera from the newly-detected floor.</param>
+        /// <param name="priorQuat">Prior rotation.</param>
+        /// <param name="priorTrans">Prior position.</param>
+        /// <returns></returns>
+        public sl.ERROR_CODE findFloorPlane(ref PlaneData plane, out float playerHeight, Quaternion priorQuat, Vector3 priorTrans)
+        {
+            IntPtr p = IntPtr.Zero;
+            Quaternion out_quat = Quaternion.Identity;
+            Vector3 out_trans = Vector3.Zero;
+            p = dllz_find_floor_plane(CameraID, out out_quat, out out_trans, priorQuat, priorTrans);
+            plane.Bounds = new Vector3[256];
+            playerHeight = 0;
+
+            if (p != IntPtr.Zero)
+            {
+                plane = (PlaneData)Marshal.PtrToStructure(p, typeof(PlaneData));
+                playerHeight = out_trans.Y;
+                return (sl.ERROR_CODE)plane.ErrorCode;
+            }
+            else
+                return sl.ERROR_CODE.FAILURE;
+        }
+
+        /// <summary>
+        /// Using data from a detected floor plane, updates supplied vertex and triangle arrays with
+        /// data needed to make a mesh that represents it. These arrays are updated directly from the wrapper.
+        /// </summary>
+        /// <param name="vertices">Array to be filled with mesh vertices.</param>
+        /// <param name="triangles">Array to be filled with mesh triangles, stored as indexes of each triangle's points.</param>
+        /// <param name="numVertices">Total vertices in the mesh.</param>
+        /// <param name="numTriangles">Total triangle indexes (3x number of triangles).</param>
+        /// <returns></returns>
+        public int convertFloorPlaneToMesh(Vector3[] vertices, int[] triangles, out int numVertices, out int numTriangles)
+        {
+            return dllz_convert_floorplane_to_mesh(CameraID, vertices, triangles, out numVertices, out numTriangles);
+        }
+
+        /// <summary>
+        /// Checks for a plane in the real world at given screen-space coordinates.
+        /// Use ZEDPlaneDetectionManager.DetectPlaneAtHit() for a higher-level version that turns planes into GameObjects.
+        /// </summary>
+        /// <param name="plane">Data on the detected plane.</param>
+        /// <param name="screenPos">Point on the ZED image to check for a plane.</param>
+        /// <returns></returns>
+        public sl.ERROR_CODE findPlaneAtHit(ref PlaneData plane, Vector2 coord)
+        {
+            IntPtr p = IntPtr.Zero;
+            Quaternion out_quat = Quaternion.Identity;
+            Vector3 out_trans = Vector3.Zero;
+
+            p = dllz_find_plane_at_hit(CameraID, coord, true);
+            plane.Bounds = new Vector3[256];
+
+            if (p != IntPtr.Zero)
+            {
+                plane = (PlaneData)Marshal.PtrToStructure(p, typeof(PlaneData));
+                return (sl.ERROR_CODE)plane.ErrorCode;
+            }
+            else
+                return sl.ERROR_CODE.FAILURE;
+        }
+
+        /// <summary>
+        /// Using data from a detected hit plane, updates supplied vertex and triangle arrays with
+        /// data needed to make a mesh that represents it. These arrays are updated directly from the wrapper.
+        /// </summary>
+        /// <param name="vertices">Array to be filled with mesh vertices.</param>
+        /// <param name="triangles">Array to be filled with mesh triangles, stored as indexes of each triangle's points.</param>
+        /// <param name="numVertices">Total vertices in the mesh.</param>
+        /// <param name="numTriangles">Total triangle indexes (3x number of triangles).</param>
+        /// <returns></returns>
+        public int convertHitPlaneToMesh(Vector3[] vertices, int[] triangles, out int numVertices, out int numTriangles)
+        {
+            return dllz_convert_hitplane_to_mesh(CameraID, vertices, triangles, out numVertices, out numTriangles);
         }
 
         ////////////////////////
