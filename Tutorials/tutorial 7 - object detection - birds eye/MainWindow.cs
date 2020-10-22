@@ -79,12 +79,12 @@ namespace sl
             // Configure object detection runtime parameters
             obj_runtime_parameters = new dll_ObjectDetectionRuntimeParameters();
             obj_runtime_parameters.detectionConfidenceThreshold = 35;
-            //obj_runtime_parameters.objectClassFilter = new int[(int)OBJECT_CLASS.LAST];
-            //obj_runtime_parameters.objectClassFilter[(int)sl.OBJECT_CLASS.PERSON] = Convert.ToInt32(true);
+            obj_runtime_parameters.objectClassFilter = new int[(int)OBJECT_CLASS.LAST];
+            obj_runtime_parameters.objectClassFilter[(int)sl.OBJECT_CLASS.PERSON] = Convert.ToInt32(true);
             //obj_runtime_parameters.objectClassFilter[(int)sl.OBJECT_CLASS.VEHICLE] = Convert.ToInt32(true);
             // To set a specific threshold
-            //obj_runtime_parameters.object_confidence_threshold = new int[(int)OBJECT_CLASS.LAST];
-            //obj_runtime_parameters.object_confidence_threshold[(int)sl.OBJECT_CLASS.PERSON] = 35;
+            obj_runtime_parameters.object_confidence_threshold = new int[(int)OBJECT_CLASS.LAST];
+            obj_runtime_parameters.object_confidence_threshold[(int)sl.OBJECT_CLASS.PERSON] = 35;
             //obj_runtime_parameters.object_confidence_threshold[(int)sl.OBJECT_CLASS.VEHICLE] = 35;
 
             cam_pose = new Pose();

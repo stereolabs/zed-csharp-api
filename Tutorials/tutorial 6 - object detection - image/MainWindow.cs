@@ -44,14 +44,13 @@ namespace sl
                 Console.WriteLine(" ERROR : Use ZED2 Camera only");
                 return;
             }
-
+       
             // Enable tracking (mandatory for object detection)
             Quaternion quat = Quaternion.Identity;
             Vector3 vec = Vector3.Zero;
             zedCamera.EnableTracking(ref quat, ref vec);
 
             runtimeParameters = new RuntimeParameters();
-
             // Enable the Objects detection module
             dll_ObjectDetectionParameters obj_det_params = new dll_ObjectDetectionParameters();
             obj_det_params.enableObjectTracking = true; // the object detection will track objects across multiple images, instead of an image-by-image basis
@@ -77,12 +76,12 @@ namespace sl
             // Configure object detection runtime parameters
             obj_runtime_parameters = new dll_ObjectDetectionRuntimeParameters();
             obj_runtime_parameters.detectionConfidenceThreshold = 35;
-            //obj_runtime_parameters.objectClassFilter = new int[(int)OBJECT_CLASS.LAST];
-            //obj_runtime_parameters.objectClassFilter[(int)sl.OBJECT_CLASS.PERSON] = Convert.ToInt32(true);
+            obj_runtime_parameters.objectClassFilter = new int[(int)OBJECT_CLASS.LAST];
+            obj_runtime_parameters.objectClassFilter[(int)sl.OBJECT_CLASS.PERSON] = Convert.ToInt32(true);
 
             // To set a specific threshold
-            //obj_runtime_parameters.object_confidence_threshold = new int[(int)OBJECT_CLASS.LAST];
-            //obj_runtime_parameters.object_confidence_threshold[(int)sl.OBJECT_CLASS.PERSON] = 35;
+            obj_runtime_parameters.object_confidence_threshold = new int[(int)OBJECT_CLASS.LAST];
+            obj_runtime_parameters.object_confidence_threshold[(int)sl.OBJECT_CLASS.PERSON] = 35;
 
             // Create OpenGL window
             CreateWindow();

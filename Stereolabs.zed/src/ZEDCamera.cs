@@ -139,6 +139,10 @@ namespace sl
             get { return fov_V; }
         }
         /// <summary>
+        /// Structure containing information about all the sensors available in the current device
+        /// </summary>
+        private SensorsConfiguration sensorsConfiguration;
+        /// <summary>
         /// Stereo parameters for current ZED camera prior to rectification (distorted).
         /// </summary>
         private CalibrationParameters calibrationParametersRaw;
@@ -156,6 +160,10 @@ namespace sl
         /// </summary>
         private bool cameraReady = false;
 
+        public SensorsConfiguration SensorsConfiguration
+        {
+            get { return sensorsConfiguration; }
+        }
         /// <summary>
         /// Stereo parameters for current ZED camera prior to rectification (distorted).
         /// </summary>
@@ -315,6 +323,9 @@ namespace sl
 
         [DllImport(nameDll, EntryPoint = "dllz_get_calibration_parameters")]
         private static extern IntPtr dllz_get_calibration_parameters(int cameraID, bool raw);
+
+        [DllImport(nameDll, EntryPoint = "dllz_get_sensors_configuration")]
+        private static extern IntPtr dllz_get_sensors_configuration(int cameraID);
 
         [DllImport(nameDll, EntryPoint = "dllz_get_camera_model")]
         private static extern int dllz_get_camera_model(int cameraID);
@@ -1071,6 +1082,19 @@ namespace sl
 
             return parameters;
 
+        }
+
+        public SensorsConfiguration GetInternalSensorsConfiguration()
+        {
+            IntPtr p = dllz_get_sensors_configuration(CameraID);
+
+            if (p == IntPtr.Zero)
+            {
+                return new SensorsConfiguration();
+            }
+            SensorsConfiguration configuration = (SensorsConfiguration)Marshal.PtrToStructure(p, typeof(SensorsConfiguration));
+
+            return configuration;
         }
 
         /// <summary>
