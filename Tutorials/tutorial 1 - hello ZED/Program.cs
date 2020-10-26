@@ -23,7 +23,7 @@ namespace sl
             int zed_serial = zedCamera.GetZEDSerialNumber();
             Console.WriteLine("Hello! This is my serial number: " + zed_serial);
             Console.ReadLine();
- 
+
             zedCamera.Close();
         }
     }

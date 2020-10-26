@@ -532,7 +532,7 @@ namespace sl
         * Objects Detection functions (starting v3.0)
         */
         [DllImport(nameDll, EntryPoint = "dllz_enable_objects_detection")]
-        private static extern int dllz_enable_objects_detection(int cameraID, ref dll_ObjectDetectionParameters od_params);
+        private static extern int dllz_enable_objects_detection(int cameraID, ref ObjectDetectionParameters od_params);
 
         [DllImport(nameDll, EntryPoint = "dllz_disable_objects_detection")]
         private static extern void dllz_disable_objects_detection(int cameraID);
@@ -541,7 +541,7 @@ namespace sl
         private static extern void dllz_pause_objects_detection(int cameraID, bool status);
 
         [DllImport(nameDll, EntryPoint = "dllz_retrieve_objects_data")]
-        private static extern int dllz_retrieve_objects_data(int cameraID, ref dll_ObjectDetectionRuntimeParameters od_params, ref ObjectsFrameSDK objFrame);
+        private static extern int dllz_retrieve_objects_data(int cameraID, ref ObjectDetectionRuntimeParameters od_params, ref ObjectsFrameSDK objFrame);
 
 
         /*
@@ -1986,7 +1986,7 @@ namespace sl
         /// Enable object detection module
         /// </summary>
         /// <returns> returns an ERROR_CODE that indicates the type of error </returns>
-        public sl.ERROR_CODE EnableObjectsDetection(ref dll_ObjectDetectionParameters od_params)
+        public sl.ERROR_CODE EnableObjectsDetection(ref ObjectDetectionParameters od_params)
         {
             sl.ERROR_CODE objDetectStatus = ERROR_CODE.FAILURE;
             lock (grabLock)
@@ -2026,7 +2026,7 @@ namespace sl
         /// <param name="od_params"> Object detection runtime parameters </param>
         /// <param name="objFrame"> ObjectsFrameSDK that contains all the detection data </param>
         /// <returns> returns an ERROR_CODE that indicates the type of error </returns>
-        public sl.ERROR_CODE RetrieveObjectsDetectionData(ref dll_ObjectDetectionRuntimeParameters od_params, ref ObjectsFrameSDK objFrame)
+        public sl.ERROR_CODE RetrieveObjectsDetectionData(ref ObjectDetectionRuntimeParameters od_params, ref ObjectsFrameSDK objFrame)
         {
             return (sl.ERROR_CODE)dllz_retrieve_objects_data(CameraID, ref od_params, ref objFrame);
         }

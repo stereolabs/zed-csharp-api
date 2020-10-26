@@ -1652,7 +1652,7 @@ namespace sl
     ////////////////////////////////////////  Object Detection /////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     [StructLayout(LayoutKind.Sequential)]
-    public struct dll_ObjectDetectionParameters
+    public struct ObjectDetectionParameters
     {
         /// <summary>
         /// Defines if the object detection is synchronized to the image or runs in a separate thread.
@@ -1679,7 +1679,7 @@ namespace sl
 
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct dll_ObjectDetectionRuntimeParameters
+    public struct ObjectDetectionRuntimeParameters
     {
         /// <summary>
         /// The detection confidence threshold between 1 and 99. 

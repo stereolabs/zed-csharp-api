@@ -15,7 +15,7 @@ namespace sl
     {
         GLViewer viewer;
         ZEDCamera zedCamera;
-        dll_ObjectDetectionRuntimeParameters obj_runtime_parameters;
+        ObjectDetectionRuntimeParameters obj_runtime_parameters;
         RuntimeParameters runtimeParameters;
         ZEDMat zedMat;
         ObjectsFrameSDK object_frame;
@@ -52,7 +52,7 @@ namespace sl
 
             runtimeParameters = new RuntimeParameters();
             // Enable the Objects detection module
-            dll_ObjectDetectionParameters obj_det_params = new dll_ObjectDetectionParameters();
+            ObjectDetectionParameters obj_det_params = new ObjectDetectionParameters();
             obj_det_params.enableObjectTracking = true; // the object detection will track objects across multiple images, instead of an image-by-image basis
             obj_det_params.enable2DMask = false;
             obj_det_params.enable_body_fitting = true; // smooth skeletons moves
@@ -74,7 +74,7 @@ namespace sl
             viewer = new GLViewer(new Resolution((uint)Width, (uint)Height));
 
             // Configure object detection runtime parameters
-            obj_runtime_parameters = new dll_ObjectDetectionRuntimeParameters();
+            obj_runtime_parameters = new ObjectDetectionRuntimeParameters();
             obj_runtime_parameters.detectionConfidenceThreshold = 35;
             obj_runtime_parameters.objectClassFilter = new int[(int)OBJECT_CLASS.LAST];
             obj_runtime_parameters.objectClassFilter[(int)sl.OBJECT_CLASS.PERSON] = Convert.ToInt32(true);
