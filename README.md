@@ -37,5 +37,6 @@ Both dll are automatically added into the build folder as a NuGet package. There
 
 ### Deployment
 
-When the program is built, *Stereolabs.zed.dll* and *sl_zed_interface.dll* will be automatically copied into the build foldery.
+When the program is built, *Stereolabs.zed.dll* and *sl_zed_interface.dll* will be automatically copied into the build folder.
+
 When deploying the application, make sure that *sl_zed_interface.dll* and *Stereolabs.zed.dll* are packaged with the executable files, and shipped on a target PC that has the proper ZED SDK version installed.
