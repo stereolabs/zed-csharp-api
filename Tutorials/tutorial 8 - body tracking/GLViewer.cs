@@ -583,9 +583,7 @@ namespace sl
         {
             vaoID_ = 0;
             isStatic_ = false;
-           
-
-
+          
             shader.it = new Shader(Shader.SK_VERTEX_SHADER, Shader.SK_FRAGMENT_SHADER);
             shader.MVP_Mat = Gl.GetUniformLocation(shader.it.getProgramId(), "u_mvpMatrix");
 

@@ -13,6 +13,8 @@ namespace sl
             InitParameters init_params = new InitParameters();
             init_params.resolution = RESOLUTION.HD1080;
             init_params.cameraFPS = 30;
+            // No depth computation required here
+            init_params.depthMode = DEPTH_MODE.NONE;
             ZEDCamera zed = new ZEDCamera(0);
             // Open the camera
             ERROR_CODE err = zed.Init(ref init_params);
