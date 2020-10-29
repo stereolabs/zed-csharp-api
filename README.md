@@ -18,7 +18,7 @@ This repository shows how to use the ZED SDK functionalities in C#.
 
 The C++ to C# is done the following way :
 
-- A C interface to the ZED SDK is provided (*sl_zed_interface.dll*, currently built for ZED SDK 3.3).
+- A C interface to the ZED SDK (`sl_zed_interface.dll`) is provided.
 - A .NET wrapper `Stereolabs.zed` that imports the functions from the dll interface.
 
 Both dll are automatically added into the build folder as a NuGet package. There is no need to build them anymore.
@@ -30,7 +30,7 @@ Both dll are automatically added into the build folder as a NuGet package. There
 1. Enter the tutorials folder and generate the Tutorials solution using cmake.
 **Use Visual studio 2017** (at least) compiler in **x64** mode.
 
-![Cmake](./Documentation/img/cmake_settings.jpg)
+![Cmake](./doc_image/cmake_settings.jpg)
 
 2. Press configure and generate.
 3. Open Tutorials.zed.sln solution and build the solution.
