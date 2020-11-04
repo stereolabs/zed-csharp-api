@@ -1348,7 +1348,7 @@ class Simple3DObject
             {
 
                 Gl.BindBuffer(BufferTarget.ElementArrayBuffer, vboID_[2]);
-                Gl.BufferData(BufferTarget.ElementArrayBuffer, (uint)indices_.Count() * sizeof(float), indices_.ToArray(), isStatic_ ? BufferUsage.StaticDraw : BufferUsage.DynamicDraw);
+                Gl.BufferData(BufferTarget.ElementArrayBuffer, (uint)indices_.Count() * sizeof(uint), indices_.ToArray(), isStatic_ ? BufferUsage.StaticDraw : BufferUsage.DynamicDraw);
             }
             if (normals_.Count() > 0)
             {

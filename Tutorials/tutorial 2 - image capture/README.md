@@ -45,7 +45,7 @@ RetrieveImage() takes a sl.ZEDMat as parameter, as well as a VIEW mode. We first
 The ZEDMat will not be automatically created in that function.
 
 
-![Image Capture Wnd](./../../Documentation/img/image_capture.jpg)
+![Image Capture Wnd](./../../doc_image/image_capture.jpg)
 
 
 <i>Note:</i> the image timestamp is given in nanoseconds. You can compare the timestamp between two grab() using `zedCamera.GetCameraTimestamp()` : it should be close to the framerate time, if you don't have frames dropped.
