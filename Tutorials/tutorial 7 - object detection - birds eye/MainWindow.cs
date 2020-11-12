@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,13 +14,13 @@ namespace sl
     class MainWindow
     {
         GLViewer viewer;
-        ZEDCamera zedCamera;
+        Camera zedCamera;
         ObjectDetectionRuntimeParameters obj_runtime_parameters;
         RuntimeParameters runtimeParameters;
-        ZEDMat point_cloud;
+        Mat point_cloud;
         Pose cam_pose;
         Resolution res;
-        ObjectsFrameSDK object_frame;
+        Objects object_frame;
 
         public MainWindow(string[] args)
         {
@@ -29,15 +29,15 @@ namespace sl
             init_params.resolution = RESOLUTION.HD720;
             init_params.cameraFPS = 60;
             init_params.depthMode = DEPTH_MODE.ULTRA;
-            init_params.coordinateUnit = UNIT.METER;
+            init_params.coordinateUnits = UNIT.METER;
             init_params.coordinateSystem = COORDINATE_SYSTEM.RIGHT_HANDED_Y_UP;
             init_params.depthMaximumDistance = 50f;
             init_params.cameraDisableSelfCalib = true;
 
             parseArgs(args, ref init_params);
             // Open the camera
-            zedCamera = new ZEDCamera(0);
-            ERROR_CODE err = zedCamera.Init(ref init_params);
+            zedCamera = new Camera(0);
+            ERROR_CODE err = zedCamera.Open(ref init_params);
 
             if (err != ERROR_CODE.SUCCESS)
                 Environment.Exit(-1);
@@ -51,7 +51,7 @@ namespace sl
             // Enable tracking (mandatory for object detection)
             Quaternion quat = Quaternion.Identity;
             Vector3 vec = Vector3.Zero;
-            zedCamera.EnableTracking(ref quat, ref vec);
+            zedCamera.EnablePositionalTracking(ref quat, ref vec);
 
             runtimeParameters = new RuntimeParameters();
 
@@ -65,13 +65,13 @@ namespace sl
             zedCamera.EnableObjectsDetection(ref obj_det_params);
 
             // Create ZED Objects filled in the main loop
-            object_frame = new ObjectsFrameSDK();
-            point_cloud = new ZEDMat();
+            object_frame = new Objects();
+            point_cloud = new Mat();
             int Height = zedCamera.ImageHeight;
             int Width = zedCamera.ImageWidth;
 
             res = new Resolution((uint)Width, (uint)Height);
-            point_cloud.Create(res, MAT_TYPE.MAT_32F_C4, MEM.MEM_CPU);
+            point_cloud.Create(res, MAT_TYPE.MAT_32F_C4, MEM.CPU);
 
             // Create OpenGL Viewer
             viewer = new GLViewer();
@@ -83,8 +83,8 @@ namespace sl
             obj_runtime_parameters.objectClassFilter[(int)sl.OBJECT_CLASS.PERSON] = Convert.ToInt32(true);
             //obj_runtime_parameters.objectClassFilter[(int)sl.OBJECT_CLASS.VEHICLE] = Convert.ToInt32(true);
             // To set a specific threshold
-            obj_runtime_parameters.object_confidence_threshold = new int[(int)OBJECT_CLASS.LAST];
-            obj_runtime_parameters.object_confidence_threshold[(int)sl.OBJECT_CLASS.PERSON] = 35;
+            obj_runtime_parameters.objectConfidenceThreshold = new int[(int)OBJECT_CLASS.LAST];
+            obj_runtime_parameters.objectConfidenceThreshold[(int)sl.OBJECT_CLASS.PERSON] = 35;
             //obj_runtime_parameters.object_confidence_threshold[(int)sl.OBJECT_CLASS.VEHICLE] = 35;
 
             cam_pose = new Pose();
@@ -184,12 +184,12 @@ namespace sl
                 if (point_cloud.IsInit())
                 {
                     // Retrieve Objects
-                    err = zedCamera.RetrieveObjectsDetectionData(ref obj_runtime_parameters, ref object_frame);
+                    err = zedCamera.RetrieveObjects(ref object_frame, ref obj_runtime_parameters);
 
                     if (err == ERROR_CODE.SUCCESS && object_frame.isNew != 0)
                     {
                         // Retrieve left image
-                        zedCamera.RetrieveMeasure(point_cloud, sl.MEASURE.XYZRGBA, sl.MEM.MEM_CPU, res);
+                        zedCamera.RetrieveMeasure(point_cloud, sl.MEASURE.XYZRGBA, sl.MEM.CPU, res);
                         zedCamera.GetPosition(ref cam_pose, REFERENCE_FRAME.WORLD);
                         //Update GL View
                         viewer.update(point_cloud, object_frame, cam_pose);
@@ -202,7 +202,7 @@ namespace sl
 
         private void close()
         {
-            zedCamera.DisableTracking();
+            zedCamera.DisablePositionalTracking();
             zedCamera.DisableObjectsDetection();
             zedCamera.Close();
             viewer.exit();
@@ -213,7 +213,7 @@ namespace sl
             if (args.Length > 0 && args[0].IndexOf(".svo") != -1)
             {
                 // SVO input mode
-                param.inputType = INPUT_TYPE.INPUT_TYPE_SVO;
+                param.inputType = INPUT_TYPE.SVO;
                 param.pathSVO = args[0];
                 Console.WriteLine("[Sample] Using SVO File input: " + args[0]);
             }
@@ -224,7 +224,7 @@ namespace sl
                 if (IPAddress.TryParse(arg, out ip))
                 {
                     // Stream input mode - IP + port
-                    param.inputType = INPUT_TYPE.INPUT_TYPE_STREAM;
+                    param.inputType = INPUT_TYPE.STREAM;
                     param.ipStream = ip.ToString();
                     Console.WriteLine("[Sample] Using Stream input, IP : " + ip);
                 }

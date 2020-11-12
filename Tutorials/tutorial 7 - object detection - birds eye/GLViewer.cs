@@ -1,4 +1,4 @@
-﻿using OpenGL;
+using OpenGL;
 using OpenGL.CoreUI;
 using System;
 using System.Collections.Generic;
@@ -92,7 +92,7 @@ class GLViewer
         available = true;
     }
 
-    public void update(ZEDMat image, ObjectsFrameSDK objects, sl.Pose pose)
+    public void update(Mat image, Objects objects, sl.Pose pose)
     {
         pointCloud.pushNewPC(image);
 
@@ -107,20 +107,20 @@ class GLViewer
         // For each object
         for (int idx = 0; idx < objects.numObject; idx++)
         {
-            sl.ObjectDataSDK obj = objects.objectData[idx];
+            sl.ObjectData obj = objects.objectData[idx];
 
             // Only show tracked objects
             if (renderObject(obj))
             {
                 List<Vector3> bb_ = new List<Vector3>();
-                bb_.AddRange(obj.worldBoundingBox);
+                bb_.AddRange(obj.boundingBox);
                 float4 clr_id = generateColorClass(obj.id);
-                float4 clr_class = generateColorClass((int)obj.objectClass);
+                float4 clr_class = generateColorClass((int)obj.label);
 
-                if (obj.objectTrackingState != sl.OBJECT_TRACK_STATE.OK)
+                if (obj.objectTrackingState != sl.OBJECT_TRACKING_STATE.OK)
                     clr_id = clr_class;
                 else
-                    createIDRendering(obj.rootWorldPosition, clr_id, obj.id);
+                    createIDRendering(obj.position, clr_id, obj.id);
 
                 createBboxRendering(bb_, clr_id);
             }
@@ -162,7 +162,7 @@ class GLViewer
     public void render()
     {
         camera_.update();
-            
+
         BBox_edges.pushToGPU();
         BBox_faces.pushToGPU();
 
@@ -285,8 +285,8 @@ class GLViewer
         return color;
     }
 
-    bool renderObject(ObjectDataSDK i) {
-        return (i.objectTrackingState == OBJECT_TRACK_STATE.OK || i.objectTrackingState == OBJECT_TRACK_STATE.OFF);
+    bool renderObject(ObjectData i) {
+        return (i.objectTrackingState == OBJECT_TRACKING_STATE.OK || i.objectTrackingState == OBJECT_TRACKING_STATE.OFF);
     }
 
     private void setRenderCameraProjection(CameraParameters camParams, float znear, float zfar)
@@ -295,7 +295,7 @@ class GLViewer
             // Just slightly up the ZED camera FOV to make a small black border
             float fov_y = (camParams.vFOV+0.5f) *PI / 180;
             float fov_x = (camParams.hFOV+0.5f) * PI / 180;
-            
+
             projection_.M11 = 1.0f / (float)Math.Tan(fov_x * 0.5f);
             projection_.M22 = 1.0f / (float)Math.Tan(fov_y * 0.5f);
             projection_.M33 = -(zfar + znear) / (zfar - znear);
@@ -316,7 +316,7 @@ class GLViewer
             projection_.M32 = 0;
 
             projection_.M41 = 0;
-            projection_.M42 = 0;          
+            projection_.M42 = 0;
         }
 
     int getIdx(BODY_PARTS part)
@@ -429,7 +429,7 @@ class ImageHandler
         Gl.BindTexture(TextureTarget.Texture2d, 0);
     }
 
-    public void pushNewImage(ZEDMat zedImage)
+    public void pushNewImage(Mat zedImage)
     {
         // Update Texture with current zedImage
         Gl.TexSubImage2D(TextureTarget.Texture2d, 0, 0, 0, zedImage.GetWidth(), zedImage.GetHeight(), PixelFormat.Rgba, PixelType.UnsignedByte, zedImage.GetPtr());
@@ -473,7 +473,7 @@ class PointCloud
     public PointCloud()
     {
         shader = new ShaderData();
-        mat_ = new ZEDMat();
+        mat_ = new Mat();
     }
 
     void close()
@@ -495,14 +495,14 @@ class PointCloud
         shader.it = new Shader(Shader.POINTCLOUD_VERTEX_SHADER, Shader.POINTCLOUD_FRAGMENT_SHADER);
         shader.MVP_Mat = Gl.GetUniformLocation(shader.it.getProgramId(), "u_mvpMatrix");
 
-        mat_.Create(res, sl.MAT_TYPE.MAT_32F_C4, MEM.MEM_CPU);
+        mat_.Create(res, sl.MAT_TYPE.MAT_32F_C4, MEM.CPU);
     }
 
-    public void pushNewPC(ZEDMat matXYZRGBA)
+    public void pushNewPC(Mat matXYZRGBA)
     {
         if (mat_.IsInit())
         {
-            mat_.SetFrom(matXYZRGBA, COPY_TYPE.COPY_TYPE_CPU_CPU);
+            mat_.SetFrom(matXYZRGBA, COPY_TYPE.CPU_CPU);
         }
     }
 
@@ -525,7 +525,7 @@ class PointCloud
     }
     uint bufferGLID_;
 
-    ZEDMat mat_;
+    Mat mat_;
     ShaderData shader;
 };
 
@@ -586,7 +586,7 @@ class CameraGL
     public Vector3 getOffsetFromPosition() { return offset_; }
 
     public void setDirection(Vector3 direction, Vector3 vertical)
-    { 
+    {
         Vector3 dirNormalized = Vector3.Normalize(direction);
 
         // Create rotation
@@ -606,7 +606,7 @@ class CameraGL
         rotation_.Y = half_sin * w.Y;
         rotation_.Z = half_sin * w.Z;
 
-        ///////////////////////   
+        ///////////////////////
         updateVectors();
         vertical_ = vertical;
         if (Vector3.Dot(vertical, up_) < 0) rotate(Quaternion.CreateFromAxisAngle(Vector3.UnitZ, (float)Math.PI));
@@ -626,7 +626,7 @@ class CameraGL
     {
         rotate(Quaternion.CreateFromRotationMatrix(m));
     }
-        
+
     public void setRotation(Quaternion rot)
     {
         rotation_ = rot;
@@ -1348,7 +1348,7 @@ class Simple3DObject
             {
 
                 Gl.BindBuffer(BufferTarget.ElementArrayBuffer, vboID_[2]);
-                Gl.BufferData(BufferTarget.ElementArrayBuffer, (uint)indices_.Count() * sizeof(uint), indices_.ToArray(), isStatic_ ? BufferUsage.StaticDraw : BufferUsage.DynamicDraw);
+                Gl.BufferData(BufferTarget.ElementArrayBuffer, (uint)indices_.Count() * sizeof(float), indices_.ToArray(), isStatic_ ? BufferUsage.StaticDraw : BufferUsage.DynamicDraw);
             }
             if (normals_.Count() > 0)
             {
@@ -1361,7 +1361,7 @@ class Simple3DObject
             Gl.BindVertexArray(0);
             Gl.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
             Gl.BindBuffer(BufferTarget.ArrayBuffer, 0);
-        } 
+        }
     }
 
     public void clear()

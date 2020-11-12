@@ -1,0 +1,634 @@
+<!-- HTML header for doxygen 1.8.7-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+		<meta name="robots" content="noindex, follow"/>
+        <meta name="generator" content="Doxygen 1.8.20"/>
+        <title>ZEDCameraSettings.CameraSettings Class Reference | API Reference | Stereolabs</title><!--END PROJECT_NAME (ZED csharp API)-->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,500,600,700,800">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:300,400,500,600,700">
+        <link href="tabs.css?t=Mon Nov 2 2020 16:51:54" rel="stylesheet" type="text/css"/>
+        <script type="text/javascript" src="jquery.js?t=Mon Nov 2 2020 16:51:54"></script>
+        <script type="text/javascript" src="custom.js?t=Mon Nov 2 2020 16:51:54"></script>
+        <script type="text/javascript" src="dynsections.js?t=Mon Nov 2 2020 16:51:54"></script>
+        <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+        <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+  $(document).ready(function() { init_search(); });
+/* @license-end */
+</script>
+        <link href="stylesheet.css?t=Mon Nov 2 2020 16:51:54" rel="stylesheet" type="text/css" />
+    </head>
+    <body>
+        <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+            <div id="titlearea">
+                <table cellspacing="0" cellpadding="0">
+                    <tbody>
+                        <tr style="height: 58px;">
+                            <td class="headerSpacer"></td>
+                            <td id="projectlogo">
+                                <a href="https://www.stereolabs.com"><img src="https://www.stereolabs.com/img/logo_stereolabs.svg" alt="Stereolabs logo" id="logo"></a>
+                            </td>
+                            <td class="nav-links nav-links-header">
+                                <a href="https://www.stereolabs.com/docs/" >DOCUMENTATION</a>
+                            </td>
+                            <td class="nav-links nav-links-header">
+                                <a href="https://www.stereolabs.com/docs/code-samples/" >SAMPLES</a>
+                            </td>
+                            <td class="nav-links nav-links-header">
+                                <a class="active" href="https://www.stereolabs.com/developers/documentation/API/latest/" >API REFERENCE</a>
+                            </td>
+                            <td class="nav-links nav-links-header">
+                                <a href="https://support.stereolabs.com/hc/en-us" >SUPPORT</a>
+                            </td>
+                            <td class="nav-links nav-links-header">
+                                <a href="https://www.stereolabs.com/developers/release/latest/" >DOWNLOADS</a>
+                            </td>
+                            <td><i class="mobile-navigation"></i></td>
+                            <!--<td id="projectlogo" >
+                                <a href="https://www.stereolabs.com/"> <img alt="Logo" src="logo_stereolabs.png" height="27"/> </a>
+                            </td>-->
+                            <!--<td style="padding-left: 0.4cm;">-->
+                                <!--<div id="projectname">--><!--ZED csharp API-->
+                                    <!--<span id="projectnumber"> | ZED SDK 3.0.0</span>-->
+                                <!--</div>-->
+                                <!--BEGIN PROJECT_BRIEF<div id="projectbrief"></div><!--END PROJECT_BRIEF-->
+                            <!--</td>-->
+                            <td>        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="subtitlearea">
+                <table cellspacing="0" cellpadding="0">
+                    <tbody>
+                        <tr style="height: 28px;">
+                            <td class="headerSpacer"></td>
+                            <td id="subMenuCpp" class="nav-links nav-links-header nav-links-selected">
+                                <a href="https://www.stereolabs.com/docs/api/"  >C++</a>
+                            </td>
+                            <td id="subMenuPython" class="nav-links nav-links-header">
+                                <a href="https://www.stereolabs.com/docs/api/python/" >Python</a>
+                            </td>
+		                        <td id="subMenuCSharp" class="nav-links nav-links-header">
+                                <a href="https://www.stereolabs.com/docs/api/csharp/" >C#</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- end header part -->
+<!-- Generated by Doxygen 1.8.20 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search');
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('classsl_1_1ZEDCameraSettings_1_1CameraSettings.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Functions</a> &#124;
+<a href="#pub-attribs">Attributes</a> &#124;
+<a href="#properties">Properties</a> &#124;
+<a href="classsl_1_1ZEDCameraSettings_1_1CameraSettings-members.html">List of all members</a>  </div>
+  <div class="headertitle">
+<div class="title">ZEDCameraSettings.CameraSettings Class Reference</div>  </div>
+</div><!--header-->
+<div class="contents">
+
+<p>Container for ZED camera settings, with constructors for easily creating default or specific values or making duplicate instances.  
+ <a href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#details">More...</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ac1adc9df2b650d574bd7eb237a1922ca"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#ac1adc9df2b650d574bd7eb237a1922ca">CameraSettings</a> (int brightness=4, int contrast=4, int hue=0, int saturation=4, int sharpness=3, int gamma=5, int whiteBalance=-1, int gain=-1, int exposure=-1, int ledStatus=1)</td></tr>
+<tr class="memdesc:ac1adc9df2b650d574bd7eb237a1922ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. Call without arguments to set all values to default.  <a href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#ac1adc9df2b650d574bd7eb237a1922ca">More...</a><br /></td></tr>
+<tr class="separator:ac1adc9df2b650d574bd7eb237a1922ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9bf5e43d3f247cbbd39a85f818949f6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#ab9bf5e43d3f247cbbd39a85f818949f6">CameraSettings</a> (<a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html">CameraSettings</a> other)</td></tr>
+<tr class="memdesc:ab9bf5e43d3f247cbbd39a85f818949f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. Sets settings to match another <a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html" title="Container for ZED camera settings, with constructors for easily creating default or specific values o...">CameraSettings</a> passed in the argument.  <a href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#ab9bf5e43d3f247cbbd39a85f818949f6">More...</a><br /></td></tr>
+<tr class="separator:ab9bf5e43d3f247cbbd39a85f818949f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad2e7bb3962422c1b6aa6f9ece6786ca1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html">CameraSettings</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#ad2e7bb3962422c1b6aa6f9ece6786ca1">Clone</a> ()</td></tr>
+<tr class="memdesc:ad2e7bb3962422c1b6aa6f9ece6786ca1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a new instance of <a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html" title="Container for ZED camera settings, with constructors for easily creating default or specific values o...">CameraSettings</a> with the same settings as the instance this function was called with.  <a href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#ad2e7bb3962422c1b6aa6f9ece6786ca1">More...</a><br /></td></tr>
+<tr class="separator:ad2e7bb3962422c1b6aa6f9ece6786ca1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
+Attributes</h2></td></tr>
+<tr class="memitem:a7414e152d6b3f48bebe667d8fdf2343d"><td class="memItemLeft" align="right" valign="top">int[]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#a7414e152d6b3f48bebe667d8fdf2343d">settings</a> = new int[System.Enum.GetNames(typeof(<a class="el" href="group__Video__group.html#gafdecf198c85568238dacc827f5d085de">sl.CAMERA_SETTINGS</a>)).Length]</td></tr>
+<tr class="memdesc:a7414e152d6b3f48bebe667d8fdf2343d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Holds an int for each setting, with indexes corresponding to <a class="el" href="group__Video__group.html#gafdecf198c85568238dacc827f5d085de" title="Lists available camera settings for the ZED camera (contrast, hue, saturation, gain,...">sl.CAMERA_SETTINGS</a>.  <a href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#a7414e152d6b3f48bebe667d8fdf2343d">More...</a><br /></td></tr>
+<tr class="separator:a7414e152d6b3f48bebe667d8fdf2343d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="properties"></a>
+Properties</h2></td></tr>
+<tr class="memitem:a7e0b5636d02d6736682f42f0fd44481d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#a7e0b5636d02d6736682f42f0fd44481d">Brightness</a><code> [get, set]</code></td></tr>
+<tr class="memdesc:a7e0b5636d02d6736682f42f0fd44481d"><td class="mdescLeft">&#160;</td><td class="mdescRight">ZED camera's brightness setting.  <a href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#a7e0b5636d02d6736682f42f0fd44481d">More...</a><br /></td></tr>
+<tr class="separator:a7e0b5636d02d6736682f42f0fd44481d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac3c07f44ce96511679c38f4da771d31"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#aac3c07f44ce96511679c38f4da771d31">Saturation</a><code> [get, set]</code></td></tr>
+<tr class="memdesc:aac3c07f44ce96511679c38f4da771d31"><td class="mdescLeft">&#160;</td><td class="mdescRight">ZED camera's saturation setting.  <a href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#aac3c07f44ce96511679c38f4da771d31">More...</a><br /></td></tr>
+<tr class="separator:aac3c07f44ce96511679c38f4da771d31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb07db2aba8e8a58672d24190c67fb58"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#aeb07db2aba8e8a58672d24190c67fb58">Hue</a><code> [get, set]</code></td></tr>
+<tr class="memdesc:aeb07db2aba8e8a58672d24190c67fb58"><td class="mdescLeft">&#160;</td><td class="mdescRight">ZED camera's hue setting.  <a href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#aeb07db2aba8e8a58672d24190c67fb58">More...</a><br /></td></tr>
+<tr class="separator:aeb07db2aba8e8a58672d24190c67fb58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6be413ef1237983fb6367a5cd17a9030"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#a6be413ef1237983fb6367a5cd17a9030">Contrast</a><code> [get, set]</code></td></tr>
+<tr class="memdesc:a6be413ef1237983fb6367a5cd17a9030"><td class="mdescLeft">&#160;</td><td class="mdescRight">ZED camera's contrast setting.  <a href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#a6be413ef1237983fb6367a5cd17a9030">More...</a><br /></td></tr>
+<tr class="separator:a6be413ef1237983fb6367a5cd17a9030"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd68acd46dea02fdd9ba6d80bc3d6c1c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#abd68acd46dea02fdd9ba6d80bc3d6c1c">Sharpness</a><code> [get, set]</code></td></tr>
+<tr class="memdesc:abd68acd46dea02fdd9ba6d80bc3d6c1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">ZED camera's contrast setting.  <a href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#abd68acd46dea02fdd9ba6d80bc3d6c1c">More...</a><br /></td></tr>
+<tr class="separator:abd68acd46dea02fdd9ba6d80bc3d6c1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64585072954ae62fb15537afba4856ee"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#a64585072954ae62fb15537afba4856ee">Gamma</a><code> [get, set]</code></td></tr>
+<tr class="memdesc:a64585072954ae62fb15537afba4856ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">ZED camera's contrast setting.  <a href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#a64585072954ae62fb15537afba4856ee">More...</a><br /></td></tr>
+<tr class="separator:a64585072954ae62fb15537afba4856ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03e2c3aa25e6b9d0381b7e614e1bb880"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#a03e2c3aa25e6b9d0381b7e614e1bb880">Gain</a><code> [get, set]</code></td></tr>
+<tr class="memdesc:a03e2c3aa25e6b9d0381b7e614e1bb880"><td class="mdescLeft">&#160;</td><td class="mdescRight">ZED camera's gain setting. -1 means automatic.  <a href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#a03e2c3aa25e6b9d0381b7e614e1bb880">More...</a><br /></td></tr>
+<tr class="separator:a03e2c3aa25e6b9d0381b7e614e1bb880"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab38b36b57fead628088bb3f699aaa38f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#ab38b36b57fead628088bb3f699aaa38f">Exposure</a><code> [get, set]</code></td></tr>
+<tr class="memdesc:ab38b36b57fead628088bb3f699aaa38f"><td class="mdescLeft">&#160;</td><td class="mdescRight">ZED camera's exposure setting. -1 means automatic.  <a href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#ab38b36b57fead628088bb3f699aaa38f">More...</a><br /></td></tr>
+<tr class="separator:ab38b36b57fead628088bb3f699aaa38f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8247e3ff1c7d17f2bf2c6917aef19ca2"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#a8247e3ff1c7d17f2bf2c6917aef19ca2">WhiteBalance</a><code> [get, set]</code></td></tr>
+<tr class="memdesc:a8247e3ff1c7d17f2bf2c6917aef19ca2"><td class="mdescLeft">&#160;</td><td class="mdescRight">ZED camera's white balance setting. -1 means automatic.  <a href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#a8247e3ff1c7d17f2bf2c6917aef19ca2">More...</a><br /></td></tr>
+<tr class="separator:a8247e3ff1c7d17f2bf2c6917aef19ca2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b43116e8721e5e64e15cdddcf7c5f33"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#a3b43116e8721e5e64e15cdddcf7c5f33">LEDStatus</a><code> [get, set]</code></td></tr>
+<tr class="memdesc:a3b43116e8721e5e64e15cdddcf7c5f33"><td class="mdescLeft">&#160;</td><td class="mdescRight">ZED camera's LED status  <a href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#a3b43116e8721e5e64e15cdddcf7c5f33">More...</a><br /></td></tr>
+<tr class="separator:a3b43116e8721e5e64e15cdddcf7c5f33"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Container for ZED camera settings, with constructors for easily creating default or specific values or making duplicate instances. </p>
+</div><h2 class="groupheader">Constructor and Destructor</h2>
+<a id="ac1adc9df2b650d574bd7eb237a1922ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac1adc9df2b650d574bd7eb237a1922ca">&#9670;&nbsp;</a></span>CameraSettings() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html">CameraSettings</a> </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>brightness</em> = <code>4</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>contrast</em> = <code>4</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>hue</em> = <code>0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>saturation</em> = <code>4</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>sharpness</em> = <code>3</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>gamma</em> = <code>5</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>whiteBalance</em> = <code>-1</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>gain</em> = <code>-1</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>exposure</em> = <code>-1</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>ledStatus</em> = <code>1</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Constructor. Call without arguments to set all values to default. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">brightness</td><td>Camera's brightness setting.</td></tr>
+    <tr><td class="paramname">contrast</td><td>Camera's contrast setting.</td></tr>
+    <tr><td class="paramname">hue</td><td>Camera's hue setting.</td></tr>
+    <tr><td class="paramname">saturation</td><td>Camera's saturation setting.</td></tr>
+    <tr><td class="paramname">sharpness</td><td>Camera's sharpness setting.</td></tr>
+    <tr><td class="paramname">gamma</td><td>Camera's gamma setting.</td></tr>
+    <tr><td class="paramname">whiteBalance</td><td>Camera's white balance setting. -1 means automatic.</td></tr>
+    <tr><td class="paramname">gain</td><td>Camera's gain setting. -1 means automatic.</td></tr>
+    <tr><td class="paramname">exposure</td><td>Camera's exposure setting. -1 means automatic.</td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="reference">Referenced by <a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#ad2e7bb3962422c1b6aa6f9ece6786ca1">ZEDCameraSettings.CameraSettings.Clone()</a>.</p>
+
+</div>
+</div>
+<a id="ab9bf5e43d3f247cbbd39a85f818949f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9bf5e43d3f247cbbd39a85f818949f6">&#9670;&nbsp;</a></span>CameraSettings() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html">CameraSettings</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html">CameraSettings</a>&#160;</td>
+          <td class="paramname"><em>other</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Constructor. Sets settings to match another <a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html" title="Container for ZED camera settings, with constructors for easily creating default or specific values o...">CameraSettings</a> passed in the argument. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">other</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">Functions</h2>
+<a id="ad2e7bb3962422c1b6aa6f9ece6786ca1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad2e7bb3962422c1b6aa6f9ece6786ca1">&#9670;&nbsp;</a></span>Clone()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html">CameraSettings</a> Clone </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns a new instance of <a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html" title="Container for ZED camera settings, with constructors for easily creating default or specific values o...">CameraSettings</a> with the same settings as the instance this function was called with. </p>
+<dl class="section return"><dt>Returns</dt><dd>New instance of <a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html" title="Container for ZED camera settings, with constructors for easily creating default or specific values o...">CameraSettings</a>.</dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Variables</h2>
+<a id="a7414e152d6b3f48bebe667d8fdf2343d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7414e152d6b3f48bebe667d8fdf2343d">&#9670;&nbsp;</a></span>settings</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int [] settings = new int[System.Enum.GetNames(typeof(<a class="el" href="group__Video__group.html#gafdecf198c85568238dacc827f5d085de">sl.CAMERA_SETTINGS</a>)).Length]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Holds an int for each setting, with indexes corresponding to <a class="el" href="group__Video__group.html#gafdecf198c85568238dacc827f5d085de" title="Lists available camera settings for the ZED camera (contrast, hue, saturation, gain,...">sl.CAMERA_SETTINGS</a>. </p>
+
+<p class="reference">Referenced by <a class="el" href="classsl_1_1ZEDCameraSettings_1_1CameraSettings.html#ac1adc9df2b650d574bd7eb237a1922ca">ZEDCameraSettings.CameraSettings.CameraSettings()</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Property Documentation</h2>
+<a id="a7e0b5636d02d6736682f42f0fd44481d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e0b5636d02d6736682f42f0fd44481d">&#9670;&nbsp;</a></span>Brightness</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Brightness</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">get</span><span class="mlabel">set</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>ZED camera's brightness setting. </p>
+
+</div>
+</div>
+<a id="aac3c07f44ce96511679c38f4da771d31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aac3c07f44ce96511679c38f4da771d31">&#9670;&nbsp;</a></span>Saturation</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Saturation</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">get</span><span class="mlabel">set</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>ZED camera's saturation setting. </p>
+
+</div>
+</div>
+<a id="aeb07db2aba8e8a58672d24190c67fb58"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb07db2aba8e8a58672d24190c67fb58">&#9670;&nbsp;</a></span>Hue</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Hue</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">get</span><span class="mlabel">set</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>ZED camera's hue setting. </p>
+
+</div>
+</div>
+<a id="a6be413ef1237983fb6367a5cd17a9030"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6be413ef1237983fb6367a5cd17a9030">&#9670;&nbsp;</a></span>Contrast</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Contrast</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">get</span><span class="mlabel">set</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>ZED camera's contrast setting. </p>
+
+</div>
+</div>
+<a id="abd68acd46dea02fdd9ba6d80bc3d6c1c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd68acd46dea02fdd9ba6d80bc3d6c1c">&#9670;&nbsp;</a></span>Sharpness</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Sharpness</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">get</span><span class="mlabel">set</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>ZED camera's contrast setting. </p>
+
+</div>
+</div>
+<a id="a64585072954ae62fb15537afba4856ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64585072954ae62fb15537afba4856ee">&#9670;&nbsp;</a></span>Gamma</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Gamma</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">get</span><span class="mlabel">set</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>ZED camera's contrast setting. </p>
+
+</div>
+</div>
+<a id="a03e2c3aa25e6b9d0381b7e614e1bb880"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03e2c3aa25e6b9d0381b7e614e1bb880">&#9670;&nbsp;</a></span>Gain</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Gain</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">get</span><span class="mlabel">set</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>ZED camera's gain setting. -1 means automatic. </p>
+
+</div>
+</div>
+<a id="ab38b36b57fead628088bb3f699aaa38f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab38b36b57fead628088bb3f699aaa38f">&#9670;&nbsp;</a></span>Exposure</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Exposure</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">get</span><span class="mlabel">set</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>ZED camera's exposure setting. -1 means automatic. </p>
+
+</div>
+</div>
+<a id="a8247e3ff1c7d17f2bf2c6917aef19ca2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8247e3ff1c7d17f2bf2c6917aef19ca2">&#9670;&nbsp;</a></span>WhiteBalance</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int WhiteBalance</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">get</span><span class="mlabel">set</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>ZED camera's white balance setting. -1 means automatic. </p>
+
+</div>
+</div>
+<a id="a3b43116e8721e5e64e15cdddcf7c5f33"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b43116e8721e5e64e15cdddcf7c5f33">&#9670;&nbsp;</a></span>LEDStatus</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int LEDStatus</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">get</span><span class="mlabel">set</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>ZED camera's LED status </p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->

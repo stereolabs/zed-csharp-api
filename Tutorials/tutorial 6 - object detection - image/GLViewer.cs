@@ -1,4 +1,4 @@
-﻿using OpenGL;
+using OpenGL;
 using OpenGL.CoreUI;
 using System;
 using System.Collections.Generic;
@@ -60,7 +60,7 @@ namespace sl
 
         }
 
-        public void update(ZEDMat image, ObjectsFrameSDK objects)
+        public void update(Mat image, Objects objects)
         {
             image_handler.pushNewImage(image);
 
@@ -73,22 +73,22 @@ namespace sl
             // For each object
             for (int idx = 0; idx < objects.numObject; idx++)
             {
-                sl.ObjectDataSDK obj = objects.objectData[idx];
+                sl.ObjectData obj = objects.objectData[idx];
 
                 // Only show tracked objects
                 if (renderObject(obj))
                 {
                     List<Vector3> bb_ = new List<Vector3>();
-                    bb_.AddRange(obj.worldBoundingBox);
+                    bb_.AddRange(obj.boundingBox);
                     if (bb_.Count > 0)
                     {
                         float4 clr_id = generateColorClass(obj.id);
-                        float4 clr_class = generateColorClass((int)obj.objectClass);
+                        float4 clr_class = generateColorClass((int)obj.label);
 
-                        if (obj.objectTrackingState != sl.OBJECT_TRACK_STATE.OK)
+                        if (obj.objectTrackingState != sl.OBJECT_TRACKING_STATE.OK)
                             clr_id = clr_class;
                         else
-                            createIDRendering(obj.rootWorldPosition, clr_id, obj.id);
+                            createIDRendering(obj.position, clr_id, obj.id);
 
                         createBboxRendering(bb_, clr_id);
                     }
@@ -128,7 +128,7 @@ namespace sl
         public void draw()
         {
             image_handler.draw();
-            
+
             Gl.UseProgram(shaderBasic.it.getProgramId());
             Gl.UniformMatrix4f(shaderBasic.MVP_Mat, 1, true, projection_);
             Gl.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
@@ -179,8 +179,8 @@ namespace sl
             return color;
         }
 
-        bool renderObject(ObjectDataSDK i) {
-            return (i.objectTrackingState == OBJECT_TRACK_STATE.OK || i.objectTrackingState == OBJECT_TRACK_STATE.OFF);
+        bool renderObject(ObjectData i) {
+            return (i.objectTrackingState == OBJECT_TRACKING_STATE.OK || i.objectTrackingState == OBJECT_TRACKING_STATE.OFF);
         }
 
         private void setRenderCameraProjection(CameraParameters camParams, float znear, float zfar)
@@ -189,7 +189,7 @@ namespace sl
             // Just slightly up the ZED camera FOV to make a small black border
             float fov_y = (camParams.vFOV+0.5f) *PI / 180;
             float fov_x = (camParams.hFOV+0.5f) * PI / 180;
-            
+
             projection_.M11 = 1.0f / (float)Math.Tan(fov_x * 0.5f);
             projection_.M22 = 1.0f / (float)Math.Tan(fov_y * 0.5f);
             projection_.M33 = -(zfar + znear) / (zfar - znear);
@@ -210,7 +210,7 @@ namespace sl
             projection_.M32 = 0;
 
             projection_.M41 = 0;
-            projection_.M42 = 0;          
+            projection_.M42 = 0;
         }
 
         void printText()
@@ -219,7 +219,7 @@ namespace sl
             foreach(ObjectClassName obj in objectsName)
             {
                 Gl.WindowPos2(obj.position.X, obj.position.Y);
- 
+
             }
         }
 
@@ -288,7 +288,7 @@ namespace sl
             Gl.BindTexture(TextureTarget.Texture2d, 0);
         }
 
-        public void pushNewImage(ZEDMat zedImage)
+        public void pushNewImage(Mat zedImage)
         {
             // Update Texture with current zedImage
             Gl.TexSubImage2D(TextureTarget.Texture2d, 0, 0, 0, zedImage.GetWidth(), zedImage.GetHeight(), PixelFormat.Rgba, PixelType.UnsignedByte, zedImage.GetPtr());
@@ -474,7 +474,7 @@ namespace sl
         public void init()
         {
             vaoID_ = 0;
-            isStatic_ = false;        
+            isStatic_ = false;
 
             shader.it = new Shader(Shader.VERTEX_SHADER, Shader.FRAGMENT_SHADER);
             shader.MVP_Mat = Gl.GetUniformLocation(shader.it.getProgramId(), "u_mvpMatrix");
@@ -573,7 +573,7 @@ namespace sl
             }
         }
 
-        public void addSingleVerticalLine(Vector3 top_pt, Vector3 bot_pt, float4 clr) 
+        public void addSingleVerticalLine(Vector3 top_pt, Vector3 bot_pt, float4 clr)
         {
             List<Vector3> current_pts = new List<Vector3>()
             {
@@ -584,7 +584,7 @@ namespace sl
                 (top_pt + bot_pt* (grid_size - 1.0f)) / grid_size,
                 bot_pt
             };
-        
+
             int start_id = vertices_.Count / 3;
             for (int i = 0; i<current_pts.Count; i++)
             {
@@ -756,7 +756,7 @@ namespace sl
                 Gl.BindVertexArray(0);
                 Gl.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
                 Gl.BindBuffer(BufferTarget.ArrayBuffer, 0);
-            } 
+            }
         }
 
         public void clear()
