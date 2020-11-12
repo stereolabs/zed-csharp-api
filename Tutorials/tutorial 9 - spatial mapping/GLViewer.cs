@@ -107,7 +107,6 @@ namespace sl
             {
                 if (ask_clear)
                 {
-                    Console.WriteLine("CLEAR");
                     sub_maps.Clear();
                     ask_clear = false;
                 }
@@ -338,16 +337,6 @@ namespace sl
                 Gl.BindVertexArray(vaoID_);
                 Gl.DrawElements(draw_mesh == true ? PrimitiveType.Triangles : PrimitiveType.Points, current_fc, DrawElementsType.UnsignedInt, IntPtr.Zero);
                 Gl.BindVertexArray(0);
-            }
-        }
-
-        ~SpatialMappingObject()
-        {
-            current_fc = 0;
-            if(vaoID_ != 0)
-            {
-                Gl.DeleteBuffers(vboID_);
-                Gl.DeleteVertexArrays(vaoID_);
             }
         }
 

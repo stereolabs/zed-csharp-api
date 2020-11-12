@@ -88,6 +88,8 @@ namespace sl
             // Create OpenGL Viewer
             viewer = new GLViewer(new Resolution((uint)Width, (uint)Height));
 
+            Console.WriteLine("Hit SPACE BAR to start spatial mapping...");
+
             // Create OpenGL window
             CreateWindow();
         }
@@ -210,6 +212,7 @@ namespace sl
 
                             zedCamera.EnableSpatialMapping(ref spatialMappingParameters);
 
+                            Console.WriteLine("Hit SPACE BAR to stop spatial mapping...");
                             // Clear previous Mesh data
                             viewer.clearCurrentMesh();
 
@@ -256,6 +259,8 @@ namespace sl
                             mapping_state = SPATIAL_MAPPING_STATE.NOT_ENABLED;
                             mapping_activated = false;
                             zedCamera.DisableSpatialMapping();
+
+                            Console.WriteLine("Hit SPACE BAR to start spatial mapping...");
                         }
                     }
                     timer++;
