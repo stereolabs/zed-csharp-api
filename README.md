@@ -35,7 +35,7 @@ The C# API uses two packages that are published to Nuget.org.
 
 ### Usage
 
-Here is an example of the .NET API. 
+Here is an example of the .NET API.
 ```C#
 using System.Numerics;
 
