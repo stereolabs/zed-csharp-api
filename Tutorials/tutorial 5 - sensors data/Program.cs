@@ -1,4 +1,4 @@
-﻿//======= Copyright (c) Stereolabs Corporation, All rights reserved. ===============
+//======= Copyright (c) Stereolabs Corporation, All rights reserved. ===============
 using System;
 using System.Runtime.InteropServices;
 using System.Numerics;
@@ -13,19 +13,19 @@ namespace sl
             InitParameters init_params = new InitParameters();
             init_params.resolution = RESOLUTION.HD1080;
             init_params.cameraFPS = 30;
-            ZEDCamera zed = new ZEDCamera();
+            Camera zed = new Camera(0);
             // Open the camera
-            ERROR_CODE err = zed.Init(ref init_params);
+            ERROR_CODE err = zed.Open(ref init_params);
             if (err != ERROR_CODE.SUCCESS)
                 Environment.Exit(-1);
 
             SensorsData sensors_data = new SensorsData();
             ulong last_imu_timestamp = 0;
-            RuntimeParameters runtimeParameters = new RuntimeParameters();
 
+            RuntimeParameters runtimeParameters = new RuntimeParameters();
             while (zed.Grab(ref runtimeParameters) == ERROR_CODE.SUCCESS)
             {
-                zed.GetInternalSensorsData(ref sensors_data, TIME_REFERENCE.CURRENT);
+                zed.GetSensorsData(ref sensors_data, TIME_REFERENCE.CURRENT);
                 if (sensors_data.imu.timestamp > last_imu_timestamp)
                 {
                     // Show Sensors Data

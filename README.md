@@ -1,4 +1,4 @@
-# Stereolabs ZED - C# API (beta)
+# Stereolabs.Net - C#/.NET API 
 
 This repository shows how to use the ZED SDK functionalities in C#.
 
@@ -12,36 +12,62 @@ This repository shows how to use the ZED SDK functionalities in C#.
 - **Windows** 10 64bits or later
 - Visual Studio 2017 with C# extensions
 - Cmake 3.8 at least (Support of C#)
-- [ZED SDK **3.1**](https://www.stereolabs.com/developers/release/) and its dependency ([CUDA](https://developer.nvidia.com/cuda-downloads))
+- [ZED SDK **3.3**](https://www.stereolabs.com/developers/release/) and its dependency ([CUDA](https://developer.nvidia.com/cuda-downloads))
 
-## Instructions
+## NuGet
 
-The C++ to C# is done the following way :
+The C# API uses two packages that are published to Nuget.org.
 
-- A C interface to the ZED SDK is provided in the Resources folder (*sl_zed_interface.dll*, currently built for ZED SDK 3.1)
-- A .NET wrapper `Stereolabs.zed` that import the function from the dll interface (must be built)
-- You can then use the functions of the .NET wrapper in your program.
+| Package | Description | Link |
+|---------|-------------|------|
+|**sl_zed_interface**| C interface of the ZED SDK | [![NuGet version](https://badge.fury.io/nu/sl_zed_interface.svg)](https://badge.fury.io/nu/sl_zed_interface) |
+|**Stereolabs.zed**| .NET Wrapper that imports the functions from the interface | [![NuGet version](https://badge.fury.io/nu/Stereolabs.zed.svg)](https://badge.fury.io/nu/Stereolabs.zed) |
 
-### Build for .NET Wrapper
+### Build the tutorials
 
-1. Enter the Stereolabs.zed folder and generate the VS solution using cmake.
+1. Enter the tutorials folder and generate the Tutorials solution using cmake.
 **Use Visual studio 2017** (at least) compiler in **x64** mode.
 
 ![Cmake](./Documentation/img/cmake_settings.jpg)
 
 2. Press configure and generate.
-3. Open Stereolabs.zed.sln solution and build the solution.
-4. Make sure to build INSTALL so that both *sl_zed_interface.dll* and *Stereolabs.zed.dll* are copied into the *ZED_SDK_ROOT_DIR/bin* folder (usually *C:/Program Files(x86)/ZED SDK/bin/*).
-  You might need admin rights to do that.
+3. Open Tutorials.zed.sln solution and build the solution.
 
-### Build the tutorials
+### Usage
 
-Enter the tutorials folder and generate the Tutorials solution using cmake.
-Use the same settings at the .NET wrapper. (x64/ VS2017)
+Here is an example of the .NET API.
+```C#
+using System.Numerics;
 
-Open Tutorials.sln solution and build it.
+namespace sl
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            // Set configuration parameters
+            InitParameters init_params = new InitParameters();
+            init_params.resolution = RESOLUTION.HD1080;
+            init_params.cameraFPS = 30;
+            Camera zedCamera = new Camera(0);
+            // Open the camera
+            ERROR_CODE err = zedCamera.Open(ref init_params);
+            if (err != ERROR_CODE.SUCCESS)
+                Environment.Exit(-1);
+
+            // Get camera information (serial number)
+            int zed_serial = zedCamera.GetZEDSerialNumber();
+            Console.WriteLine("Hello! This is my serial number: " + zed_serial);
+            Console.ReadLine();
+
+            zedCamera.Close();
+        }
+    }
+}
+```
 
 ### Deployment
 
-When the program is built, *Stereolabs.zed.dll* will be automatically copied into the build folder, because it is DoNet dependency.
-When deploying the application, make sure that *sl_zed_interface.dll* is packaged with the executable files, and shipped on a target PC that has the proper ZED SDK version installed.
+When the program is built, *Stereolabs.zed.dll* and *sl_zed_interface.dll* will be automatically downloaded into the build folder.
+
+When deploying the application, make sure that *sl_zed_interface.dll* and *Stereolabs.zed.dll* are packaged with the executable files, and shipped on a target PC that has the proper ZED SDK version installed.

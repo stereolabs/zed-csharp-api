@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['pathsvo_420',['pathSVO',['../classsl_1_1InitParameters.html#a71fb25acf142b0c0a5b64d61b4b54482',1,'sl::InitParameters']]],
+  ['pauseobjectsdetection_421',['PauseObjectsDetection',['../classsl_1_1Camera.html#addcb40be3947bd95d678101dd0fcb094',1,'sl::Camera']]],
+  ['pausespatialmapping_422',['PauseSpatialMapping',['../classsl_1_1Camera.html#a23c47ce87639b5d8a20c2aae7d3cfbb9',1,'sl::Camera']]],
+  ['performance_423',['PERFORMANCE',['../group__Depth__group.html#gga8d542017c9b012a19a15d46be9b7fa43a063360736adfccfae2f1d8093c02959a',1,'sl']]],
+  ['person_424',['PERSON',['../group__Object__group.html#gga13b0c230bc8fee5bbaaaa57a45fa1177a9a8538fe173720857a031b8314073752',1,'sl.PERSON()'],['../group__Object__group.html#gga0c86adfc07c4fb24dc84f1fd2adc5ebaa9a8538fe173720857a031b8314073752',1,'sl.PERSON()']]],
+  ['plane_5fnot_5ffound_425',['PLANE_NOT_FOUND',['../group__Core__group.html#gga4db9ee29f2ff83c71567c12f6bfbf28ca1e345c594047d138db48599b4e3b912b',1,'sl']]],
+  ['plane_5ftype_426',['PLANE_TYPE',['../group__SpatialMapping__group.html#ga6a917c0031f78daf898e779ddae225a3',1,'sl']]],
+  ['planecenter_427',['PlaneCenter',['../structsl_1_1PlaneData.html#a0ff458272a98abf4b7decc166e0d9076',1,'sl::PlaneData']]],
+  ['planedata_428',['PlaneData',['../structsl_1_1PlaneData.html',1,'sl']]],
+  ['planeequation_429',['PlaneEquation',['../structsl_1_1PlaneData.html#aae53cf410afc4777818dae8051b91999',1,'sl::PlaneData']]],
+  ['planenormal_430',['PlaneNormal',['../structsl_1_1PlaneData.html#afbfb596ccc593fecdb12327c8df46696',1,'sl::PlaneData']]],
+  ['planetransformorientation_431',['PlaneTransformOrientation',['../structsl_1_1PlaneData.html#a4e48c40d8f10d7cb78ed9079a2ba6eaf',1,'sl::PlaneData']]],
+  ['planetransformposition_432',['PlaneTransformPosition',['../structsl_1_1PlaneData.html#a657c32eb85a25b1f08632f2a4dc4de04',1,'sl::PlaneData']]],
+  ['ply_433',['PLY',['../group__SpatialMapping__group.html#gga001684799cf2f2a948bfa463f39cae19a4a3c9b033e217d93b5841938bc23e3a2',1,'sl']]],
+  ['port_434',['port',['../structsl_1_1StreamingParameters.html#a2f1e845120e1cdd036593b32cc794aab',1,'sl::StreamingParameters']]],
+  ['portstream_435',['portStream',['../classsl_1_1InitParameters.html#a22e4ae259189d1424f0cc3c780ca7f38',1,'sl::InitParameters']]],
+  ['pose_436',['Pose',['../structsl_1_1Pose.html',1,'sl']]],
+  ['pose_5fconfidence_437',['pose_confidence',['../structsl_1_1Pose.html#a1e5ec748db2e79ab28a08c83823e55d6',1,'sl::Pose']]],
+  ['position_438',['position',['../structsl_1_1ObjectData.html#acfb76c74e507fea066625f69fbc8a146',1,'sl::ObjectData']]],
+  ['positional_5ftracking_5fstate_439',['POSITIONAL_TRACKING_STATE',['../group__PositionalTracking__group.html#gae481924a311113375bb3a99748d79e17',1,'sl']]],
+  ['positional_20tracking_20module_440',['Positional Tracking Module',['../group__PositionalTracking__group.html',1,'']]],
+  ['positionaltrackingparameters_441',['PositionalTrackingParameters',['../classsl_1_1PositionalTrackingParameters.html',1,'sl']]],
+  ['positioncovariance_442',['positionCovariance',['../structsl_1_1ObjectData.html#a15cc1913649303dcfbc4c57f3380188f',1,'sl::ObjectData']]],
+  ['pressure_443',['pressure',['../structsl_1_1BarometerData.html#ac870e1249bab4a2a68cc4126761d24ef',1,'sl::BarometerData']]]
+];

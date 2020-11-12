@@ -1,0 +1,413 @@
+<!-- HTML header for doxygen 1.8.7-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+		<meta name="robots" content="noindex, follow"/>
+        <meta name="generator" content="Doxygen 1.8.20"/>
+        <title>Object Detection Module | API Reference | Stereolabs</title><!--END PROJECT_NAME (ZED csharp API)-->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,500,600,700,800">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:300,400,500,600,700">
+        <link href="tabs.css?t=Thu Nov 12 2020 16:57:17" rel="stylesheet" type="text/css"/>
+        <script type="text/javascript" src="jquery.js?t=Thu Nov 12 2020 16:57:17"></script>
+        <script type="text/javascript" src="custom.js?t=Thu Nov 12 2020 16:57:17"></script>
+        <script type="text/javascript" src="dynsections.js?t=Thu Nov 12 2020 16:57:17"></script>
+        <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+        <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+  $(document).ready(function() { init_search(); });
+/* @license-end */
+</script>
+        <link href="stylesheet.css?t=Thu Nov 12 2020 16:57:17" rel="stylesheet" type="text/css" />
+    </head>
+    <body>
+        <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+            <div id="titlearea">
+                <table cellspacing="0" cellpadding="0">
+                    <tbody>
+                        <tr style="height: 58px;">
+                            <td class="headerSpacer"></td>
+                            <td id="projectlogo">
+                                <a href="https://www.stereolabs.com"><img src="https://www.stereolabs.com/img/logo_stereolabs.svg" alt="Stereolabs logo" id="logo"></a>
+                            </td>
+                            <td class="nav-links nav-links-header">
+                                <a href="https://www.stereolabs.com/docs/" >DOCUMENTATION</a>
+                            </td>
+                            <td class="nav-links nav-links-header">
+                                <a href="https://www.stereolabs.com/docs/code-samples/" >SAMPLES</a>
+                            </td>
+                            <td class="nav-links nav-links-header">
+                                <a class="active" href="https://www.stereolabs.com/developers/documentation/API/latest/" >API REFERENCE</a>
+                            </td>
+                            <td class="nav-links nav-links-header">
+                                <a href="https://support.stereolabs.com/hc/en-us" >SUPPORT</a>
+                            </td>
+                            <td class="nav-links nav-links-header">
+                                <a href="https://www.stereolabs.com/developers/release/latest/" >DOWNLOADS</a>
+                            </td>
+                            <td><i class="mobile-navigation"></i></td>
+                            <!--<td id="projectlogo" >
+                                <a href="https://www.stereolabs.com/"> <img alt="Logo" src="logo_stereolabs.png" height="27"/> </a>
+                            </td>-->
+                            <!--<td style="padding-left: 0.4cm;">-->
+                                <!--<div id="projectname">--><!--ZED csharp API-->
+                                    <!--<span id="projectnumber"> | ZED SDK 3.0.0</span>-->
+                                <!--</div>-->
+                                <!--BEGIN PROJECT_BRIEF<div id="projectbrief"></div><!--END PROJECT_BRIEF-->
+                            <!--</td>-->
+                            <td>        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="subtitlearea">
+                <table cellspacing="0" cellpadding="0">
+                    <tbody>
+                        <tr style="height: 28px;">
+                            <td class="headerSpacer"></td>
+                            <td id="subMenuCpp" class="nav-links nav-links-header nav-links-selected">
+                                <a href="https://www.stereolabs.com/docs/api/"  >C++</a>
+                            </td>
+                            <td id="subMenuPython" class="nav-links nav-links-header">
+                                <a href="https://www.stereolabs.com/docs/api/python/" >Python</a>
+                            </td>
+		                        <td id="subMenuCSharp" class="nav-links nav-links-header">
+                                <a href="https://www.stereolabs.com/docs/api/csharp/" >C#</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- end header part -->
+<!-- Generated by Doxygen 1.8.20 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search');
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('group__Object__group.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#enum-members">Enumerations</a>  </div>
+  <div class="headertitle">
+<div class="title">Object Detection Module</div>  </div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsl_1_1ObjectDetectionParameters.html">ObjectDetectionParameters</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the object detection parameters.  <a href="structsl_1_1ObjectDetectionParameters.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsl_1_1ObjectDetectionRuntimeParameters.html">ObjectDetectionRuntimeParameters</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the object detection runtime parameters.  <a href="structsl_1_1ObjectDetectionRuntimeParameters.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsl_1_1ObjectData.html">ObjectData</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Object data structure directly from the SDK. Represents a single object detection.  <a href="structsl_1_1ObjectData.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsl_1_1Objects.html">Objects</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Object Scene data directly from the ZED SDK. Represents all detections given during a single image frame. Contains the number of object in the scene and the objectData structure for each object. Since the data is transmitted from C++ to C#, the size of the structure must be constant. Therefore, there is a limitation of 200 (MAX_OBJECT constant) objects in the image.  <a href="structsl_1_1Objects.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:ga13b0c230bc8fee5bbaaaa57a45fa1177"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__Object__group.html#ga13b0c230bc8fee5bbaaaa57a45fa1177">OBJECT_CLASS</a> </td></tr>
+<tr class="memdesc:ga13b0c230bc8fee5bbaaaa57a45fa1177"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lists available object class  <a href="group__Object__group.html#ga13b0c230bc8fee5bbaaaa57a45fa1177">More...</a><br /></td></tr>
+<tr class="separator:ga13b0c230bc8fee5bbaaaa57a45fa1177"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0c86adfc07c4fb24dc84f1fd2adc5eba"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__Object__group.html#ga0c86adfc07c4fb24dc84f1fd2adc5eba">OBJECT_SUBCLASS</a> </td></tr>
+<tr class="memdesc:ga0c86adfc07c4fb24dc84f1fd2adc5eba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lists available object subclass.  <a href="group__Object__group.html#ga0c86adfc07c4fb24dc84f1fd2adc5eba">More...</a><br /></td></tr>
+<tr class="separator:ga0c86adfc07c4fb24dc84f1fd2adc5eba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga43eecfa6fb832a9e5d86bb5e5007b2fa"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__Object__group.html#ga43eecfa6fb832a9e5d86bb5e5007b2fa">OBJECT_TRACKING_STATE</a> </td></tr>
+<tr class="memdesc:ga43eecfa6fb832a9e5d86bb5e5007b2fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tracking state of an individual object.  <a href="group__Object__group.html#ga43eecfa6fb832a9e5d86bb5e5007b2fa">More...</a><br /></td></tr>
+<tr class="separator:ga43eecfa6fb832a9e5d86bb5e5007b2fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaded996f5683c57eedae7b24b6818ce9a"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__Object__group.html#gaded996f5683c57eedae7b24b6818ce9a">OBJECT_ACTION_STATE</a> </td></tr>
+<tr class="memdesc:gaded996f5683c57eedae7b24b6818ce9a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lists available object action state.  <a href="group__Object__group.html#gaded996f5683c57eedae7b24b6818ce9a">More...</a><br /></td></tr>
+<tr class="separator:gaded996f5683c57eedae7b24b6818ce9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4a212b90726adaaf0fae801b1cc913f4"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__Object__group.html#ga4a212b90726adaaf0fae801b1cc913f4">DETECTION_MODEL</a> </td></tr>
+<tr class="memdesc:ga4a212b90726adaaf0fae801b1cc913f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">List available models for detection  <a href="group__Object__group.html#ga4a212b90726adaaf0fae801b1cc913f4">More...</a><br /></td></tr>
+<tr class="separator:ga4a212b90726adaaf0fae801b1cc913f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gacce1373b1af32c33563d484bf326bc8e"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__Object__group.html#gacce1373b1af32c33563d484bf326bc8e">BODY_PARTS</a> </td></tr>
+<tr class="memdesc:gacce1373b1af32c33563d484bf326bc8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">semantic and order of human body keypoints.  <a href="group__Object__group.html#gacce1373b1af32c33563d484bf326bc8e">More...</a><br /></td></tr>
+<tr class="separator:gacce1373b1af32c33563d484bf326bc8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="ga13b0c230bc8fee5bbaaaa57a45fa1177"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga13b0c230bc8fee5bbaaaa57a45fa1177">&#9670;&nbsp;</a></span>OBJECT_CLASS</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__Object__group.html#ga13b0c230bc8fee5bbaaaa57a45fa1177">OBJECT_CLASS</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Lists available object class </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga13b0c230bc8fee5bbaaaa57a45fa1177a9a8538fe173720857a031b8314073752"></a>PERSON&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga13b0c230bc8fee5bbaaaa57a45fa1177ae9fa318f4d73c31493e98096efa497e2"></a>VEHICLE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga13b0c230bc8fee5bbaaaa57a45fa1177a110dd19a31a5420ce23696d3ae2cf36c"></a>BAG&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga13b0c230bc8fee5bbaaaa57a45fa1177a5a91b94bd57ea4b80e2cf856319271a6"></a>ANIMAL&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga13b0c230bc8fee5bbaaaa57a45fa1177a1823d2cca6e313eee19092550854d6bd"></a>ELECTRONICS&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga13b0c230bc8fee5bbaaaa57a45fa1177ad02729c7b6fa6bb1928f4486852068a2"></a>FRUIT_VEGETABLE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga13b0c230bc8fee5bbaaaa57a45fa1177af447f5c03508de4d88e340390ba7c78f"></a>LAST&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
+<a id="ga0c86adfc07c4fb24dc84f1fd2adc5eba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga0c86adfc07c4fb24dc84f1fd2adc5eba">&#9670;&nbsp;</a></span>OBJECT_SUBCLASS</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__Object__group.html#ga0c86adfc07c4fb24dc84f1fd2adc5eba">OBJECT_SUBCLASS</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Lists available object subclass. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaa9a8538fe173720857a031b8314073752"></a>PERSON&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaa4bdeeb2e61c16dbc81956e1bd9148809"></a>BICYCLE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaaedc860e2d30b3a5c8823c026e7a79e03"></a>CAR&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaa6362ced3b8cb6f984e23428bd0688ff3"></a>MOTORBIKE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaa0e0c9d888d1093cb2dfa6b25cbce19d8"></a>BUS&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaa881c2687b20d706b709caf71a1cf8315"></a>TRUCK&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaa45341cc1cc5a485ca18fd816b833175b"></a>BOAT&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaaad225b2392b1192d4d6793d147cb174c"></a>BACKPACK&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaa1969e28f59335fb94af569908794d7c5"></a>HANDBAG&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaa97427a7b1cd77df1fd59b43c98f93653"></a>SUITCASE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaa9d39abce5a287b8019327ecd8a97ce56"></a>BIRD&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaac01ae1a5f122f25ce5675f86028b536a"></a>CAT&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaab0e603b215aa2da0e6c605301d79efe4"></a>DOG&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaa5580b2daa12c1eee42bfb8e513684f98"></a>HORSE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaa5facb2b7b44c48caaca95e34a7fb3bb2"></a>SHEEP&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaaaba62e390ce6b279dd8b42de91f045a1"></a>COW&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaa9fdda3b13bd0e46477fb1386c98315c1"></a>CELLPHONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaaeefe54b149d5f44eaaa610d1e821740c"></a>LAPTOP&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaab252d1fe1c0c16d001027c2fce9b6529"></a>BANANA&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaa4c462d6dd59d782386bb1cdad0060c70"></a>APPLE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaa5b6490317b6f7270bc3ab5ffd07c1f52"></a>ORANGE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaa7816b59e7a500d29a7e4bdf8ade5dd43"></a>CARROT&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="gga0c86adfc07c4fb24dc84f1fd2adc5ebaaf447f5c03508de4d88e340390ba7c78f"></a>LAST&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
+<a id="ga43eecfa6fb832a9e5d86bb5e5007b2fa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga43eecfa6fb832a9e5d86bb5e5007b2fa">&#9670;&nbsp;</a></span>OBJECT_TRACKING_STATE</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__Object__group.html#ga43eecfa6fb832a9e5d86bb5e5007b2fa">OBJECT_TRACKING_STATE</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Tracking state of an individual object. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga43eecfa6fb832a9e5d86bb5e5007b2faa88559a0cfd8250c9d65970cc145c92d4"></a>OFF&#160;</td><td class="fielddoc"><p>The tracking is not yet initialized, the object ID is not usable. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga43eecfa6fb832a9e5d86bb5e5007b2faae0aa021e21dddbd6d8cecec71e9cf564"></a>OK&#160;</td><td class="fielddoc"><p>The object is tracked. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga43eecfa6fb832a9e5d86bb5e5007b2faadb46ca6757195ce8c1f015c9781d869e"></a>SEARCHING&#160;</td><td class="fielddoc"><p>The object couldn't be detected in the image and is potentially occluded, the trajectory is estimated. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga43eecfa6fb832a9e5d86bb5e5007b2faa1b52d4a7cbbcb87a81515c443453a2d5"></a>TERMINATE&#160;</td><td class="fielddoc"><p>This is the last searching state of the track, the track will be deleted in the next retreiveObject. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+<a id="gaded996f5683c57eedae7b24b6818ce9a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaded996f5683c57eedae7b24b6818ce9a">&#9670;&nbsp;</a></span>OBJECT_ACTION_STATE</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__Object__group.html#gaded996f5683c57eedae7b24b6818ce9a">OBJECT_ACTION_STATE</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Lists available object action state. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggaded996f5683c57eedae7b24b6818ce9aaa5daf7f2ebbba4975d61dab1c40188c7"></a>IDLE&#160;</td><td class="fielddoc"><p>The object is staying static. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaded996f5683c57eedae7b24b6818ce9aaaf5a690fd5ec6f789dbfc51ec6a891ba"></a>MOVING&#160;</td><td class="fielddoc"><p>The object is moving. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaded996f5683c57eedae7b24b6818ce9aaf447f5c03508de4d88e340390ba7c78f"></a>LAST&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
+<a id="ga4a212b90726adaaf0fae801b1cc913f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4a212b90726adaaf0fae801b1cc913f4">&#9670;&nbsp;</a></span>DETECTION_MODEL</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__Object__group.html#ga4a212b90726adaaf0fae801b1cc913f4">DETECTION_MODEL</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>List available models for detection </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga4a212b90726adaaf0fae801b1cc913f4ad0ad3b3bdc4f664d988f674418c92253"></a>MULTI_CLASS_BOX&#160;</td><td class="fielddoc"><p>Any objects, bounding box based. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga4a212b90726adaaf0fae801b1cc913f4ac66528993fdc8979a69da22fe74ea291"></a>MULTI_CLASS_BOX_ACCURATE&#160;</td><td class="fielddoc"><p>Any objects, bounding box based. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga4a212b90726adaaf0fae801b1cc913f4abe0fc72efd25f8005596a625c82e249c"></a>HUMAN_BODY_FAST&#160;</td><td class="fielddoc"><p>Keypoints based, specific to human skeleton, real time performance even on Jetson or low end GPU cards. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga4a212b90726adaaf0fae801b1cc913f4aaf93babd15089d9b16389fda641ae399"></a>HUMAN_BODY_ACCURATE&#160;</td><td class="fielddoc"><p>Keypoints based, specific to human skeleton, state of the art accuracy, requires powerful GPU. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+<a id="gacce1373b1af32c33563d484bf326bc8e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gacce1373b1af32c33563d484bf326bc8e">&#9670;&nbsp;</a></span>BODY_PARTS</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__Object__group.html#gacce1373b1af32c33563d484bf326bc8e">BODY_PARTS</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>semantic and order of human body keypoints. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggacce1373b1af32c33563d484bf326bc8eacb01e43a4cae492bdd0dac857257c2d6"></a>NOSE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggacce1373b1af32c33563d484bf326bc8ea83b597c9fed163902c0c1bab110b4cdf"></a>NECK&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggacce1373b1af32c33563d484bf326bc8ea8442084df8c845d9ea3331660028e9e5"></a>RIGHT_SHOULDER&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggacce1373b1af32c33563d484bf326bc8ead4962b783e738bcc552cc446df77431a"></a>RIGHT_ELBOW&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggacce1373b1af32c33563d484bf326bc8eab8ca261f68d8da2e815dd279ac85c3d6"></a>RIGHT_WRIST&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggacce1373b1af32c33563d484bf326bc8eaf1f5fbc485f4b2ebbd82ae940959b693"></a>LEFT_SHOULDER&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggacce1373b1af32c33563d484bf326bc8ea595585583f6a477abdf501190a1401db"></a>LEFT_ELBOW&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggacce1373b1af32c33563d484bf326bc8ead42a6d9d2e4e6cd1d251a09b43340397"></a>LEFT_WRIST&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggacce1373b1af32c33563d484bf326bc8eacbb23de297c688cb974eabe67ef6a9b6"></a>RIGHT_HIP&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggacce1373b1af32c33563d484bf326bc8ea018ae3e79d5298acc94244dd1a1d7da9"></a>RIGHT_KNEE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggacce1373b1af32c33563d484bf326bc8ea39d4eb4dc137d4d614b8b1ae5804a8ba"></a>RIGHT_ANKLE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggacce1373b1af32c33563d484bf326bc8eaf22b4ee4d96d59fbd606f9ba7dedd1fe"></a>LEFT_HIP&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggacce1373b1af32c33563d484bf326bc8ea52fc5e895af38e9a51cb60c3a5522c41"></a>LEFT_KNEE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggacce1373b1af32c33563d484bf326bc8ea1b006a123eb369242599a8041bdb0522"></a>LEFT_ANKLE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggacce1373b1af32c33563d484bf326bc8eaa1b900513572a1938a19508ac3d2598f"></a>RIGHT_EYE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggacce1373b1af32c33563d484bf326bc8eace8edac89ce4d2bbc53b4473568e3ed9"></a>LEFT_EYE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggacce1373b1af32c33563d484bf326bc8eab7a762fed5fc4bf376b2a6beae9ac453"></a>RIGHT_EAR&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggacce1373b1af32c33563d484bf326bc8ea4dc707564b2878942487a944e60ff3a5"></a>LEFT_EAR&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ggacce1373b1af32c33563d484bf326bc8eaf447f5c03508de4d88e340390ba7c78f"></a>LAST&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
