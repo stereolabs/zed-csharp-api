@@ -59,7 +59,7 @@ namespace sl
             obj_det_params.imageSync = true; // the object detection is synchronized to the image
             obj_det_params.detectionModel = sl.DETECTION_MODEL.MULTI_CLASS_BOX_ACCURATE;
 
-            zedCamera.EnableObjectsDetection(ref obj_det_params);
+            zedCamera.EnableObjectDetection(ref obj_det_params);
 
             // Create ZED Objects filled in the main loop
             object_frame = new Objects();
@@ -177,7 +177,7 @@ namespace sl
         private void close()
         {
             zedCamera.DisablePositionalTracking();
-            zedCamera.DisableObjectsDetection();
+            zedCamera.DisableObjectDetection();
             zedCamera.Close();
             viewer.exit();
         }

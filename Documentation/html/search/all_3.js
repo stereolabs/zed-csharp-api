@@ -14,7 +14,7 @@ var searchData=
   ['detectionconfidencethreshold_130',['detectionConfidenceThreshold',['../structsl_1_1ObjectDetectionRuntimeParameters.html#a46452c935a8ff035673616704ed47f01',1,'sl::ObjectDetectionRuntimeParameters']]],
   ['detectionmodel_131',['detectionModel',['../structsl_1_1ObjectDetectionParameters.html#ae83a8c37f3157dc7eecdc9eb9d5de372',1,'sl.ObjectDetectionParameters.detectionModel()'],['../structsl_1_1Objects.html#ae83a8c37f3157dc7eecdc9eb9d5de372',1,'sl.Objects.detectionModel()']]],
   ['dfov_132',['dFOV',['../structsl_1_1CameraParameters.html#ad06caec41af37df32b8a2440ca17a938',1,'sl::CameraParameters']]],
-  ['disableobjectsdetection_133',['DisableObjectsDetection',['../classsl_1_1Camera.html#acd220ced1712e3364cebe4b77c079eff',1,'sl::Camera']]],
+  ['disableobjectdetection_133',['DisableObjectDetection',['../classsl_1_1Camera.html#ab04c84b11c1047cfedd38083d55670a4',1,'sl::Camera']]],
   ['disablepositionaltracking_134',['DisablePositionalTracking',['../classsl_1_1Camera.html#a77a3d2ea2a4e453b04e99a381328187b',1,'sl::Camera']]],
   ['disablerecording_135',['DisableRecording',['../classsl_1_1Camera.html#ac8fa07bb8ca0e7875f90f6f288acc9f9',1,'sl::Camera']]],
   ['disablespatialmapping_136',['DisableSpatialMapping',['../classsl_1_1Camera.html#a65a8651a61c14bdc475e08f92f47deba',1,'sl::Camera']]],

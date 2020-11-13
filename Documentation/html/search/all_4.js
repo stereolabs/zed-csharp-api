@@ -7,7 +7,7 @@ var searchData=
   ['enabledepth_148',['enableDepth',['../classsl_1_1RuntimeParameters.html#a6a0c1a250060907ec651d2b2c236c63b',1,'sl::RuntimeParameters']]],
   ['enableimageenhancement_149',['enableImageEnhancement',['../classsl_1_1InitParameters.html#a5b4a56d14863a807723349508cc37d79',1,'sl::InitParameters']]],
   ['enableimufusion_150',['enableIMUFusion',['../classsl_1_1PositionalTrackingParameters.html#a7ffb04709d76a13aa013ff5f1756ecc0',1,'sl::PositionalTrackingParameters']]],
-  ['enableobjectsdetection_151',['EnableObjectsDetection',['../classsl_1_1Camera.html#ad59827827d08e8c2d2ee9b146b4e35e1',1,'sl::Camera']]],
+  ['enableobjectdetection_151',['EnableObjectDetection',['../classsl_1_1Camera.html#a41ba8c746440a65d3f2b42ec60ffdd28',1,'sl::Camera']]],
   ['enableobjecttracking_152',['enableObjectTracking',['../structsl_1_1ObjectDetectionParameters.html#a42b133de18163d6925de61e3bd6cf1ae',1,'sl::ObjectDetectionParameters']]],
   ['enableposesmothing_153',['enablePoseSmothing',['../classsl_1_1PositionalTrackingParameters.html#af52540c9d245ec3b5f8aafa8d70e2670',1,'sl::PositionalTrackingParameters']]],
   ['enablepositionaltracking_154',['EnablePositionalTracking',['../classsl_1_1Camera.html#aabb8afc833da3fb228cb5a2a2a120644',1,'sl.Camera.EnablePositionalTracking(ref Quaternion quat, ref Vector3 vec, bool enableAreaMemory=true, bool enablePoseSmoothing=false, bool setFloorAsOrigin=false, bool setAsStatic=false, bool enableIMUFusion=true, string areaFilePath=&quot;&quot;)'],['../classsl_1_1Camera.html#a9ab2a29591cb7b74b9f13f5d8440bba7',1,'sl.Camera.EnablePositionalTracking(ref PositionalTrackingParameters positionalTrackingParameters)']]],

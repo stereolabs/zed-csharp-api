@@ -31,7 +31,7 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_REFERENCES
 )
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY VS_PACKAGE_REFERENCES
-		"Stereolabs.zed _3.3.2"
-		"sl_zed_interface_3.3.2"
+		"Stereolabs.zed _3.3.1-rc"
+		"sl_zed_interface_3.3.1-rc"
 )
  

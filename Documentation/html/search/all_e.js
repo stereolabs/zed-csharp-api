@@ -1,7 +1,7 @@
 var searchData=
 [
   ['pathsvo_420',['pathSVO',['../classsl_1_1InitParameters.html#a71fb25acf142b0c0a5b64d61b4b54482',1,'sl::InitParameters']]],
-  ['pauseobjectsdetection_421',['PauseObjectsDetection',['../classsl_1_1Camera.html#addcb40be3947bd95d678101dd0fcb094',1,'sl::Camera']]],
+  ['pauseobjectdetection_421',['PauseObjectDetection',['../classsl_1_1Camera.html#a3385b907ba158945c95addc8448e32ae',1,'sl::Camera']]],
   ['pausespatialmapping_422',['PauseSpatialMapping',['../classsl_1_1Camera.html#a23c47ce87639b5d8a20c2aae7d3cfbb9',1,'sl::Camera']]],
   ['performance_423',['PERFORMANCE',['../group__Depth__group.html#gga8d542017c9b012a19a15d46be9b7fa43a063360736adfccfae2f1d8093c02959a',1,'sl']]],
   ['person_424',['PERSON',['../group__Object__group.html#gga13b0c230bc8fee5bbaaaa57a45fa1177a9a8538fe173720857a031b8314073752',1,'sl.PERSON()'],['../group__Object__group.html#gga0c86adfc07c4fb24dc84f1fd2adc5ebaa9a8538fe173720857a031b8314073752',1,'sl.PERSON()']]],
