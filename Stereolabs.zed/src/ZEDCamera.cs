@@ -1035,7 +1035,7 @@ namespace sl
         }
 
         /// <summary>
-        /// Overloaded function for CAMERA_SETTINGS.AEC_AGC_ROI (requires iRect as input)
+        /// Overloaded function for CAMERA_SETTINGS.AEC_AGC_ROI (requires Rect as input)
         /// </summary>
         /// <param name="settings"> Must be set to CAMERA_SETTINGS.AEC_AGC_ROI. Otherwise will return -1.</param>
         /// <param name="side"> defines left=0 or right=1 or both=2 sensor target</param>
@@ -1052,7 +1052,7 @@ namespace sl
         }
 
         /// <summary>
-        /// Overloaded function for CAMERA_SETTINGS.AEC_AGC_ROI (requires iRect as input)
+        /// Overloaded function for CAMERA_SETTINGS.AEC_AGC_ROI (requires Rect as input)
         /// </summary>
         /// <param name="settings"> Must be set to CAMERA_SETTINGS.AEC_AGC_ROI. Otherwise will return -1.</param>
         /// <param name="side"> defines left=0 or right=1 or both=2 sensor target.</param>
@@ -2036,7 +2036,6 @@ namespace sl
 
         /// <summary>
         /// Checks for a plane in the real world at given screen-space coordinates.
-        /// Use ZEDPlaneDetectionManager.DetectPlaneAtHit() for a higher-level version that turns planes into GameObjects.
         /// </summary>
         /// <param name="plane">Data on the detected plane.</param>
         /// <param name="screenPos">Point on the ZED image to check for a plane.</param>
@@ -2047,7 +2046,7 @@ namespace sl
             Quaternion out_quat = Quaternion.Identity;
             Vector3 out_trans = Vector3.Zero;
 
-            p = dllz_find_plane_at_hit(CameraID, coord, true);
+            p = dllz_find_plane_at_hit(CameraID, coord, false);
             plane.Bounds = new Vector3[256];
 
             if (p != IntPtr.Zero)

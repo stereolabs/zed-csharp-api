@@ -23,15 +23,15 @@ The C# API uses two packages that are published to Nuget.org.
 |**sl_zed_interface**| C interface of the ZED SDK | [![NuGet version](https://badge.fury.io/nu/sl_zed_interface.svg)](https://badge.fury.io/nu/sl_zed_interface) |
 |**Stereolabs.zed**| .NET Wrapper that imports the functions from the interface | [![NuGet version](https://badge.fury.io/nu/Stereolabs.zed.svg)](https://badge.fury.io/nu/Stereolabs.zed) |
 
-### Build the tutorials
+### Build the Samples
 
-1. Enter the tutorials folder and generate the Tutorials solution using cmake.
+1. Enter the tutorials folder and generate the Samples solution using cmake.
 **Use Visual studio 2017** (at least) compiler in **x64** mode.
 
 ![Cmake](./Documentation/img/cmake_settings.jpg)
 
 2. Press configure and generate.
-3. Open Tutorials.zed.sln solution and build the solution.
+3. Open Samples.sln solution and build the solution.
 
 ### Usage
 
