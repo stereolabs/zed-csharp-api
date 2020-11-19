@@ -18,9 +18,6 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION 
 # Set the C# language version, otherwise default 3.0 is taken
 set(CMAKE_CSharp_FLAGS "/langversion:7")
 
-SET(DIR_ZED_SDK_BINAIRIES $ENV{ZED_SDK_ROOT_DIR}/bin)	 
-
-
 set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_REFERENCES
         "Microsoft.CSharp"
         "PresentationCore"
@@ -28,8 +25,9 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_REFERENCES
         "System"
         "System.Numerics"
 )
-
 set_property(TARGET ${PROJECT_NAME} PROPERTY VS_PACKAGE_REFERENCES
 		"Stereolabs.zed _3.3.1-rc"
 		"sl_zed_interface_3.3.1-rc"
 )
+
+

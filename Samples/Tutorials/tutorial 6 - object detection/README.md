@@ -9,6 +9,14 @@ We assume that you have read the tutorial 1 and successfully opened your ZED.
 - First, download the latest version of the ZED SDK on [stereolabs.com](https://www.stereolabs.com).
 - For more information, read the ZED [API documentation](https://www.stereolabs.com/developers/documentation/API/).
 
+## Build for Windows
+
+- Create a "build" folder in the source folder
+- Open cmake-gui and select the source and build folders
+- Generate the Visual Studio `Win64` solution
+- Open the resulting solution and change configuration to `Release`
+- Build solution
+
 # Code overview
 ## Create a camera
 
@@ -16,7 +24,7 @@ As with previous tutorial, we create, configure and open the ZED. Here we show h
 
 If you want to use the SVO input, you need to specify both the Input type and the SVO file path  : 
 
-```
+```csharp
  init_params.inputType = sl.INPUT_TYPE.INPUT_TYPE_SVO;
  init_params.pathSVO =  "D:/mySVOfile.svo";
 ```
@@ -26,21 +34,21 @@ If you want to use the SVO input, you need to specify both the Input type and th
 Once the camera is opened, we must enable object detection module to retrieve the detected objects.
 If we want object tracking, we also need to enable position tracking in order to be able to track objects with a moving camera.
 
-```
+```csharp
 Quaternion quat = Quaternion.Identity;
 Vector3 vec = Vector3.Zero;
 
 // Enable Tracking
-err = zedCamera.EnableTracking(ref quat, ref vec);
+err = zedCamera.EnablePositionalTracking(ref quat, ref vec);
 if (err != ERROR_CODE.SUCCESS)
     Environment.Exit(-1);
 
 
 // Enable Object Detection
-dll_ObjectDetectionParameters object_detection_parameters = new dll_ObjectDetectionParameters();
+ObjectDetectionParameters object_detection_parameters = new ObjectDetectionParameters();
 object_detection_parameters.detectionModel = sl.DETECTION_MODEL.MULTI_CLASS_BOX;
 object_detection_parameters.enableObjectTracking = true;
-err = zedCamera.EnableObjectsDetection(ref object_detection_parameters);
+err = zedCamera.EnableObjectDetection(ref object_detection_parameters);
 if (err != ERROR_CODE.SUCCESS)
     Environment.Exit(-1);
 ```
@@ -57,9 +65,9 @@ Once grab has been done, you can get all the data provided with the ZED SDK.
 
 In this tutorial, we want to retrieve objects from the object detection module.
 
-```
+```csharp
 // Retrieve Objects from Object detection
-err  = zedCamera.RetrieveObjectsDetectionData(ref obj_runtime_parameters, ref object_frame);
+err  = zedCamera.RetrieveObjects(ref object_frame, ref obj_runtime_parameters);
 ```
 
 

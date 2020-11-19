@@ -9,6 +9,14 @@ We assume that you have read the tutorial 1 and successfully opened your ZED.
 - First, download the latest version of the ZED SDK on [stereolabs.com](https://www.stereolabs.com).
 - For more information, read the ZED [API documentation](https://www.stereolabs.com/developers/documentation/API/).
 
+## Build for Windows
+
+- Create a "build" folder in the source folder
+- Open cmake-gui and select the source and build folders
+- Generate the Visual Studio `Win64` solution
+- Open the resulting solution and change configuration to `Release`
+- Build solution
+
 # Code overview
 ## Create a camera
 

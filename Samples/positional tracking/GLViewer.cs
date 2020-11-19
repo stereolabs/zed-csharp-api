@@ -101,7 +101,7 @@ namespace sl
 
             foreach(ModelPart part in model.part)
             {
-                fillZED(part.nbTriangles, model.vertices, part.triangles, part.color, ref zedModel);
+                fillZED(part.nb_triangles, model.vertices, part.triangles, part.color, ref zedModel);
             }
 
             zedModel.pushToGPU();

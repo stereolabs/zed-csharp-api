@@ -8,6 +8,14 @@ We assume that you have followed previous tutorials.
 - For more information, read the ZED [API documentation](https://www.stereolabs.com/developers/documentation/API/).
 - Make sure to build the .NET wrapper located in Stereolabs.zed folder at the root of the repository. Once built and installed, you should have the C# dll Stereolabs.zed.dll and the C interface DLL loaded by the C# dll in the ZED SDK bin directory (C:/Program Files(x86)/ZED SDK/bin)
 
+## Build for Windows
+
+- Create a "build" folder in the source folder
+- Open cmake-gui and select the source and build folders
+- Generate the Visual Studio `Win64` solution
+- Open the resulting solution and change configuration to `Release`
+- Build solution
+
 # Code overview
 
 ## Capture data

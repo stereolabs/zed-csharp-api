@@ -8,8 +8,15 @@ We assume that you have followed previous tutorials (opening the ZED and image c
 - Windows 10, Ubuntu LTS
 - [ZED SDK](https://www.stereolabs.com/developers/) and its dependencies ([CUDA](https://developer.nvidia.com/cuda-downloads))
 
-# Code overview
+## Build for Windows
 
+- Create a "build" folder in the source folder
+- Open cmake-gui and select the source and build folders
+- Generate the Visual Studio `Win64` solution
+- Open the resulting solution and change configuration to `Release`
+- Build solution
+
+# Code overview
 ## Create a camera
 
 As in other tutorials, we create, configure and open the ZED.
@@ -22,7 +29,7 @@ Now that the ZED is opened, we can capture images and depth. Retrieving the dept
 * We call retrieveMeasure() to get the depth map.
 * We call retrieveMeasure() to get the point cloud.
 
-```
+```csharp
 Camera.RetrieveMeasure(depth_map, MEASURE.XYZRGBA);
 float4 xyz_value;
 depth_map.GetValue(i, j, out xyz_value, MEM.CPU);
