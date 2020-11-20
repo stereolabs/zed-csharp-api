@@ -4,8 +4,8 @@ This repository shows how to use the ZED SDK functionalities in C#.
 
 ## Getting started
 
-- First, download the latest version of the ZED SDK on [stereolabs.com](https://www.stereolabs.com/developers/release/).
-- For more information, read the ZED [API documentation](https://www.stereolabs.com/docs/api/index.html).
+- First, download the latest version of the ZED SDK on [stereolabs.com](https://www.stereolabs.com/developers)
+- For more information, read the ZED [API documentation](https://www.stereolabs.com/docs/api/python/) or our [Community page](https://community.stereolabs.com)
 
 ## Prerequisites
 
@@ -71,3 +71,6 @@ namespace sl
 When the program is built, *Stereolabs.zed.dll* and *sl_zed_interface.dll* will be automatically downloaded into the build folder.
 
 When deploying the application, make sure that *sl_zed_interface.dll* and *Stereolabs.zed.dll* are packaged with the executable files, and shipped on a target PC that has the proper ZED SDK version installed.
+
+## Support
+If you need assistance go to our Community site at https://community.stereolabs.com/
