@@ -2,6 +2,7 @@ var classsl_1_1Mat =
 [
     [ "Mat", "classsl_1_1Mat.html#a13e4639b574685e1d9162ed953e607ed", null ],
     [ "Mat", "classsl_1_1Mat.html#aed9f759307334e4007e66860e20976a8", null ],
+    [ "Mat", "classsl_1_1Mat.html#afc1347684c53dd8b4a4b3bb0ef7f22b0", null ],
     [ "Create", "classsl_1_1Mat.html#add43baab64a9470ccef3a07ab7703cee", null ],
     [ "Create", "classsl_1_1Mat.html#a7953bbdcf11fefce6ee57c0af227425d", null ],
     [ "IsInit", "classsl_1_1Mat.html#a5b44b999b9b39ce150dd3d2e234a3dcf", null ],

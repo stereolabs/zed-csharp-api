@@ -239,7 +239,11 @@ namespace sl
         /// <summary>
         /// Unsigned char, four channels. Used for color images, like the main RGB image from each sensor. 
         /// </summary>
-        MAT_8U_C4
+        MAT_8U_C4,
+        /// <summary>
+        /// Unsigned short 1 channel.
+        /// </summary>
+        MAT_16U_C1
     };
 
     /// \ingroup Core_group
@@ -457,6 +461,19 @@ namespace sl
                 throw new Exception("ZED Mat not initialized.");
             }
             _matInternalPtr = ptr;
+        }
+
+        /// <summary>
+        /// Creates a Mat with a given resolution.
+        /// </summary>
+        /// <param name="resolution">Resolution for the new Mat.</param>
+        /// <param name="type">Data type and number of channels the Mat will hold.
+        /// Depends on texture type: see sl.VIEW and sl.MEASURE in ZEDCommon.cs.</param>
+        /// <param name="mem">Whether Mat should exist on CPU or GPU memory.
+        /// Choose depending on where you'll need to access it from.</param>
+        public Mat(sl.Resolution resolution, MAT_TYPE type, MEM mem = MEM.CPU)
+        {
+            _matInternalPtr = dllz_mat_create_new(resolution, (int)(type), (int)(mem));
         }
 
         /// <summary>

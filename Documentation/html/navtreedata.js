@@ -25,18 +25,31 @@
 var NAVTREE =
 [
   [ "ZED csharp API", "index.html", [
-    [ "Main class : Camera", "classsl_1_1Camera.html", null ],
     [ "Modules", "modules.html", "modules" ],
-    [ "All Classes", "annotated.html", "annotated" ],
-    [ "Changelog", "md_release-notes.html", null ]
+    [ "Namespace Members", "namespacemembers.html", [
+      [ "All", "namespacemembers.html", null ],
+      [ "Enumerations", "namespacemembers_enum.html", null ]
+    ] ],
+    [ "Classes", "annotated.html", [
+      [ "Class List", "annotated.html", "annotated_dup" ],
+      [ "Class Hierarchy", "hierarchy.html", "hierarchy" ],
+      [ "Class Members", "functions.html", [
+        [ "All", "functions.html", "functions_dup" ],
+        [ "Functions", "functions_func.html", null ],
+        [ "Variables", "functions_vars.html", "functions_vars" ],
+        [ "Enumerations", "functions_enum.html", null ],
+        [ "Properties", "functions_prop.html", null ]
+      ] ]
+    ] ]
   ] ]
 ];
 
 var NAVTREEINDEX =
 [
 "annotated.html",
-"group__Core__group.html",
-"group__Video__group.html#gga77fc7bfc159040a1e2ffb074a8ad248ca87f1ba15677264359d67e2a5b34a4b68"
+"classsl_1_1SpatialMappingParameters.html#aeba5fd272459273ae808d159d38f26c3",
+"group__SpatialMapping__group.html#ga3155f0333317e8cfd79ecccbff77077e",
+"structsl_1_1StreamingParameters.html#af7d37a2bad96025b6ea4f862ce65c322"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

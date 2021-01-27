@@ -5,7 +5,8 @@ var group__Object__group =
       [ "enableObjectTracking", "structsl_1_1ObjectDetectionParameters.html#a42b133de18163d6925de61e3bd6cf1ae", null ],
       [ "enable2DMask", "structsl_1_1ObjectDetectionParameters.html#a73bf95c2dc07d9885713d552b0d5413d", null ],
       [ "detectionModel", "structsl_1_1ObjectDetectionParameters.html#ae83a8c37f3157dc7eecdc9eb9d5de372", null ],
-      [ "enableBodyFitting", "structsl_1_1ObjectDetectionParameters.html#aa2913bac07dc1b06e64840ca28aac5a6", null ]
+      [ "enableBodyFitting", "structsl_1_1ObjectDetectionParameters.html#aa2913bac07dc1b06e64840ca28aac5a6", null ],
+      [ "maxRange", "structsl_1_1ObjectDetectionParameters.html#a2480d51e0cbf660947250cc46cd8bcc2", null ]
     ] ],
     [ "ObjectDetectionRuntimeParameters", "structsl_1_1ObjectDetectionRuntimeParameters.html", [
       [ "detectionConfidenceThreshold", "structsl_1_1ObjectDetectionRuntimeParameters.html#a46452c935a8ff035673616704ed47f01", null ],
@@ -27,7 +28,8 @@ var group__Object__group =
       [ "boundingBox", "structsl_1_1ObjectData.html#af7a9c33fcc2b58a49b7ff6d41f773b43", null ],
       [ "headBoundingBox", "structsl_1_1ObjectData.html#acbd2c80a57dd8d03747a3e2f55696625", null ],
       [ "keypoints", "structsl_1_1ObjectData.html#a8d9d764bdae64416edae7201350bdc1f", null ],
-      [ "positionCovariance", "structsl_1_1ObjectData.html#a15cc1913649303dcfbc4c57f3380188f", null ]
+      [ "positionCovariance", "structsl_1_1ObjectData.html#a15cc1913649303dcfbc4c57f3380188f", null ],
+      [ "keypointConfidence", "structsl_1_1ObjectData.html#ac7d21668ff3fdabd037887183c447f40", null ]
     ] ],
     [ "Objects", "structsl_1_1Objects.html", [
       [ "numObject", "structsl_1_1Objects.html#a7358b6eb9482f4d6b32a586f0ddd0a72", null ],

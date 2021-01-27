@@ -9,10 +9,10 @@
         <title>Camera Class Reference | API Reference | Stereolabs</title><!--END PROJECT_NAME (ZED csharp API)-->
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,500,600,700,800">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:300,400,500,600,700">
-        <link href="tabs.css?t=Fri Nov 13 2020 16:09:50" rel="stylesheet" type="text/css"/>
-        <script type="text/javascript" src="jquery.js?t=Fri Nov 13 2020 16:09:50"></script>
-        <script type="text/javascript" src="custom.js?t=Fri Nov 13 2020 16:09:50"></script>
-        <script type="text/javascript" src="dynsections.js?t=Fri Nov 13 2020 16:09:50"></script>
+        <link href="tabs.css?t=Wed Jan 27 2021 13:57:23" rel="stylesheet" type="text/css"/>
+        <script type="text/javascript" src="jquery.js?t=Wed Jan 27 2021 13:57:23"></script>
+        <script type="text/javascript" src="custom.js?t=Wed Jan 27 2021 13:57:23"></script>
+        <script type="text/javascript" src="dynsections.js?t=Wed Jan 27 2021 13:57:23"></script>
         <link href="navtree.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="resize.js"></script>
 <script type="text/javascript" src="navtreedata.js"></script>
@@ -25,7 +25,7 @@
   $(document).ready(function() { init_search(); });
 /* @license-end */
 </script>
-        <link href="stylesheet.css?t=Fri Nov 13 2020 16:09:50" rel="stylesheet" type="text/css" />
+        <link href="stylesheet.css?t=Wed Jan 27 2021 13:57:23" rel="stylesheet" type="text/css" />
     </head>
     <body>
         <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -58,7 +58,7 @@
                             </td>-->
                             <!--<td style="padding-left: 0.4cm;">-->
                                 <!--<div id="projectname">--><!--ZED csharp API-->
-                                    <!--<span id="projectnumber"> | ZED SDK 3.0.0</span>-->
+                                    <!--<span id="projectnumber"> | ZED SDK 3.3.0</span>-->
                                 <!--</div>-->
                                 <!--BEGIN PROJECT_BRIEF<div id="projectbrief"></div><!--END PROJECT_BRIEF-->
                             <!--</td>-->
@@ -139,11 +139,11 @@ $(document).ready(function(){initNavTree('classsl_1_1Camera.html',''); initResiz
 
 <div class="header">
   <div class="summary">
-<a href="#pub-types">Types</a> &#124;
-<a href="#pub-methods">Functions</a> &#124;
-<a href="#pub-static-methods">Static Functions</a> &#124;
-<a href="#pub-attribs">Attributes</a> &#124;
-<a href="#pub-static-attribs">Static Attributes</a> &#124;
+<a href="#pub-types">Public Types</a> &#124;
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="#properties">Properties</a> &#124;
 <a href="classsl_1_1Camera-members.html">List of all members</a>  </div>
   <div class="headertitle">
@@ -153,15 +153,21 @@ $(document).ready(function(){initNavTree('classsl_1_1Camera.html',''); initResiz
 
 <p>This class is the main interface with the camera and the SDK features, such as: video, depth, tracking, mapping, and more.  
  <a href="classsl_1_1Camera.html#details">More...</a></p>
+<div class="dynheader">
+Collaboration diagram for Camera:</div>
+<div class="dyncontent">
+<div class="center"><!-- SVG 0 -->
+</div>
+</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
-Types</h2></td></tr>
+Public Types</h2></td></tr>
 <tr class="memitem:a912167aa5066b8dcfdb70d74680ca98c"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a912167aa5066b8dcfdb70d74680ca98c">TYPE_VIEW</a> </td></tr>
 <tr class="memdesc:a912167aa5066b8dcfdb70d74680ca98c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Type of textures requested.  <a href="classsl_1_1Camera.html#a912167aa5066b8dcfdb70d74680ca98c">More...</a><br /></td></tr>
 <tr class="separator:a912167aa5066b8dcfdb70d74680ca98c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
-Functions</h2></td></tr>
+Public Member Functions</h2></td></tr>
 <tr class="memitem:a80e94b1f37f15e4faf6c6552cb4ee0d6"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a80e94b1f37f15e4faf6c6552cb4ee0d6">GetRequestedCameraFPS</a> ()</td></tr>
 <tr class="memdesc:a80e94b1f37f15e4faf6c6552cb4ee0d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Desired FPS from the ZED camera. This is the maximum FPS for the ZED's current resolution unless a lower setting was specified in <a class="el" href="classsl_1_1Camera.html#a5b386e51619cd4f7704f5fa2f7b6dbce" title="Checks if the ZED camera is plugged in and opens it.">Open()</a>. Maximum values are bound by the ZED's output, not system performance.  <a href="classsl_1_1Camera.html#a80e94b1f37f15e4faf6c6552cb4ee0d6">More...</a><br /></td></tr>
 <tr class="separator:a80e94b1f37f15e4faf6c6552cb4ee0d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -197,6 +203,9 @@ Functions</h2></td></tr>
 <tr class="memitem:acc126954f03f1161ee73481d7206389e"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#acc126954f03f1161ee73481d7206389e">GetFOV</a> ()</td></tr>
 <tr class="memdesc:acc126954f03f1161ee73481d7206389e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the ZED's vertical field of view in radians.  <a href="classsl_1_1Camera.html#acc126954f03f1161ee73481d7206389e">More...</a><br /></td></tr>
 <tr class="separator:acc126954f03f1161ee73481d7206389e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30de940c82a52ce9c3a02f9236c8884f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a30de940c82a52ce9c3a02f9236c8884f">UpdateSelfCalibration</a> ()</td></tr>
+<tr class="memdesc:a30de940c82a52ce9c3a02f9236c8884f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform a new self calibration process. In some cases, due to temperature changes or strong vibrations, the stereo calibration becomes less accurate. Use this function to update the self-calibration data and get more reliable depth values.  <a href="classsl_1_1Camera.html#a30de940c82a52ce9c3a02f9236c8884f">More...</a><br /></td></tr>
+<tr class="separator:a30de940c82a52ce9c3a02f9236c8884f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb5460badbd8c1b49de23f9d99ee229f"><td class="memItemLeft" align="right" valign="top">uint&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#aeb5460badbd8c1b49de23f9d99ee229f">GetFrameDroppedCount</a> ()</td></tr>
 <tr class="memdesc:aeb5460badbd8c1b49de23f9d99ee229f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the number of frames dropped since <a class="el" href="classsl_1_1Camera.html#a26bcffd85cfb7416b904cdf4d1b13c97" title="Grabs a new image, rectifies it, and computes the disparity map and (optionally) the depth map....">Grab()</a> was called for the first time. Based on camera timestamps and an FPS comparison.  <a href="classsl_1_1Camera.html#aeb5460badbd8c1b49de23f9d99ee229f">More...</a><br /></td></tr>
 <tr class="separator:aeb5460badbd8c1b49de23f9d99ee229f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -222,7 +231,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:aa300ec74ebef65e091b5eababe553937"><td class="mdescLeft">&#160;</td><td class="mdescRight">Using data from a detected floor plane, updates supplied vertex and triangle arrays with data needed to make a mesh that represents it. These arrays are updated directly from the wrapper.  <a href="classsl_1_1Camera.html#aa300ec74ebef65e091b5eababe553937">More...</a><br /></td></tr>
 <tr class="separator:aa300ec74ebef65e091b5eababe553937"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a926b99a95c76c6b2959ba7127db10549"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__Core__group.html#ga4db9ee29f2ff83c71567c12f6bfbf28c">sl.ERROR_CODE</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a926b99a95c76c6b2959ba7127db10549">findPlaneAtHit</a> (ref <a class="el" href="structsl_1_1PlaneData.html">PlaneData</a> plane, Vector2 coord)</td></tr>
-<tr class="memdesc:a926b99a95c76c6b2959ba7127db10549"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks for a plane in the real world at given screen-space coordinates. Use ZEDPlaneDetectionManager.DetectPlaneAtHit() for a higher-level version that turns planes into GameObjects.  <a href="classsl_1_1Camera.html#a926b99a95c76c6b2959ba7127db10549">More...</a><br /></td></tr>
+<tr class="memdesc:a926b99a95c76c6b2959ba7127db10549"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks for a plane in the real world at given screen-space coordinates.  <a href="classsl_1_1Camera.html#a926b99a95c76c6b2959ba7127db10549">More...</a><br /></td></tr>
 <tr class="separator:a926b99a95c76c6b2959ba7127db10549"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a404e3b286ffb1cbb3a589e7c5ddae9f4"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a404e3b286ffb1cbb3a589e7c5ddae9f4">convertHitPlaneToMesh</a> (Vector3[] vertices, int[] triangles, out int numVertices, out int numTriangles)</td></tr>
 <tr class="memdesc:a404e3b286ffb1cbb3a589e7c5ddae9f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Using data from a detected hit plane, updates supplied vertex and triangle arrays with data needed to make a mesh that represents it. These arrays are updated directly from the wrapper.  <a href="classsl_1_1Camera.html#a404e3b286ffb1cbb3a589e7c5ddae9f4">More...</a><br /></td></tr>
@@ -236,57 +245,6 @@ Functions</h2></td></tr>
 <tr class="memitem:a981d29d350ebcc2fcaeed1835d39d093"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__Core__group.html#ga4db9ee29f2ff83c71567c12f6bfbf28c">sl.ERROR_CODE</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a981d29d350ebcc2fcaeed1835d39d093">SaveCurrentPointCloudInFile</a> (<a class="el" href="namespacesl.html#aed1a25f4b15c6110f7ac1dc385827049">SIDE</a> side, String filename)</td></tr>
 <tr class="memdesc:a981d29d350ebcc2fcaeed1835d39d093"><td class="mdescLeft">&#160;</td><td class="mdescRight">Save the current point cloud in a file defined by filename. Supported formats are PLY,VTK,XYZ and PCD  <a href="classsl_1_1Camera.html#a981d29d350ebcc2fcaeed1835d39d093">More...</a><br /></td></tr>
 <tr class="separator:a981d29d350ebcc2fcaeed1835d39d093"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr><td colspan="2"><div class="groupHeader">Video</div></td></tr>
-<tr class="memitem:a53a8ff7354922cf93dc90308d5355175"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__Core__group.html#ga4db9ee29f2ff83c71567c12f6bfbf28c">sl.ERROR_CODE</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a53a8ff7354922cf93dc90308d5355175">RetrieveImage</a> (<a class="el" href="classsl_1_1Mat.html">sl.Mat</a> mat, <a class="el" href="group__Video__group.html#ga77fc7bfc159040a1e2ffb074a8ad248c">sl.VIEW</a> view, <a class="el" href="group__Core__group.html#ga3fc8f9f9f84fbb0f728fc2cd399ade29">sl.MEM</a> mem=sl.MEM.CPU, <a class="el" href="structsl_1_1Resolution.html">sl.Resolution</a> resolution=new <a class="el" href="structsl_1_1Resolution.html">sl.Resolution</a>())</td></tr>
-<tr class="memdesc:a53a8ff7354922cf93dc90308d5355175"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves an image texture from the ZED SDK and loads it into a ZEDMat. Use this to get an individual texture from the last grabbed frame in a human-viewable format. Image textures work for when you want the result to be visible, such as the direct RGB image from the camera, or a greyscale image of the depth. However it will lose accuracy if used to show measurements like depth or confidence, unlike measure textures.  <a href="classsl_1_1Camera.html#a53a8ff7354922cf93dc90308d5355175">More...</a><br /></td></tr>
-<tr class="separator:a53a8ff7354922cf93dc90308d5355175"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abe554142345833572c1a4b0756accbb0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classsl_1_1InitParameters.html">InitParameters</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#abe554142345833572c1a4b0756accbb0">GetInitParameters</a> ()</td></tr>
-<tr class="memdesc:abe554142345833572c1a4b0756accbb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the init parameters used. Correspond to the structure send when the open() function was called.  <a href="classsl_1_1Camera.html#abe554142345833572c1a4b0756accbb0">More...</a><br /></td></tr>
-<tr class="separator:abe554142345833572c1a4b0756accbb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4914054f957dd906f183a277a038ecca"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classsl_1_1RuntimeParameters.html">RuntimeParameters</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a4914054f957dd906f183a277a038ecca">GetRuntimeParameters</a> ()</td></tr>
-<tr class="memdesc:a4914054f957dd906f183a277a038ecca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the runtime parameters used. Correspond to the structure send when the grab() function was called.  <a href="classsl_1_1Camera.html#a4914054f957dd906f183a277a038ecca">More...</a><br /></td></tr>
-<tr class="separator:a4914054f957dd906f183a277a038ecca"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a742dc0620af8981894e094a74d3abba7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classsl_1_1PositionalTrackingParameters.html">PositionalTrackingParameters</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a742dc0620af8981894e094a74d3abba7">GetPositionalTrackingParameters</a> ()</td></tr>
-<tr class="separator:a742dc0620af8981894e094a74d3abba7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0863d3aec805096a1753c0bd3b707206"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a0863d3aec805096a1753c0bd3b707206">SetCameraSettings</a> (<a class="el" href="group__Video__group.html#ga7bab4c6ca4fd971055eca1fdd9f4223d">VIDEO_SETTINGS</a> settings, int value)</td></tr>
-<tr class="memdesc:a0863d3aec805096a1753c0bd3b707206"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets a value in the ZED's camera settings.  <a href="classsl_1_1Camera.html#a0863d3aec805096a1753c0bd3b707206">More...</a><br /></td></tr>
-<tr class="separator:a0863d3aec805096a1753c0bd3b707206"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac6730488e8b2c351f487624affd17a51"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#ac6730488e8b2c351f487624affd17a51">GetCameraSettings</a> (<a class="el" href="group__Video__group.html#ga7bab4c6ca4fd971055eca1fdd9f4223d">VIDEO_SETTINGS</a> settings)</td></tr>
-<tr class="memdesc:ac6730488e8b2c351f487624affd17a51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the value of a given setting from the ZED camera.  <a href="classsl_1_1Camera.html#ac6730488e8b2c351f487624affd17a51">More...</a><br /></td></tr>
-<tr class="separator:ac6730488e8b2c351f487624affd17a51"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6970b59db15908ccd9041c423f61f8d1"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a6970b59db15908ccd9041c423f61f8d1">SetCameraSettings</a> (<a class="el" href="group__Video__group.html#ga7bab4c6ca4fd971055eca1fdd9f4223d">VIDEO_SETTINGS</a> settings, <a class="el" href="namespacesl.html#aed1a25f4b15c6110f7ac1dc385827049">SIDE</a> side, <a class="el" href="structsl_1_1Rect.html">Rect</a> roi, bool reset)</td></tr>
-<tr class="memdesc:a6970b59db15908ccd9041c423f61f8d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Overloaded function for CAMERA_SETTINGS.AEC_AGC_ROI (requires iRect as input)  <a href="classsl_1_1Camera.html#a6970b59db15908ccd9041c423f61f8d1">More...</a><br /></td></tr>
-<tr class="separator:a6970b59db15908ccd9041c423f61f8d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a18cf1ca6823438f26f28ba659c8110d9"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a18cf1ca6823438f26f28ba659c8110d9">GetCameraSettings</a> (<a class="el" href="group__Video__group.html#ga7bab4c6ca4fd971055eca1fdd9f4223d">VIDEO_SETTINGS</a> settings, <a class="el" href="namespacesl.html#aed1a25f4b15c6110f7ac1dc385827049">SIDE</a> side, ref <a class="el" href="structsl_1_1Rect.html">Rect</a> roi)</td></tr>
-<tr class="memdesc:a18cf1ca6823438f26f28ba659c8110d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Overloaded function for CAMERA_SETTINGS.AEC_AGC_ROI (requires iRect as input)  <a href="classsl_1_1Camera.html#a18cf1ca6823438f26f28ba659c8110d9">More...</a><br /></td></tr>
-<tr class="separator:a18cf1ca6823438f26f28ba659c8110d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a95bac007a0e50036d18ad095b36a0ba9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a95bac007a0e50036d18ad095b36a0ba9">ResetCameraSettings</a> ()</td></tr>
-<tr class="memdesc:a95bac007a0e50036d18ad095b36a0ba9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset camera settings to default  <a href="classsl_1_1Camera.html#a95bac007a0e50036d18ad095b36a0ba9">More...</a><br /></td></tr>
-<tr class="separator:a95bac007a0e50036d18ad095b36a0ba9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae878ff43cad712f69af66818bf2b39e0"><td class="memItemLeft" align="right" valign="top">ulong&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#ae878ff43cad712f69af66818bf2b39e0">GetCameraTimeStamp</a> ()</td></tr>
-<tr class="memdesc:ae878ff43cad712f69af66818bf2b39e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the timestamp at the time the latest grabbed frame was extracted from the USB stream. This is the closest timestamp you can get from when the image was taken. Must be called after calling grab().  <a href="classsl_1_1Camera.html#ae878ff43cad712f69af66818bf2b39e0">More...</a><br /></td></tr>
-<tr class="separator:ae878ff43cad712f69af66818bf2b39e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a82af713a72b62be3897f0a4ae582ea4c"><td class="memItemLeft" align="right" valign="top">ulong&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a82af713a72b62be3897f0a4ae582ea4c">GetCurrentTimeStamp</a> ()</td></tr>
-<tr class="memdesc:a82af713a72b62be3897f0a4ae582ea4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the current timestamp at the time the function is called. Can be compared to the camera timestamp for synchronization, since they have the same reference (the computer's start time).  <a href="classsl_1_1Camera.html#a82af713a72b62be3897f0a4ae582ea4c">More...</a><br /></td></tr>
-<tr class="separator:a82af713a72b62be3897f0a4ae582ea4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afe5252385e31c03799c9034ac0b67c86"><td class="memItemLeft" align="right" valign="top">ulong&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#afe5252385e31c03799c9034ac0b67c86">GetImageUpdaterTimeStamp</a> ()</td></tr>
-<tr class="memdesc:afe5252385e31c03799c9034ac0b67c86"><td class="mdescLeft">&#160;</td><td class="mdescRight">Timestamp from the most recent image update. Based on the computer's start time.  <a href="classsl_1_1Camera.html#afe5252385e31c03799c9034ac0b67c86">More...</a><br /></td></tr>
-<tr class="separator:afe5252385e31c03799c9034ac0b67c86"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abd7b4a17f2b10e97fbd4a9b621fc3f55"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#abd7b4a17f2b10e97fbd4a9b621fc3f55">GetSVOPosition</a> ()</td></tr>
-<tr class="memdesc:abd7b4a17f2b10e97fbd4a9b621fc3f55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current position of the SVO being recorded to.  <a href="classsl_1_1Camera.html#abd7b4a17f2b10e97fbd4a9b621fc3f55">More...</a><br /></td></tr>
-<tr class="separator:abd7b4a17f2b10e97fbd4a9b621fc3f55"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a08efdd458d1effc0f5675c78e6454bb1"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a08efdd458d1effc0f5675c78e6454bb1">GetSVONumberOfFrames</a> ()</td></tr>
-<tr class="memdesc:a08efdd458d1effc0f5675c78e6454bb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the total number of frames in the loaded SVO file.  <a href="classsl_1_1Camera.html#a08efdd458d1effc0f5675c78e6454bb1">More...</a><br /></td></tr>
-<tr class="separator:a08efdd458d1effc0f5675c78e6454bb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab7b043ffa99196093dcbc1cc930e6da1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#ab7b043ffa99196093dcbc1cc930e6da1">SetSVOPosition</a> (int frame)</td></tr>
-<tr class="memdesc:ab7b043ffa99196093dcbc1cc930e6da1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the position of the SVO file currently being read to a desired frame.  <a href="classsl_1_1Camera.html#ab7b043ffa99196093dcbc1cc930e6da1">More...</a><br /></td></tr>
-<tr class="separator:ab7b043ffa99196093dcbc1cc930e6da1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9c11407a6a5df0e7dc2585729b277052"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a9c11407a6a5df0e7dc2585729b277052">GetCameraFPS</a> ()</td></tr>
-<tr class="memdesc:a9c11407a6a5df0e7dc2585729b277052"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the current camera FPS. This is limited primarily by resolution but can also be lower due to setting a lower desired resolution in <a class="el" href="classsl_1_1Camera.html#a5b386e51619cd4f7704f5fa2f7b6dbce" title="Checks if the ZED camera is plugged in and opens it.">Open()</a> or from USB connection/bandwidth issues.  <a href="classsl_1_1Camera.html#a9c11407a6a5df0e7dc2585729b277052">More...</a><br /></td></tr>
-<tr class="separator:a9c11407a6a5df0e7dc2585729b277052"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab47dcac4e2c1ae1306965fe002b574f0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#ab47dcac4e2c1ae1306965fe002b574f0">SetCameraFPS</a> (int fps)</td></tr>
-<tr class="memdesc:ab47dcac4e2c1ae1306965fe002b574f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets a new target frame rate for the camera. If it's not possible with the current resolution, the SDK will target the closest possible frame rate instead.  <a href="classsl_1_1Camera.html#ab47dcac4e2c1ae1306965fe002b574f0">More...</a><br /></td></tr>
-<tr class="separator:ab47dcac4e2c1ae1306965fe002b574f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Depth Sensing</div></td></tr>
 <tr class="memitem:a9ec3c76714b1e8583a3231f30540509c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__Core__group.html#ga4db9ee29f2ff83c71567c12f6bfbf28c">sl.ERROR_CODE</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a9ec3c76714b1e8583a3231f30540509c">RetrieveMeasure</a> (<a class="el" href="classsl_1_1Mat.html">sl.Mat</a> mat, <a class="el" href="group__Depth__group.html#ga798a8eed10c573d759ef7e5a5bcd545d">sl.MEASURE</a> measure, <a class="el" href="group__Core__group.html#ga3fc8f9f9f84fbb0f728fc2cd399ade29">sl.MEM</a> mem=sl.MEM.CPU, <a class="el" href="structsl_1_1Resolution.html">sl.Resolution</a> resolution=new <a class="el" href="structsl_1_1Resolution.html">sl.Resolution</a>())</td></tr>
 <tr class="memdesc:a9ec3c76714b1e8583a3231f30540509c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves a measure texture from the ZED SDK and loads it into a ZEDMat. Use this to get an individual texture from the last grabbed frame with measurements in every pixel - such as a depth map, confidence map, etc. Measure textures are not human-viewable but don't lose accuracy, unlike image textures.  <a href="classsl_1_1Camera.html#a9ec3c76714b1e8583a3231f30540509c">More...</a><br /></td></tr>
@@ -370,7 +328,7 @@ Functions</h2></td></tr>
 <tr class="separator:a678aa1d8e187de269f5451a536dc04e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
-Static Functions</h2></td></tr>
+Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a5d0bb6c5e64671cd3bdd56673cadaf7b"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a5d0bb6c5e64671cd3bdd56673cadaf7b">UnloadPlugin</a> ()</td></tr>
 <tr class="separator:a5d0bb6c5e64671cd3bdd56673cadaf7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a418383a5aa66a2cc528b4a1201e9db0e"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a418383a5aa66a2cc528b4a1201e9db0e">UnloadInstance</a> (int id)</td></tr>
@@ -392,7 +350,7 @@ Static Functions</h2></td></tr>
 <tr class="separator:a9d52d6a1e704da9736f4614a4729a924"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
-Attributes</h2></td></tr>
+Public Attributes</h2></td></tr>
 <tr class="memitem:acaa5cca162d671430640ea88b6fbee41"><td class="memItemLeft" align="right" valign="top">object&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#acaa5cca162d671430640ea88b6fbee41">grabLock</a> = new object()</td></tr>
 <tr class="memdesc:acaa5cca162d671430640ea88b6fbee41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mutex for the image acquisition thread.  <a href="classsl_1_1Camera.html#acaa5cca162d671430640ea88b6fbee41">More...</a><br /></td></tr>
 <tr class="separator:acaa5cca162d671430640ea88b6fbee41"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -401,7 +359,7 @@ Attributes</h2></td></tr>
 <tr class="separator:a6530ebdd91e21d63fde4e7edf57d32b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
-Static Attributes</h2></td></tr>
+Static Public Attributes</h2></td></tr>
 <tr class="memitem:a222871a0f4e1751dce486c2c6ce5d12d"><td class="memItemLeft" align="right" valign="top">const float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a222871a0f4e1751dce486c2c6ce5d12d">Deg2Rad</a> = 0.0174532924F</td></tr>
 <tr class="separator:a222871a0f4e1751dce486c2c6ce5d12d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a51100d1741d76b41b4949e4d0f6a945e"><td class="memItemLeft" align="right" valign="top">const float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a51100d1741d76b41b4949e4d0f6a945e">Rad2Deg</a> = 57.29578F</td></tr>
@@ -452,6 +410,62 @@ Properties</h2></td></tr>
 <tr class="memitem:a11a00b130fc967a6e4725d9ffa2be57e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a11a00b130fc967a6e4725d9ffa2be57e">IsCameraReady</a><code> [get]</code></td></tr>
 <tr class="memdesc:a11a00b130fc967a6e4725d9ffa2be57e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the camera has been successfully initialized.  <a href="classsl_1_1Camera.html#a11a00b130fc967a6e4725d9ffa2be57e">More...</a><br /></td></tr>
 <tr class="separator:a11a00b130fc967a6e4725d9ffa2be57e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
+Video</h2></td></tr>
+<tr class="memitem:a53a8ff7354922cf93dc90308d5355175"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__Core__group.html#ga4db9ee29f2ff83c71567c12f6bfbf28c">sl.ERROR_CODE</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a53a8ff7354922cf93dc90308d5355175">RetrieveImage</a> (<a class="el" href="classsl_1_1Mat.html">sl.Mat</a> mat, <a class="el" href="group__Video__group.html#ga77fc7bfc159040a1e2ffb074a8ad248c">sl.VIEW</a> view, <a class="el" href="group__Core__group.html#ga3fc8f9f9f84fbb0f728fc2cd399ade29">sl.MEM</a> mem=sl.MEM.CPU, <a class="el" href="structsl_1_1Resolution.html">sl.Resolution</a> resolution=new <a class="el" href="structsl_1_1Resolution.html">sl.Resolution</a>())</td></tr>
+<tr class="memdesc:a53a8ff7354922cf93dc90308d5355175"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves an image texture from the ZED SDK and loads it into a ZEDMat. Use this to get an individual texture from the last grabbed frame in a human-viewable format. Image textures work for when you want the result to be visible, such as the direct RGB image from the camera, or a greyscale image of the depth. However it will lose accuracy if used to show measurements like depth or confidence, unlike measure textures.  <a href="classsl_1_1Camera.html#a53a8ff7354922cf93dc90308d5355175">More...</a><br /></td></tr>
+<tr class="separator:a53a8ff7354922cf93dc90308d5355175"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe554142345833572c1a4b0756accbb0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classsl_1_1InitParameters.html">InitParameters</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#abe554142345833572c1a4b0756accbb0">GetInitParameters</a> ()</td></tr>
+<tr class="memdesc:abe554142345833572c1a4b0756accbb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the init parameters used. Correspond to the structure send when the open() function was called.  <a href="classsl_1_1Camera.html#abe554142345833572c1a4b0756accbb0">More...</a><br /></td></tr>
+<tr class="separator:abe554142345833572c1a4b0756accbb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4914054f957dd906f183a277a038ecca"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classsl_1_1RuntimeParameters.html">RuntimeParameters</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a4914054f957dd906f183a277a038ecca">GetRuntimeParameters</a> ()</td></tr>
+<tr class="memdesc:a4914054f957dd906f183a277a038ecca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the runtime parameters used. Correspond to the structure send when the grab() function was called.  <a href="classsl_1_1Camera.html#a4914054f957dd906f183a277a038ecca">More...</a><br /></td></tr>
+<tr class="separator:a4914054f957dd906f183a277a038ecca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a742dc0620af8981894e094a74d3abba7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classsl_1_1PositionalTrackingParameters.html">PositionalTrackingParameters</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a742dc0620af8981894e094a74d3abba7">GetPositionalTrackingParameters</a> ()</td></tr>
+<tr class="separator:a742dc0620af8981894e094a74d3abba7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0863d3aec805096a1753c0bd3b707206"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a0863d3aec805096a1753c0bd3b707206">SetCameraSettings</a> (<a class="el" href="group__Video__group.html#ga7bab4c6ca4fd971055eca1fdd9f4223d">VIDEO_SETTINGS</a> settings, int value)</td></tr>
+<tr class="memdesc:a0863d3aec805096a1753c0bd3b707206"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets a value in the ZED's camera settings.  <a href="classsl_1_1Camera.html#a0863d3aec805096a1753c0bd3b707206">More...</a><br /></td></tr>
+<tr class="separator:a0863d3aec805096a1753c0bd3b707206"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6730488e8b2c351f487624affd17a51"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#ac6730488e8b2c351f487624affd17a51">GetCameraSettings</a> (<a class="el" href="group__Video__group.html#ga7bab4c6ca4fd971055eca1fdd9f4223d">VIDEO_SETTINGS</a> settings)</td></tr>
+<tr class="memdesc:ac6730488e8b2c351f487624affd17a51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the value of a given setting from the ZED camera.  <a href="classsl_1_1Camera.html#ac6730488e8b2c351f487624affd17a51">More...</a><br /></td></tr>
+<tr class="separator:ac6730488e8b2c351f487624affd17a51"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6970b59db15908ccd9041c423f61f8d1"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a6970b59db15908ccd9041c423f61f8d1">SetCameraSettings</a> (<a class="el" href="group__Video__group.html#ga7bab4c6ca4fd971055eca1fdd9f4223d">VIDEO_SETTINGS</a> settings, <a class="el" href="namespacesl.html#aed1a25f4b15c6110f7ac1dc385827049">SIDE</a> side, <a class="el" href="structsl_1_1Rect.html">Rect</a> roi, bool reset)</td></tr>
+<tr class="memdesc:a6970b59db15908ccd9041c423f61f8d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Overloaded function for CAMERA_SETTINGS.AEC_AGC_ROI (requires <a class="el" href="structsl_1_1Rect.html" title="Rect structure to define a rectangle or a ROI in pixels Use to set ROI target for AEC/AGC">Rect</a> as input)  <a href="classsl_1_1Camera.html#a6970b59db15908ccd9041c423f61f8d1">More...</a><br /></td></tr>
+<tr class="separator:a6970b59db15908ccd9041c423f61f8d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18cf1ca6823438f26f28ba659c8110d9"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a18cf1ca6823438f26f28ba659c8110d9">GetCameraSettings</a> (<a class="el" href="group__Video__group.html#ga7bab4c6ca4fd971055eca1fdd9f4223d">VIDEO_SETTINGS</a> settings, <a class="el" href="namespacesl.html#aed1a25f4b15c6110f7ac1dc385827049">SIDE</a> side, ref <a class="el" href="structsl_1_1Rect.html">Rect</a> roi)</td></tr>
+<tr class="memdesc:a18cf1ca6823438f26f28ba659c8110d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Overloaded function for CAMERA_SETTINGS.AEC_AGC_ROI (requires <a class="el" href="structsl_1_1Rect.html" title="Rect structure to define a rectangle or a ROI in pixels Use to set ROI target for AEC/AGC">Rect</a> as input)  <a href="classsl_1_1Camera.html#a18cf1ca6823438f26f28ba659c8110d9">More...</a><br /></td></tr>
+<tr class="separator:a18cf1ca6823438f26f28ba659c8110d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95bac007a0e50036d18ad095b36a0ba9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a95bac007a0e50036d18ad095b36a0ba9">ResetCameraSettings</a> ()</td></tr>
+<tr class="memdesc:a95bac007a0e50036d18ad095b36a0ba9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset camera settings to default  <a href="classsl_1_1Camera.html#a95bac007a0e50036d18ad095b36a0ba9">More...</a><br /></td></tr>
+<tr class="separator:a95bac007a0e50036d18ad095b36a0ba9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae878ff43cad712f69af66818bf2b39e0"><td class="memItemLeft" align="right" valign="top">ulong&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#ae878ff43cad712f69af66818bf2b39e0">GetCameraTimeStamp</a> ()</td></tr>
+<tr class="memdesc:ae878ff43cad712f69af66818bf2b39e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the timestamp at the time the latest grabbed frame was extracted from the USB stream. This is the closest timestamp you can get from when the image was taken. Must be called after calling grab().  <a href="classsl_1_1Camera.html#ae878ff43cad712f69af66818bf2b39e0">More...</a><br /></td></tr>
+<tr class="separator:ae878ff43cad712f69af66818bf2b39e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82af713a72b62be3897f0a4ae582ea4c"><td class="memItemLeft" align="right" valign="top">ulong&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a82af713a72b62be3897f0a4ae582ea4c">GetCurrentTimeStamp</a> ()</td></tr>
+<tr class="memdesc:a82af713a72b62be3897f0a4ae582ea4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the current timestamp at the time the function is called. Can be compared to the camera timestamp for synchronization, since they have the same reference (the computer's start time).  <a href="classsl_1_1Camera.html#a82af713a72b62be3897f0a4ae582ea4c">More...</a><br /></td></tr>
+<tr class="separator:a82af713a72b62be3897f0a4ae582ea4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe5252385e31c03799c9034ac0b67c86"><td class="memItemLeft" align="right" valign="top">ulong&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#afe5252385e31c03799c9034ac0b67c86">GetImageUpdaterTimeStamp</a> ()</td></tr>
+<tr class="memdesc:afe5252385e31c03799c9034ac0b67c86"><td class="mdescLeft">&#160;</td><td class="mdescRight">Timestamp from the most recent image update. Based on the computer's start time.  <a href="classsl_1_1Camera.html#afe5252385e31c03799c9034ac0b67c86">More...</a><br /></td></tr>
+<tr class="separator:afe5252385e31c03799c9034ac0b67c86"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd7b4a17f2b10e97fbd4a9b621fc3f55"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#abd7b4a17f2b10e97fbd4a9b621fc3f55">GetSVOPosition</a> ()</td></tr>
+<tr class="memdesc:abd7b4a17f2b10e97fbd4a9b621fc3f55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current position of the SVO being recorded to.  <a href="classsl_1_1Camera.html#abd7b4a17f2b10e97fbd4a9b621fc3f55">More...</a><br /></td></tr>
+<tr class="separator:abd7b4a17f2b10e97fbd4a9b621fc3f55"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08efdd458d1effc0f5675c78e6454bb1"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a08efdd458d1effc0f5675c78e6454bb1">GetSVONumberOfFrames</a> ()</td></tr>
+<tr class="memdesc:a08efdd458d1effc0f5675c78e6454bb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the total number of frames in the loaded SVO file.  <a href="classsl_1_1Camera.html#a08efdd458d1effc0f5675c78e6454bb1">More...</a><br /></td></tr>
+<tr class="separator:a08efdd458d1effc0f5675c78e6454bb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab7b043ffa99196093dcbc1cc930e6da1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#ab7b043ffa99196093dcbc1cc930e6da1">SetSVOPosition</a> (int frame)</td></tr>
+<tr class="memdesc:ab7b043ffa99196093dcbc1cc930e6da1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the position of the SVO file currently being read to a desired frame.  <a href="classsl_1_1Camera.html#ab7b043ffa99196093dcbc1cc930e6da1">More...</a><br /></td></tr>
+<tr class="separator:ab7b043ffa99196093dcbc1cc930e6da1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c11407a6a5df0e7dc2585729b277052"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a9c11407a6a5df0e7dc2585729b277052">GetCameraFPS</a> ()</td></tr>
+<tr class="memdesc:a9c11407a6a5df0e7dc2585729b277052"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the current camera FPS. This is limited primarily by resolution but can also be lower due to setting a lower desired resolution in <a class="el" href="classsl_1_1Camera.html#a5b386e51619cd4f7704f5fa2f7b6dbce" title="Checks if the ZED camera is plugged in and opens it.">Open()</a> or from USB connection/bandwidth issues.  <a href="classsl_1_1Camera.html#a9c11407a6a5df0e7dc2585729b277052">More...</a><br /></td></tr>
+<tr class="separator:a9c11407a6a5df0e7dc2585729b277052"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab47dcac4e2c1ae1306965fe002b574f0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#ab47dcac4e2c1ae1306965fe002b574f0">SetCameraFPS</a> (int fps)</td></tr>
+<tr class="memdesc:ab47dcac4e2c1ae1306965fe002b574f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets a new target frame rate for the camera. If it's not possible with the current resolution, the SDK will target the closest possible frame rate instead.  <a href="classsl_1_1Camera.html#ab47dcac4e2c1ae1306965fe002b574f0">More...</a><br /></td></tr>
+<tr class="separator:ab47dcac4e2c1ae1306965fe002b574f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2912c81366bd8195b49c8a61e63aac20"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structsl_1_1Resolution.html">sl.Resolution</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsl_1_1Camera.html#a2912c81366bd8195b49c8a61e63aac20">GetResolution</a> (<a class="el" href="group__Video__group.html#gabd0374c748530a64a72872c43b2cc828">RESOLUTION</a> resolution)</td></tr>
+<tr class="memdesc:a2912c81366bd8195b49c8a61e63aac20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get sl.Resolion from a RESOLUTION enum  <a href="classsl_1_1Camera.html#a2912c81366bd8195b49c8a61e63aac20">More...</a><br /></td></tr>
+<tr class="separator:a2912c81366bd8195b49c8a61e63aac20"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
 Spatial Mapping</h2></td></tr>
@@ -537,7 +551,7 @@ Spatial Mapping</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This class is the main interface with the camera and the SDK features, such as: video, depth, tracking, mapping, and more. </p>
-</div><h2 class="groupheader">Enumeration</h2>
+</div><h2 class="groupheader">Member Enumeration Documentation</h2>
 <a id="a912167aa5066b8dcfdb70d74680ca98c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a912167aa5066b8dcfdb70d74680ca98c">&#9670;&nbsp;</a></span>TYPE_VIEW</h2>
 
@@ -568,7 +582,7 @@ Spatial Mapping</h2></td></tr>
 
 </div>
 </div>
-<h2 class="groupheader">Constructor and Destructor</h2>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a1d18a03b5d8a26693c8ef6c2d1f0246a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1d18a03b5d8a26693c8ef6c2d1f0246a">&#9670;&nbsp;</a></span>Camera()</h2>
 
@@ -603,7 +617,7 @@ Spatial Mapping</h2></td></tr>
 
 </div>
 </div>
-<h2 class="groupheader">Functions</h2>
+<h2 class="groupheader">Member Function Documentation</h2>
 <a id="a80e94b1f37f15e4faf6c6552cb4ee0d6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a80e94b1f37f15e4faf6c6552cb4ee0d6">&#9670;&nbsp;</a></span>GetRequestedCameraFPS()</h2>
 
@@ -1009,6 +1023,41 @@ Spatial Mapping</h2></td></tr>
 
 </div>
 </div>
+<a id="a2912c81366bd8195b49c8a61e63aac20"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2912c81366bd8195b49c8a61e63aac20">&#9670;&nbsp;</a></span>GetResolution()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="structsl_1_1Resolution.html">sl.Resolution</a> GetResolution </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__Video__group.html#gabd0374c748530a64a72872c43b2cc828">RESOLUTION</a>&#160;</td>
+          <td class="paramname"><em>resolution</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get sl.Resolion from a RESOLUTION enum </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">resolution</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd></dd></dl>
+
+</div>
+</div>
 <a id="a0863d3aec805096a1753c0bd3b707206"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0863d3aec805096a1753c0bd3b707206">&#9670;&nbsp;</a></span>SetCameraSettings() <span class="overload">[1/2]</span></h2>
 
@@ -1138,7 +1187,7 @@ Spatial Mapping</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Overloaded function for CAMERA_SETTINGS.AEC_AGC_ROI (requires iRect as input) </p>
+<p>Overloaded function for CAMERA_SETTINGS.AEC_AGC_ROI (requires <a class="el" href="structsl_1_1Rect.html" title="Rect structure to define a rectangle or a ROI in pixels Use to set ROI target for AEC/AGC">Rect</a> as input) </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">settings</td><td>Must be set to CAMERA_SETTINGS.AEC_AGC_ROI. Otherwise will return -1.</td></tr>
@@ -1192,7 +1241,7 @@ Spatial Mapping</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Overloaded function for CAMERA_SETTINGS.AEC_AGC_ROI (requires iRect as input) </p>
+<p>Overloaded function for CAMERA_SETTINGS.AEC_AGC_ROI (requires <a class="el" href="structsl_1_1Rect.html" title="Rect structure to define a rectangle or a ROI in pixels Use to set ROI target for AEC/AGC">Rect</a> as input) </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">settings</td><td>Must be set to CAMERA_SETTINGS.AEC_AGC_ROI. Otherwise will return -1.</td></tr>
@@ -1635,6 +1684,42 @@ Spatial Mapping</h2></td></tr>
 
 <p>Returns the ZED's vertical field of view in radians. </p>
 <dl class="section return"><dt>Returns</dt><dd>Vertical field of view.</dd></dl>
+
+</div>
+</div>
+<a id="a30de940c82a52ce9c3a02f9236c8884f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30de940c82a52ce9c3a02f9236c8884f">&#9670;&nbsp;</a></span>UpdateSelfCalibration()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UpdateSelfCalibration </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Perform a new self calibration process. In some cases, due to temperature changes or strong vibrations, the stereo calibration becomes less accurate. Use this function to update the self-calibration data and get more reliable depth values. </p>
+<p>The self calibration will occur at the next grab() call.</p>
+<p>New values will then be available in getCameraInformation(), be sure to get them to still have consistent 2D &lt;-&gt; 3D conversion.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cameraID</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd></dd></dl>
 
 </div>
 </div>
@@ -4090,7 +4175,7 @@ Spatial Mapping</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Checks for a plane in the real world at given screen-space coordinates. Use ZEDPlaneDetectionManager.DetectPlaneAtHit() for a higher-level version that turns planes into GameObjects. </p>
+<p>Checks for a plane in the real world at given screen-space coordinates. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">plane</td><td>Data on the detected plane.</td></tr>
@@ -4737,7 +4822,7 @@ Spatial Mapping</h2></td></tr>
 
 </div>
 </div>
-<h2 class="groupheader">Variables</h2>
+<h2 class="groupheader">Member Data Documentation</h2>
 <a id="a222871a0f4e1751dce486c2c6ce5d12d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a222871a0f4e1751dce486c2c6ce5d12d">&#9670;&nbsp;</a></span>Deg2Rad</h2>
 
@@ -4816,7 +4901,7 @@ Spatial Mapping</h2></td></tr>
 
 <p><a class="el" href="classsl_1_1Camera.html" title="This class is the main interface with the camera and the SDK features, such as: video,...">Camera</a> ID (for multiple cameras) </p>
 
-<p class="reference">Referenced by <a class="el" href="classsl_1_1Camera.html#a0507c746dc882a0ba9bc08f1071b47e8">Camera.ApplyTexture()</a>, <a class="el" href="classsl_1_1Camera.html#a1d18a03b5d8a26693c8ef6c2d1f0246a">Camera.Camera()</a>, <a class="el" href="classsl_1_1Camera.html#a7f7a3199c392465d0767c6506c1af5b4">Camera.Close()</a>, <a class="el" href="classsl_1_1Camera.html#aa300ec74ebef65e091b5eababe553937">Camera.convertFloorPlaneToMesh()</a>, <a class="el" href="classsl_1_1Camera.html#a404e3b286ffb1cbb3a589e7c5ddae9f4">Camera.convertHitPlaneToMesh()</a>, <a class="el" href="classsl_1_1Camera.html#ab04c84b11c1047cfedd38083d55670a4">Camera.DisableObjectDetection()</a>, <a class="el" href="classsl_1_1Camera.html#a77a3d2ea2a4e453b04e99a381328187b">Camera.DisablePositionalTracking()</a>, <a class="el" href="classsl_1_1Camera.html#ac8fa07bb8ca0e7875f90f6f288acc9f9">Camera.DisableRecording()</a>, <a class="el" href="classsl_1_1Camera.html#a65a8651a61c14bdc475e08f92f47deba">Camera.DisableSpatialMapping()</a>, <a class="el" href="classsl_1_1Camera.html#a305a230c65c71d689b02fe3ecf5f3ea9">Camera.DisableStreaming()</a>, <a class="el" href="classsl_1_1Camera.html#a41ba8c746440a65d3f2b42ec60ffdd28">Camera.EnableObjectDetection()</a>, <a class="el" href="classsl_1_1Camera.html#aabb8afc833da3fb228cb5a2a2a120644">Camera.EnablePositionalTracking()</a>, <a class="el" href="classsl_1_1Camera.html#aed8d88faf8bca05185115f44ff68f3c0">Camera.EnableRecording()</a>, <a class="el" href="classsl_1_1Camera.html#a1d0d0b3ba80645ca68b6abe961117eb0">Camera.EnableSpatialMapping()</a>, <a class="el" href="classsl_1_1Camera.html#a319ff4a7887b509ecca53914868c08e9">Camera.EnableStreaming()</a>, <a class="el" href="classsl_1_1Camera.html#a694b5e23a7a09b345dc15c839dc21cd0">Camera.ExtractWholeSpatialMap()</a>, <a class="el" href="classsl_1_1Camera.html#a889664891db0c49f780217c6e917f05f">Camera.FilterMesh()</a>, <a class="el" href="classsl_1_1Camera.html#a8d01f559fb36a1e3d905b9de303d1db1">Camera.findFloorPlane()</a>, <a class="el" href="classsl_1_1Camera.html#a926b99a95c76c6b2959ba7127db10549">Camera.findPlaneAtHit()</a>, <a class="el" href="classsl_1_1Camera.html#a33b707b21fe148c3b5be9de5972ac4e6">Camera.GetCalibrationParameters()</a>, <a class="el" href="classsl_1_1Camera.html#ae99d6224731bea2c7a136262a88e13bf">Camera.GetCameraFirmwareVersion()</a>, <a class="el" href="classsl_1_1Camera.html#a9c11407a6a5df0e7dc2585729b277052">Camera.GetCameraFPS()</a>, <a class="el" href="classsl_1_1Camera.html#ab0f9c2c2b0288d1bd81a26abace39451">Camera.GetCameraModel()</a>, <a class="el" href="classsl_1_1Camera.html#ac6730488e8b2c351f487624affd17a51">Camera.GetCameraSettings()</a>, <a class="el" href="classsl_1_1Camera.html#ae878ff43cad712f69af66818bf2b39e0">Camera.GetCameraTimeStamp()</a>, <a class="el" href="classsl_1_1Camera.html#a2f318ec6d194e1202e42f3bbe6ac843b">Camera.GetConfidenceThreshold()</a>, <a class="el" href="classsl_1_1Camera.html#a82af713a72b62be3897f0a4ae582ea4c">Camera.GetCurrentTimeStamp()</a>, <a class="el" href="classsl_1_1Camera.html#a446f241c8ceda318de679dffb2fa29a3">Camera.GetDepthMaxRangeValue()</a>, <a class="el" href="classsl_1_1Camera.html#a25ec4a46e11559d18423219d0b4e6509">Camera.GetDepthMinRangeValue()</a>, <a class="el" href="classsl_1_1Camera.html#ae52778d597bd9a63768a15342fa613da">Camera.GetDepthValue()</a>, <a class="el" href="classsl_1_1Camera.html#a2b62d99cfa6d23f760120b2f136f1679">Camera.GetDistanceValue()</a>, <a class="el" href="classsl_1_1Camera.html#aeb5460badbd8c1b49de23f9d99ee229f">Camera.GetFrameDroppedCount()</a>, <a class="el" href="classsl_1_1Camera.html#a042f37568b69d3a843980c3ddb16f97c">Camera.GetFrameDroppedPercent()</a>, <a class="el" href="classsl_1_1Camera.html#aa44d78e879e3caa1a05ab40d3604874f">Camera.GetGravityEstimate()</a>, <a class="el" href="classsl_1_1Camera.html#afe5252385e31c03799c9034ac0b67c86">Camera.GetImageUpdaterTimeStamp()</a>, <a class="el" href="classsl_1_1Camera.html#aee7082d9e36613954bf22a4cde530382">Camera.GetIMUOrientation()</a>, <a class="el" href="classsl_1_1Camera.html#abe554142345833572c1a4b0756accbb0">Camera.GetInitParameters()</a>, <a class="el" href="classsl_1_1Camera.html#a55a844d506b272420dbec897b2ad4339">Camera.GetInputType()</a>, <a class="el" href="classsl_1_1Camera.html#a349c130a524c0b9506fb063e34242356">Camera.GetMeshRequestStatus()</a>, <a class="el" href="classsl_1_1Camera.html#a4de0867d63e1ab3152869d2072f4546c">Camera.GetNormalValue()</a>, <a class="el" href="classsl_1_1Camera.html#a2c8278e9c6e31041026dc7780cb12740">Camera.GetPosition()</a>, <a class="el" href="classsl_1_1Camera.html#a742dc0620af8981894e094a74d3abba7">Camera.GetPositionalTrackingParameters()</a>, <a class="el" href="classsl_1_1Camera.html#a4914054f957dd906f183a277a038ecca">Camera.GetRuntimeParameters()</a>, <a class="el" href="classsl_1_1Camera.html#a182f4f2b80864b4d190ac0cd0c50ade2">Camera.GetSensorsConfiguration()</a>, <a class="el" href="classsl_1_1Camera.html#aa36704aec3a625d523fc0c7fc7e860fc">Camera.GetSensorsData()</a>, <a class="el" href="classsl_1_1Camera.html#ac350cbc86ffa88c24a36c12bce856889">Camera.GetSensorsFirmwareVersion()</a>, <a class="el" href="classsl_1_1Camera.html#a47ac418eb0610dde07ebc10554d6ef70">Camera.GetSpatialMappingState()</a>, <a class="el" href="classsl_1_1Camera.html#a08efdd458d1effc0f5675c78e6454bb1">Camera.GetSVONumberOfFrames()</a>, <a class="el" href="classsl_1_1Camera.html#abd7b4a17f2b10e97fbd4a9b621fc3f55">Camera.GetSVOPosition()</a>, <a class="el" href="classsl_1_1Camera.html#a5fd6b8a13441f26626bc2a6b5936337e">Camera.GetXYZValue()</a>, <a class="el" href="classsl_1_1Camera.html#a51cd73955b71bb4bd3bf02bc7dc2770d">Camera.GetZEDSerialNumber()</a>, <a class="el" href="classsl_1_1Camera.html#a26bcffd85cfb7416b904cdf4d1b13c97">Camera.Grab()</a>, <a class="el" href="classsl_1_1Camera.html#a6433fbcb2f69d40eb2d332d5e30235a8">Camera.IsStreamingEnabled()</a>, <a class="el" href="classsl_1_1Camera.html#a1d65ee4ad00b09a5c9c21ef6f70136bd">Camera.LoadMesh()</a>, <a class="el" href="classsl_1_1Camera.html#a1610608fd1e65214899d1d17edc974e0">Camera.MergeChunks()</a>, <a class="el" href="classsl_1_1Camera.html#a5b386e51619cd4f7704f5fa2f7b6dbce">Camera.Open()</a>, <a class="el" href="classsl_1_1Camera.html#a3385b907ba158945c95addc8448e32ae">Camera.PauseObjectDetection()</a>, <a class="el" href="classsl_1_1Camera.html#a23c47ce87639b5d8a20c2aae7d3cfbb9">Camera.PauseSpatialMapping()</a>, <a class="el" href="classsl_1_1Camera.html#a74923b1426bc2af8eefb715cef943f6e">Camera.RequestSpatialMap()</a>, <a class="el" href="classsl_1_1Camera.html#a453cd781cab8be05d33bc669ade6149f">Camera.ResetPositionalTracking()</a>, <a class="el" href="classsl_1_1Camera.html#a00111cdd6117d5e049e295d849ff06cc">Camera.RetrieveChunks()</a>, <a class="el" href="classsl_1_1Camera.html#ace1707cd24b212be7f2e9b2a2514f5ec">Camera.RetrieveFusedPointCloud()</a>, <a class="el" href="classsl_1_1Camera.html#a53a8ff7354922cf93dc90308d5355175">Camera.RetrieveImage()</a>, <a class="el" href="classsl_1_1Camera.html#a9ec3c76714b1e8583a3231f30540509c">Camera.RetrieveMeasure()</a>, <a class="el" href="classsl_1_1Camera.html#aea165ccfe634b1472c7e2244b12e11fd">Camera.RetrieveMesh()</a>, <a class="el" href="classsl_1_1Camera.html#a678aa1d8e187de269f5451a536dc04e5">Camera.RetrieveObjects()</a>, <a class="el" href="classsl_1_1Camera.html#aded7b839a613c2a33bb129ecc85a60d9">Camera.SaveCurrentDepthInFile()</a>, <a class="el" href="classsl_1_1Camera.html#ae69ee10f9788558872e7612a1bc3d56c">Camera.SaveCurrentImageInFile()</a>, <a class="el" href="classsl_1_1Camera.html#a981d29d350ebcc2fcaeed1835d39d093">Camera.SaveCurrentPointCloudInFile()</a>, <a class="el" href="classsl_1_1Camera.html#a1a2892c2a1f2974b8bedb9dd07e0b929">Camera.SaveMesh()</a>, <a class="el" href="classsl_1_1Camera.html#a29de07c82055d137f60e999710c50817">Camera.SavePointCloud()</a>, <a class="el" href="classsl_1_1Camera.html#ab47dcac4e2c1ae1306965fe002b574f0">Camera.SetCameraFPS()</a>, <a class="el" href="classsl_1_1Camera.html#a0863d3aec805096a1753c0bd3b707206">Camera.SetCameraSettings()</a>, <a class="el" href="classsl_1_1Camera.html#a0ba16c65e96c268f7fde34b349f3f644">Camera.SetIMUOrientationPrior()</a>, <a class="el" href="classsl_1_1Camera.html#ab7b043ffa99196093dcbc1cc930e6da1">Camera.SetSVOPosition()</a>, <a class="el" href="classsl_1_1Camera.html#a8bf6612cba1fbed6ebb39cf98b03da44">Camera.UpdateFusedPointCloud()</a>, and <a class="el" href="classsl_1_1Camera.html#a33d16a3ba6e2a9c1602a6dbd58604209">Camera.UpdateMesh()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="classsl_1_1Camera.html#a0507c746dc882a0ba9bc08f1071b47e8">Camera.ApplyTexture()</a>, <a class="el" href="classsl_1_1Camera.html#a1d18a03b5d8a26693c8ef6c2d1f0246a">Camera.Camera()</a>, <a class="el" href="classsl_1_1Camera.html#a7f7a3199c392465d0767c6506c1af5b4">Camera.Close()</a>, <a class="el" href="classsl_1_1Camera.html#aa300ec74ebef65e091b5eababe553937">Camera.convertFloorPlaneToMesh()</a>, <a class="el" href="classsl_1_1Camera.html#a404e3b286ffb1cbb3a589e7c5ddae9f4">Camera.convertHitPlaneToMesh()</a>, <a class="el" href="classsl_1_1Camera.html#ab04c84b11c1047cfedd38083d55670a4">Camera.DisableObjectDetection()</a>, <a class="el" href="classsl_1_1Camera.html#a77a3d2ea2a4e453b04e99a381328187b">Camera.DisablePositionalTracking()</a>, <a class="el" href="classsl_1_1Camera.html#ac8fa07bb8ca0e7875f90f6f288acc9f9">Camera.DisableRecording()</a>, <a class="el" href="classsl_1_1Camera.html#a65a8651a61c14bdc475e08f92f47deba">Camera.DisableSpatialMapping()</a>, <a class="el" href="classsl_1_1Camera.html#a305a230c65c71d689b02fe3ecf5f3ea9">Camera.DisableStreaming()</a>, <a class="el" href="classsl_1_1Camera.html#a41ba8c746440a65d3f2b42ec60ffdd28">Camera.EnableObjectDetection()</a>, <a class="el" href="classsl_1_1Camera.html#aabb8afc833da3fb228cb5a2a2a120644">Camera.EnablePositionalTracking()</a>, <a class="el" href="classsl_1_1Camera.html#aed8d88faf8bca05185115f44ff68f3c0">Camera.EnableRecording()</a>, <a class="el" href="classsl_1_1Camera.html#a1d0d0b3ba80645ca68b6abe961117eb0">Camera.EnableSpatialMapping()</a>, <a class="el" href="classsl_1_1Camera.html#a319ff4a7887b509ecca53914868c08e9">Camera.EnableStreaming()</a>, <a class="el" href="classsl_1_1Camera.html#a694b5e23a7a09b345dc15c839dc21cd0">Camera.ExtractWholeSpatialMap()</a>, <a class="el" href="classsl_1_1Camera.html#a889664891db0c49f780217c6e917f05f">Camera.FilterMesh()</a>, <a class="el" href="classsl_1_1Camera.html#a8d01f559fb36a1e3d905b9de303d1db1">Camera.findFloorPlane()</a>, <a class="el" href="classsl_1_1Camera.html#a926b99a95c76c6b2959ba7127db10549">Camera.findPlaneAtHit()</a>, <a class="el" href="classsl_1_1Camera.html#a33b707b21fe148c3b5be9de5972ac4e6">Camera.GetCalibrationParameters()</a>, <a class="el" href="classsl_1_1Camera.html#ae99d6224731bea2c7a136262a88e13bf">Camera.GetCameraFirmwareVersion()</a>, <a class="el" href="classsl_1_1Camera.html#a9c11407a6a5df0e7dc2585729b277052">Camera.GetCameraFPS()</a>, <a class="el" href="classsl_1_1Camera.html#ab0f9c2c2b0288d1bd81a26abace39451">Camera.GetCameraModel()</a>, <a class="el" href="classsl_1_1Camera.html#ac6730488e8b2c351f487624affd17a51">Camera.GetCameraSettings()</a>, <a class="el" href="classsl_1_1Camera.html#ae878ff43cad712f69af66818bf2b39e0">Camera.GetCameraTimeStamp()</a>, <a class="el" href="classsl_1_1Camera.html#a2f318ec6d194e1202e42f3bbe6ac843b">Camera.GetConfidenceThreshold()</a>, <a class="el" href="classsl_1_1Camera.html#a82af713a72b62be3897f0a4ae582ea4c">Camera.GetCurrentTimeStamp()</a>, <a class="el" href="classsl_1_1Camera.html#a446f241c8ceda318de679dffb2fa29a3">Camera.GetDepthMaxRangeValue()</a>, <a class="el" href="classsl_1_1Camera.html#a25ec4a46e11559d18423219d0b4e6509">Camera.GetDepthMinRangeValue()</a>, <a class="el" href="classsl_1_1Camera.html#ae52778d597bd9a63768a15342fa613da">Camera.GetDepthValue()</a>, <a class="el" href="classsl_1_1Camera.html#a2b62d99cfa6d23f760120b2f136f1679">Camera.GetDistanceValue()</a>, <a class="el" href="classsl_1_1Camera.html#aeb5460badbd8c1b49de23f9d99ee229f">Camera.GetFrameDroppedCount()</a>, <a class="el" href="classsl_1_1Camera.html#a042f37568b69d3a843980c3ddb16f97c">Camera.GetFrameDroppedPercent()</a>, <a class="el" href="classsl_1_1Camera.html#aa44d78e879e3caa1a05ab40d3604874f">Camera.GetGravityEstimate()</a>, <a class="el" href="classsl_1_1Camera.html#afe5252385e31c03799c9034ac0b67c86">Camera.GetImageUpdaterTimeStamp()</a>, <a class="el" href="classsl_1_1Camera.html#aee7082d9e36613954bf22a4cde530382">Camera.GetIMUOrientation()</a>, <a class="el" href="classsl_1_1Camera.html#abe554142345833572c1a4b0756accbb0">Camera.GetInitParameters()</a>, <a class="el" href="classsl_1_1Camera.html#a55a844d506b272420dbec897b2ad4339">Camera.GetInputType()</a>, <a class="el" href="classsl_1_1Camera.html#a349c130a524c0b9506fb063e34242356">Camera.GetMeshRequestStatus()</a>, <a class="el" href="classsl_1_1Camera.html#a4de0867d63e1ab3152869d2072f4546c">Camera.GetNormalValue()</a>, <a class="el" href="classsl_1_1Camera.html#a2c8278e9c6e31041026dc7780cb12740">Camera.GetPosition()</a>, <a class="el" href="classsl_1_1Camera.html#a742dc0620af8981894e094a74d3abba7">Camera.GetPositionalTrackingParameters()</a>, <a class="el" href="classsl_1_1Camera.html#a4914054f957dd906f183a277a038ecca">Camera.GetRuntimeParameters()</a>, <a class="el" href="classsl_1_1Camera.html#a182f4f2b80864b4d190ac0cd0c50ade2">Camera.GetSensorsConfiguration()</a>, <a class="el" href="classsl_1_1Camera.html#aa36704aec3a625d523fc0c7fc7e860fc">Camera.GetSensorsData()</a>, <a class="el" href="classsl_1_1Camera.html#ac350cbc86ffa88c24a36c12bce856889">Camera.GetSensorsFirmwareVersion()</a>, <a class="el" href="classsl_1_1Camera.html#a47ac418eb0610dde07ebc10554d6ef70">Camera.GetSpatialMappingState()</a>, <a class="el" href="classsl_1_1Camera.html#a08efdd458d1effc0f5675c78e6454bb1">Camera.GetSVONumberOfFrames()</a>, <a class="el" href="classsl_1_1Camera.html#abd7b4a17f2b10e97fbd4a9b621fc3f55">Camera.GetSVOPosition()</a>, <a class="el" href="classsl_1_1Camera.html#a5fd6b8a13441f26626bc2a6b5936337e">Camera.GetXYZValue()</a>, <a class="el" href="classsl_1_1Camera.html#a51cd73955b71bb4bd3bf02bc7dc2770d">Camera.GetZEDSerialNumber()</a>, <a class="el" href="classsl_1_1Camera.html#a26bcffd85cfb7416b904cdf4d1b13c97">Camera.Grab()</a>, <a class="el" href="classsl_1_1Camera.html#a6433fbcb2f69d40eb2d332d5e30235a8">Camera.IsStreamingEnabled()</a>, <a class="el" href="classsl_1_1Camera.html#a1d65ee4ad00b09a5c9c21ef6f70136bd">Camera.LoadMesh()</a>, <a class="el" href="classsl_1_1Camera.html#a1610608fd1e65214899d1d17edc974e0">Camera.MergeChunks()</a>, <a class="el" href="classsl_1_1Camera.html#a5b386e51619cd4f7704f5fa2f7b6dbce">Camera.Open()</a>, <a class="el" href="classsl_1_1Camera.html#a3385b907ba158945c95addc8448e32ae">Camera.PauseObjectDetection()</a>, <a class="el" href="classsl_1_1Camera.html#a23c47ce87639b5d8a20c2aae7d3cfbb9">Camera.PauseSpatialMapping()</a>, <a class="el" href="classsl_1_1Camera.html#a74923b1426bc2af8eefb715cef943f6e">Camera.RequestSpatialMap()</a>, <a class="el" href="classsl_1_1Camera.html#a453cd781cab8be05d33bc669ade6149f">Camera.ResetPositionalTracking()</a>, <a class="el" href="classsl_1_1Camera.html#a00111cdd6117d5e049e295d849ff06cc">Camera.RetrieveChunks()</a>, <a class="el" href="classsl_1_1Camera.html#ace1707cd24b212be7f2e9b2a2514f5ec">Camera.RetrieveFusedPointCloud()</a>, <a class="el" href="classsl_1_1Camera.html#a53a8ff7354922cf93dc90308d5355175">Camera.RetrieveImage()</a>, <a class="el" href="classsl_1_1Camera.html#a9ec3c76714b1e8583a3231f30540509c">Camera.RetrieveMeasure()</a>, <a class="el" href="classsl_1_1Camera.html#aea165ccfe634b1472c7e2244b12e11fd">Camera.RetrieveMesh()</a>, <a class="el" href="classsl_1_1Camera.html#a678aa1d8e187de269f5451a536dc04e5">Camera.RetrieveObjects()</a>, <a class="el" href="classsl_1_1Camera.html#aded7b839a613c2a33bb129ecc85a60d9">Camera.SaveCurrentDepthInFile()</a>, <a class="el" href="classsl_1_1Camera.html#ae69ee10f9788558872e7612a1bc3d56c">Camera.SaveCurrentImageInFile()</a>, <a class="el" href="classsl_1_1Camera.html#a981d29d350ebcc2fcaeed1835d39d093">Camera.SaveCurrentPointCloudInFile()</a>, <a class="el" href="classsl_1_1Camera.html#a1a2892c2a1f2974b8bedb9dd07e0b929">Camera.SaveMesh()</a>, <a class="el" href="classsl_1_1Camera.html#a29de07c82055d137f60e999710c50817">Camera.SavePointCloud()</a>, <a class="el" href="classsl_1_1Camera.html#ab47dcac4e2c1ae1306965fe002b574f0">Camera.SetCameraFPS()</a>, <a class="el" href="classsl_1_1Camera.html#a0863d3aec805096a1753c0bd3b707206">Camera.SetCameraSettings()</a>, <a class="el" href="classsl_1_1Camera.html#a0ba16c65e96c268f7fde34b349f3f644">Camera.SetIMUOrientationPrior()</a>, <a class="el" href="classsl_1_1Camera.html#ab7b043ffa99196093dcbc1cc930e6da1">Camera.SetSVOPosition()</a>, <a class="el" href="classsl_1_1Camera.html#a8bf6612cba1fbed6ebb39cf98b03da44">Camera.UpdateFusedPointCloud()</a>, <a class="el" href="classsl_1_1Camera.html#a33d16a3ba6e2a9c1602a6dbd58604209">Camera.UpdateMesh()</a>, and <a class="el" href="classsl_1_1Camera.html#a30de940c82a52ce9c3a02f9236c8884f">Camera.UpdateSelfCalibration()</a>.</p>
 
 </div>
 </div>

@@ -18,6 +18,7 @@ var group__Video__group =
       [ "GetInitParameters", "classsl_1_1Camera.html#abe554142345833572c1a4b0756accbb0", null ],
       [ "GetRuntimeParameters", "classsl_1_1Camera.html#a4914054f957dd906f183a277a038ecca", null ],
       [ "GetPositionalTrackingParameters", "classsl_1_1Camera.html#a742dc0620af8981894e094a74d3abba7", null ],
+      [ "GetResolution", "classsl_1_1Camera.html#a2912c81366bd8195b49c8a61e63aac20", null ],
       [ "SetCameraSettings", "classsl_1_1Camera.html#a0863d3aec805096a1753c0bd3b707206", null ],
       [ "GetCameraSettings", "classsl_1_1Camera.html#ac6730488e8b2c351f487624affd17a51", null ],
       [ "SetCameraSettings", "classsl_1_1Camera.html#a6970b59db15908ccd9041c423f61f8d1", null ],
@@ -37,6 +38,7 @@ var group__Video__group =
       [ "GetSensorsFirmwareVersion", "classsl_1_1Camera.html#ac350cbc86ffa88c24a36c12bce856889", null ],
       [ "GetZEDSerialNumber", "classsl_1_1Camera.html#a51cd73955b71bb4bd3bf02bc7dc2770d", null ],
       [ "GetFOV", "classsl_1_1Camera.html#acc126954f03f1161ee73481d7206389e", null ],
+      [ "UpdateSelfCalibration", "classsl_1_1Camera.html#a30de940c82a52ce9c3a02f9236c8884f", null ],
       [ "GetFrameDroppedCount", "classsl_1_1Camera.html#aeb5460badbd8c1b49de23f9d99ee229f", null ],
       [ "GetFrameDroppedPercent", "classsl_1_1Camera.html#a042f37568b69d3a843980c3ddb16f97c", null ],
       [ "IsZedConnected", "classsl_1_1Camera.html#aba3242fcf57a7d8d9b804d7756d5da15", null ],
@@ -153,7 +155,8 @@ var group__Video__group =
       [ "sensorsRequired", "classsl_1_1InitParameters.html#aabb4b71355d450a885c1f0cb9579a20f", null ],
       [ "ipStream", "classsl_1_1InitParameters.html#abfcddcf4bae47fb546f7060bdf108de4", null ],
       [ "portStream", "classsl_1_1InitParameters.html#a22e4ae259189d1424f0cc3c780ca7f38", null ],
-      [ "enableImageEnhancement", "classsl_1_1InitParameters.html#a5b4a56d14863a807723349508cc37d79", null ]
+      [ "enableImageEnhancement", "classsl_1_1InitParameters.html#a5b4a56d14863a807723349508cc37d79", null ],
+      [ "optionalOpencvCalibrationFile", "classsl_1_1InitParameters.html#a5808c9f343cf445b938c97ff234f0b4f", null ]
     ] ],
     [ "RecordingParameters", "structsl_1_1RecordingParameters.html", [
       [ "RecordingParameters", "structsl_1_1RecordingParameters.html#a612b6b3f97bf6d0bbea7c6885439d022", null ],
@@ -217,7 +220,9 @@ var group__Video__group =
       [ "CONFIDENCE", "group__Video__group.html#gga77fc7bfc159040a1e2ffb074a8ad248ca87f1ba15677264359d67e2a5b34a4b68", null ],
       [ "NORMALS", "group__Video__group.html#gga77fc7bfc159040a1e2ffb074a8ad248caa50eb8a5845601666a9dd4504ebef51a", null ],
       [ "DEPTH_RIGHT", "group__Video__group.html#gga77fc7bfc159040a1e2ffb074a8ad248ca7492731e9d2fcf4a51d5927ed146a05c", null ],
-      [ "NORMALS_RIGHT", "group__Video__group.html#gga77fc7bfc159040a1e2ffb074a8ad248ca8a3369e8bc6878b1679db4b6a1b41b38", null ]
+      [ "NORMALS_RIGHT", "group__Video__group.html#gga77fc7bfc159040a1e2ffb074a8ad248ca8a3369e8bc6878b1679db4b6a1b41b38", null ],
+      [ "DEPTH_U16_MM", "group__Video__group.html#gga77fc7bfc159040a1e2ffb074a8ad248ca478648d1b7c56244d4e107af7262ce2d", null ],
+      [ "DEPTH_U16_MM_RIGHT", "group__Video__group.html#gga77fc7bfc159040a1e2ffb074a8ad248ca0acf21db610c018880ea7bfe37b5f5fb", null ]
     ] ],
     [ "VIDEO_SETTINGS", "group__Video__group.html#ga7bab4c6ca4fd971055eca1fdd9f4223d", [
       [ "BRIGHTNESS", "group__Video__group.html#gga7bab4c6ca4fd971055eca1fdd9f4223da3a8a0aeb55d2886191dee8a5e0d07cc9", null ],

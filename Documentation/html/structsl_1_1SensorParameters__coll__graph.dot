@@ -1,0 +1,9 @@
+digraph "SensorParameters"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="{SensorParameters\n|+ type\l+ resolution\l+ sampling_rate\l+ noise_density\l+ random_walk\l+ sensor_unit\l+ isAvailable\l|}",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Structure containing information about a single sensor available in the current device"];
+  Node2 -> Node1 [color="grey25",fontsize="10",style="solid",label=" +range" ,arrowhead="odiamond",fontname="Helvetica"];
+  Node2 [label="{float2\n|+ x\l+ y\l|+ float2()\l+ add()\l+ sub()\l}",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structsl_1_1float2.html",tooltip="Represents a 2D vector of floats for use on both the CPU and GPU."];
+}

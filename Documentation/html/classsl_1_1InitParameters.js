@@ -23,5 +23,6 @@ var classsl_1_1InitParameters =
     [ "sensorsRequired", "classsl_1_1InitParameters.html#aabb4b71355d450a885c1f0cb9579a20f", null ],
     [ "ipStream", "classsl_1_1InitParameters.html#abfcddcf4bae47fb546f7060bdf108de4", null ],
     [ "portStream", "classsl_1_1InitParameters.html#a22e4ae259189d1424f0cc3c780ca7f38", null ],
-    [ "enableImageEnhancement", "classsl_1_1InitParameters.html#a5b4a56d14863a807723349508cc37d79", null ]
+    [ "enableImageEnhancement", "classsl_1_1InitParameters.html#a5b4a56d14863a807723349508cc37d79", null ],
+    [ "optionalOpencvCalibrationFile", "classsl_1_1InitParameters.html#a5808c9f343cf445b938c97ff234f0b4f", null ]
 ];

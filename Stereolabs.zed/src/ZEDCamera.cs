@@ -83,7 +83,7 @@ namespace sl
         /// Current ZED resolution setting. Set at initialization.
         /// </summary>
         private RESOLUTION currentResolution;
-        
+
         /// <summary>
         /// Callback for c++ debugging. Should not be used in C#.
         /// </summary>
@@ -230,7 +230,7 @@ namespace sl
         * Opening function (Opens camera and creates textures).
         */
         [DllImport(nameDll, EntryPoint = "dllz_open")]
-        private static extern int dllz_open(int cameraID, ref dll_initParameters parameters, System.Text.StringBuilder svoPath, System.Text.StringBuilder ipStream, int portStream, System.Text.StringBuilder output, System.Text.StringBuilder opt_settings_path);
+        private static extern int dllz_open(int cameraID, ref dll_initParameters parameters, System.Text.StringBuilder svoPath, System.Text.StringBuilder ipStream, int portStream, System.Text.StringBuilder output, System.Text.StringBuilder opt_settings_path, System.Text.StringBuilder opencv_calib_path);
 
         /*
          * Close function.
@@ -286,6 +286,9 @@ namespace sl
         [DllImport(nameDll, EntryPoint = "dllz_get_height")]
         private static extern int dllz_get_height(int cameraID);
 
+        [DllImport(nameDll, EntryPoint = "dllz_update_self_calibration")]
+        private static extern IntPtr dllz_update_self_calibration(int cameraID);
+
         [DllImport(nameDll, EntryPoint = "dllz_get_calibration_parameters")]
         private static extern IntPtr dllz_get_calibration_parameters(int cameraID, bool raw);
 
@@ -333,7 +336,7 @@ namespace sl
 
         [DllImport(nameDll, EntryPoint = "dllz_get_positional_tracking_parameters")]
         private static extern IntPtr dllz_get_positional_tracking_parameters(int cameraID);
-        
+
 
         /*
          * SVO control functions.
@@ -385,7 +388,7 @@ namespace sl
          * Motion Tracking functions.
          */
         [DllImport(nameDll, EntryPoint = "dllz_enable_tracking")]
-        private static extern int dllz_enable_tracking(int cameraID, ref Quaternion quat, ref Vector3 vec, bool enableSpatialMemory = false, bool enablePoseSmoothing = false, bool enableFloorAlignment = false, 
+        private static extern int dllz_enable_tracking(int cameraID, ref Quaternion quat, ref Vector3 vec, bool enableSpatialMemory = false, bool enablePoseSmoothing = false, bool enableFloorAlignment = false,
             bool trackingIsStatic = false, bool enableIMUFusion = true, System.Text.StringBuilder aeraFilePath = null);
 
         [DllImport(nameDll, EntryPoint = "dllz_disable_tracking")]
@@ -471,7 +474,7 @@ namespace sl
 
         [DllImport(nameDll, EntryPoint = "dllz_save_point_cloud")]
         private static extern bool dllz_save_point_cloud(int cameraID, string filename, MESH_FILE_FORMAT format);
-        
+
         [DllImport(nameDll, EntryPoint = "dllz_load_mesh")]
         private static extern bool dllz_load_mesh(int cameraID, string filename, int[] nbVerticesInSubemeshes, int[] nbTrianglesInSubemeshes, ref int nbSubmeshes, int[] updatedIndices, ref int nbVertices, ref int nbTriangles, int nbMaxSubmesh, int[] textureSize = null);
 
@@ -742,7 +745,7 @@ namespace sl
             [MarshalAs(UnmanagedType.U1)]
             public bool sensorsRequired;
             /// <summary>
-            /// Whether to enable improved color/gamma curves added in ZED SDK 3.0. 
+            /// Whether to enable improved color/gamma curves added in ZED SDK 3.0.
             /// </summary>
             [MarshalAs(UnmanagedType.U1)]
             public bool enableImageEnhancement;
@@ -798,7 +801,7 @@ namespace sl
             /// </summary>
             public int confidenceThreshold;
             /// <summary>
-            /// Defines texture confidence threshold for the depth. Based on textureness confidence. 
+            /// Defines texture confidence threshold for the depth. Based on textureness confidence.
             /// </summary>
             public int textureConfidenceThreshold;
 
@@ -855,7 +858,8 @@ namespace sl
                 new System.Text.StringBuilder(initParameters.ipStream, initParameters.ipStream.Length),
                 initParameters.portStream,
                 new System.Text.StringBuilder(initParameters.sdkVerboseLogFile, initParameters.sdkVerboseLogFile.Length),
-                new System.Text.StringBuilder(initParameters.optionalSettingsPath, initParameters.optionalSettingsPath.Length));
+                new System.Text.StringBuilder(initParameters.optionalSettingsPath, initParameters.optionalSettingsPath.Length),
+                new System.Text.StringBuilder(initParameters.optionalOpencvCalibrationFile, initParameters.optionalOpencvCalibrationFile.Length));
 
             if ((ERROR_CODE)v != ERROR_CODE.SUCCESS)
             {
@@ -891,7 +895,7 @@ namespace sl
             dll_RuntimeParameters rt_params = new dll_RuntimeParameters(runtimeParameters);
             return (sl.ERROR_CODE)dllz_grab(CameraID, ref rt_params);
         }
- 
+
         /// <summary>
         /// Return the INPUT_TYPE currently used
         /// </summary>
@@ -957,7 +961,6 @@ namespace sl
                 sdkVerbose = dll_parameters.sdkVerbose,
                 depthStabilization = dll_parameters.depthStabilization,
                 sensorsRequired = dll_parameters.sensorsRequired
-
             };
             return parameters;
         }
@@ -1006,6 +1009,24 @@ namespace sl
             };
 
             return trackingParams;
+        }
+
+        /// <summary>
+        /// Get sl.Resolion from a RESOLUTION enum
+        /// </summary>
+        /// <param name="resolution"></param>
+        /// <returns></returns>
+        public static sl.Resolution GetResolution(RESOLUTION resolution)
+        {
+            sl.Resolution res = new sl.Resolution();
+            switch (resolution)
+            {
+                case RESOLUTION.HD2K: res = new sl.Resolution(2208, 1242); break;
+                case RESOLUTION.HD1080: res = new sl.Resolution(1920, 1080); break;
+                case RESOLUTION.HD720: res = new sl.Resolution(1280, 720); break;
+                case RESOLUTION.VGA: res = new sl.Resolution(672, 376); break;
+            }
+            return res;
         }
 
 
@@ -1239,6 +1260,20 @@ namespace sl
         }
 
         /// <summary>
+        /// Perform a new self calibration process.
+        /// In some cases, due to temperature changes or strong vibrations, the stereo calibration becomes less accurate.
+        /// Use this function to update the self-calibration data and get more reliable depth values.
+        /// <remarks>The self calibration will occur at the next \ref grab() call.</remarks>
+        /// New values will then be available in \ref getCameraInformation(), be sure to get them to still have consistent 2D <-> 3D conversion.
+        /// </summary>
+        /// <param name="cameraID"></param>
+        /// <returns></returns>
+        public void UpdateSelfCalibration()
+        {
+            dllz_update_self_calibration(CameraID);
+        }
+
+        /// <summary>
         /// Gets the number of frames dropped since Grab() was called for the first time.
         /// Based on camera timestamps and an FPS comparison.
         /// </summary><remarks>Similar to the Frame Drop display in the ZED Explorer app.</remarks>
@@ -1256,7 +1291,7 @@ namespace sl
         {
             return dllz_get_frame_dropped_percent(CameraID);
         }
-       
+
 
         /// <summary>
         /// Checks if the ZED camera is connected.
@@ -1690,10 +1725,10 @@ namespace sl
         {
             return (sl.ERROR_CODE)dllz_retrieve_mesh(CameraID, vertices, triangles, nbSubmeshMax, uvs, textures);
         }
-             
+
         /// <summary>
         /// Retrieves all chunks of the current generated mesh. Call UpdateMesh() before calling this.
-        /// Vertex and triangle arrays must be at least of the sizes returned by UpdateMesh (nbVertices and nbTriangles). 
+        /// Vertex and triangle arrays must be at least of the sizes returned by UpdateMesh (nbVertices and nbTriangles).
         /// </summary>
         /// <param name="mesh">The mesh to be filled with the generated spatial map.</param>
         /// <returns>Error code indicating if the update was successful, and why it wasn't otherwise.</returns>
@@ -1742,12 +1777,12 @@ namespace sl
         /// <param name="uvsOffset">Starting index in the UVs stack.</param>
         private void SetMesh(ref Mesh mesh, int indexUpdate, ref int verticesOffset, ref int trianglesOffset)
         {
-            if (!mesh.chunks.TryGetValue(indexUpdate, out Chunk subMesh)) //Use the existing chunk/submesh if already in the dictionary. Otherwise, make a new one. 
+            if (!mesh.chunks.TryGetValue(indexUpdate, out Chunk subMesh)) //Use the existing chunk/submesh if already in the dictionary. Otherwise, make a new one.
             {
                 subMesh = new Chunk();
                 mesh.chunks.Add(indexUpdate, subMesh);
             }
-            //If the dynamicMesh's triangle and vertex arrays are unassigned or are the wrong size, redo the array. 
+            //If the dynamicMesh's triangle and vertex arrays are unassigned or are the wrong size, redo the array.
             if (subMesh.triangles == null || subMesh.triangles.Length != 3 * mesh.nbTrianglesInSubmesh[indexUpdate])
             {
                 subMesh.triangles = new int[3 * mesh.nbTrianglesInSubmesh[indexUpdate]];
@@ -1757,11 +1792,11 @@ namespace sl
                 subMesh.vertices = new Vector3[mesh.nbVerticesInSubmesh[indexUpdate]];
             }
 
-            //Clear the old mesh data. 
+            //Clear the old mesh data.
             Array.Clear(subMesh.vertices, 0, subMesh.vertices.Length);
             Array.Clear(subMesh.triangles, 0, subMesh.triangles.Length);
 
-            //Copy data retrieved from the ZED SDK into the current chunk. 
+            //Copy data retrieved from the ZED SDK into the current chunk.
             System.Array.Copy(mesh.vertices, verticesOffset, subMesh.vertices, 0, mesh.nbVerticesInSubmesh[indexUpdate]);
             verticesOffset += mesh.nbVerticesInSubmesh[indexUpdate];
             System.Buffer.BlockCopy(mesh.triangles, trianglesOffset * sizeof(int), subMesh.triangles, 0, 3 * mesh.nbTrianglesInSubmesh[indexUpdate] * sizeof(int)); //Block copy has better performance than Array.
@@ -2220,7 +2255,7 @@ namespace sl
 
         /// <summary>
         /// Save the current point cloud in a file defined by filename.
-        /// Supported formats are PLY,VTK,XYZ and PCD 
+        /// Supported formats are PLY,VTK,XYZ and PCD
         /// </summary>
         /// <param name="side">defines left (0) or right (1) point cloud</param>
         /// <param name="filename"> filename must end with .ply, .xyz , .vtk or .pcd </param>
@@ -2278,7 +2313,7 @@ namespace sl
         }
 
         /// <summary>
-        /// Retrieve object detection data 
+        /// Retrieve object detection data
         /// </summary>
         /// <param name="od_params"> Object detection runtime parameters </param>
         /// <param name="objFrame"> ObjectsFrameSDK that contains all the detection data </param>

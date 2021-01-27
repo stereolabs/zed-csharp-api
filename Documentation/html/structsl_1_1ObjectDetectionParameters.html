@@ -9,10 +9,10 @@
         <title>ObjectDetectionParameters Struct Reference | API Reference | Stereolabs</title><!--END PROJECT_NAME (ZED csharp API)-->
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,500,600,700,800">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:300,400,500,600,700">
-        <link href="tabs.css?t=Fri Nov 13 2020 16:09:50" rel="stylesheet" type="text/css"/>
-        <script type="text/javascript" src="jquery.js?t=Fri Nov 13 2020 16:09:50"></script>
-        <script type="text/javascript" src="custom.js?t=Fri Nov 13 2020 16:09:50"></script>
-        <script type="text/javascript" src="dynsections.js?t=Fri Nov 13 2020 16:09:50"></script>
+        <link href="tabs.css?t=Wed Jan 27 2021 13:57:23" rel="stylesheet" type="text/css"/>
+        <script type="text/javascript" src="jquery.js?t=Wed Jan 27 2021 13:57:23"></script>
+        <script type="text/javascript" src="custom.js?t=Wed Jan 27 2021 13:57:23"></script>
+        <script type="text/javascript" src="dynsections.js?t=Wed Jan 27 2021 13:57:23"></script>
         <link href="navtree.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="resize.js"></script>
 <script type="text/javascript" src="navtreedata.js"></script>
@@ -25,7 +25,7 @@
   $(document).ready(function() { init_search(); });
 /* @license-end */
 </script>
-        <link href="stylesheet.css?t=Fri Nov 13 2020 16:09:50" rel="stylesheet" type="text/css" />
+        <link href="stylesheet.css?t=Wed Jan 27 2021 13:57:23" rel="stylesheet" type="text/css" />
     </head>
     <body>
         <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -58,7 +58,7 @@
                             </td>-->
                             <!--<td style="padding-left: 0.4cm;">-->
                                 <!--<div id="projectname">--><!--ZED csharp API-->
-                                    <!--<span id="projectnumber"> | ZED SDK 3.0.0</span>-->
+                                    <!--<span id="projectnumber"> | ZED SDK 3.3.0</span>-->
                                 <!--</div>-->
                                 <!--BEGIN PROJECT_BRIEF<div id="projectbrief"></div><!--END PROJECT_BRIEF-->
                             <!--</td>-->
@@ -139,7 +139,7 @@ $(document).ready(function(){initNavTree('structsl_1_1ObjectDetectionParameters.
 
 <div class="header">
   <div class="summary">
-<a href="#pub-attribs">Attributes</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="structsl_1_1ObjectDetectionParameters-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">ObjectDetectionParameters Struct Reference<div class="ingroups"><a class="el" href="group__Object__group.html">Object Detection Module</a></div></div>  </div>
@@ -148,9 +148,15 @@ $(document).ready(function(){initNavTree('structsl_1_1ObjectDetectionParameters.
 
 <p>Sets the object detection parameters.  
  <a href="structsl_1_1ObjectDetectionParameters.html#details">More...</a></p>
+<div class="dynheader">
+Collaboration diagram for ObjectDetectionParameters:</div>
+<div class="dyncontent">
+<div class="center"><!-- SVG 0 -->
+</div>
+</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
-Attributes</h2></td></tr>
+Public Attributes</h2></td></tr>
 <tr class="memitem:a9b1621ec8a25cad11658775f6f7e80d9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsl_1_1ObjectDetectionParameters.html#a9b1621ec8a25cad11658775f6f7e80d9">imageSync</a></td></tr>
 <tr class="memdesc:a9b1621ec8a25cad11658775f6f7e80d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defines if the object detection is synchronized to the image or runs in a separate thread.  <a href="structsl_1_1ObjectDetectionParameters.html#a9b1621ec8a25cad11658775f6f7e80d9">More...</a><br /></td></tr>
 <tr class="separator:a9b1621ec8a25cad11658775f6f7e80d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -166,10 +172,13 @@ Attributes</h2></td></tr>
 <tr class="memitem:aa2913bac07dc1b06e64840ca28aac5a6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsl_1_1ObjectDetectionParameters.html#aa2913bac07dc1b06e64840ca28aac5a6">enableBodyFitting</a></td></tr>
 <tr class="memdesc:aa2913bac07dc1b06e64840ca28aac5a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defines if the body fitting will be applied.  <a href="structsl_1_1ObjectDetectionParameters.html#aa2913bac07dc1b06e64840ca28aac5a6">More...</a><br /></td></tr>
 <tr class="separator:aa2913bac07dc1b06e64840ca28aac5a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2480d51e0cbf660947250cc46cd8bcc2"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsl_1_1ObjectDetectionParameters.html#a2480d51e0cbf660947250cc46cd8bcc2">maxRange</a></td></tr>
+<tr class="memdesc:a2480d51e0cbf660947250cc46cd8bcc2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defines a upper depth range for detections. Defined in UNIT set at <a class="el" href="classsl_1_1Camera.html#a5b386e51619cd4f7704f5fa2f7b6dbce" title="Checks if the ZED camera is plugged in and opens it.">sl.Camera.Open</a>. Default value is set to sl.Initparameters.depthMaximumDistance (can not be higher).  <a href="structsl_1_1ObjectDetectionParameters.html#a2480d51e0cbf660947250cc46cd8bcc2">More...</a><br /></td></tr>
+<tr class="separator:a2480d51e0cbf660947250cc46cd8bcc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Sets the object detection parameters. </p>
-</div><h2 class="groupheader">Variables</h2>
+</div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="a9b1621ec8a25cad11658775f6f7e80d9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9b1621ec8a25cad11658775f6f7e80d9">&#9670;&nbsp;</a></span>imageSync</h2>
 
@@ -247,6 +256,22 @@ Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Defines if the body fitting will be applied. </p>
+
+</div>
+</div>
+<a id="a2480d51e0cbf660947250cc46cd8bcc2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2480d51e0cbf660947250cc46cd8bcc2">&#9670;&nbsp;</a></span>maxRange</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float maxRange</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Defines a upper depth range for detections. Defined in UNIT set at <a class="el" href="classsl_1_1Camera.html#a5b386e51619cd4f7704f5fa2f7b6dbce" title="Checks if the ZED camera is plugged in and opens it.">sl.Camera.Open</a>. Default value is set to sl.Initparameters.depthMaximumDistance (can not be higher). </p>
 
 </div>
 </div>

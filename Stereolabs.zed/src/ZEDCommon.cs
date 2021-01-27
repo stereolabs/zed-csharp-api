@@ -548,9 +548,14 @@ namespace sl
         /// </summary>
         public Vector3 magneticField;
         /// <summary>
-        /// Magnetic field raw values in uT
+        /// (3x1) Vector for magnetometer raw values (uncalibrated) In other words, the current magnetic field (uT), along with the x, y, and z axes.
         /// </summary>
         public Vector3 magneticFieldUncalibrated;
+        /// <summary>
+        /// (3x1) Vector for magnetometer values (after user calibration) In other words, the current magnetic field (uT), along with the x, y, and z axes.
+        /// <remarks>To calibrate the magnetometer sensor please use the ZED Sensor Viewer tool</remarks>
+        /// </summary>
+        public Vector3 magneticFieldCalibrated;
     };
 
     /// \ingroup Sensors_group
@@ -1143,6 +1148,12 @@ namespace sl
         /// Whether to enable improved color/gamma curves added in ZED SDK 3.0.
         /// </summary>
         public bool enableImageEnhancement = true;
+        /// <summary>
+        /// Set an optional file path where the SDK can find a file containing the calibration information of the camera computed by OpenCV.
+        /// <remarks> Using this will disable the factory calibration of the camera. </remarks>
+        /// <warning> Erroneous calibration values can lead to poor SDK modules accuracy. </warning>
+        /// </summary>
+        public string optionalOpencvCalibrationFile;
 
         /// <summary>
         /// Constructor. Sets default initialization parameters.
@@ -1172,6 +1183,7 @@ namespace sl
             this.ipStream = "";
             this.portStream = 30000;
             this.enableImageEnhancement = true;
+            this.optionalOpencvCalibrationFile = "";
         }
 
     }
@@ -1403,27 +1415,27 @@ namespace sl
     public enum VIEW
     {
         /// <summary>
-        /// Left RGBA image. As a ZEDMat, MAT_TYPE is set to MAT_TYPE_8U_C4.
+        /// Left RGBA image. As a Mat, MAT_TYPE is set to MAT_TYPE_8U_C4.
         /// </summary>
         LEFT,
         /// <summary>
-        /// Right RGBA image. As a ZEDMat, MAT_TYPE is set to sl::MAT_TYPE_8U_C4.
+        /// Right RGBA image. As a Mat, MAT_TYPE is set to sl::MAT_TYPE_8U_C4.
         /// </summary>
         RIGHT,
         /// <summary>
-        /// Left GRAY image. As a ZEDMat, MAT_TYPE is set to sl::MAT_TYPE_8U_C1.
+        /// Left GRAY image. As a Mat, MAT_TYPE is set to sl::MAT_TYPE_8U_C1.
         /// </summary>
         LEFT_GREY,
         /// <summary>
-        /// Right GRAY image. As a ZEDMat, MAT_TYPE is set to sl::MAT_TYPE_8U_C1.
+        /// Right GRAY image. As a Mat, MAT_TYPE is set to sl::MAT_TYPE_8U_C1.
         /// </summary>
         RIGHT_GREY,
         /// <summary>
-        /// Left RGBA unrectified image. As a ZEDMat, MAT_TYPE is set to sl::MAT_TYPE_8U_C4.
+        /// Left RGBA unrectified image. As a Mat, MAT_TYPE is set to sl::MAT_TYPE_8U_C4.
         /// </summary>
         LEFT_UNRECTIFIED,
         /// <summary>
-        /// Right RGBA unrectified image. As a ZEDMat, MAT_TYPE is set to sl::MAT_TYPE_8U_C4.
+        /// Right RGBA unrectified image. As a Mat, MAT_TYPE is set to sl::MAT_TYPE_8U_C4.
         /// </summary>
         RIGHT_UNRECTIFIED,
         /// <summary>
@@ -1431,43 +1443,51 @@ namespace sl
         /// </summary>
         LEFT_UNRECTIFIED_GREY,
         /// <summary>
-        /// Right GRAY unrectified image. As a ZEDMat, MAT_TYPE is set to sl::MAT_TYPE_8U_C1.
+        /// Right GRAY unrectified image. As a Mat, MAT_TYPE is set to sl::MAT_TYPE_8U_C1.
         /// </summary>
         RIGHT_UNRECTIFIED_GREY,
         /// <summary>
-        ///  Left and right image. Will be double the width to hold both. As a ZEDMat, MAT_TYPE is set to MAT_8U_C4.
+        ///  Left and right image. Will be double the width to hold both. As a Mat, MAT_TYPE is set to MAT_8U_C4.
         /// </summary>
         SIDE_BY_SIDE,
         /// <summary>
-        /// Normalized depth image. As a ZEDMat, MAT_TYPE is set to sl::MAT_TYPE_8U_C4.
+        /// Normalized depth image. As a Mat, MAT_TYPE is set to sl::MAT_TYPE_8U_C4.
         /// <para>Use an Image texture for viewing only. For measurements, use a Measure type instead
         /// (ZEDCamera.RetrieveMeasure()) to preserve accuracy. </para>
         /// </summary>
         DEPTH,
         /// <summary>
-        /// Normalized confidence image. As a ZEDMat, MAT_TYPE is set to MAT_8U_C4.
+        /// Normalized confidence image. As a Mat, MAT_TYPE is set to MAT_8U_C4.
         /// <para>Use an Image texture for viewing only. For measurements, use a Measure type instead
         /// (ZEDCamera.RetrieveMeasure()) to preserve accuracy. </para>
         /// </summary>
         CONFIDENCE,
         /// <summary>
-        /// Color rendering of the normals. As a ZEDMat, MAT_TYPE is set to MAT_8U_C4.
+        /// Color rendering of the normals. As a Mat, MAT_TYPE is set to MAT_8U_C4.
         /// <para>Use an Image texture for viewing only. For measurements, use a Measure type instead
         /// (ZEDCamera.RetrieveMeasure()) to preserve accuracy. </para>
         /// </summary>
         NORMALS,
         /// <summary>
-        /// Color rendering of the right depth mapped on right sensor. As a ZEDMat, MAT_TYPE is set to MAT_8U_C4.
+        /// Color rendering of the right depth mapped on right sensor. As a Mat, MAT_TYPE is set to MAT_8U_C4.
         /// <para>Use an Image texture for viewing only. For measurements, use a Measure type instead
         /// (ZEDCamera.RetrieveMeasure()) to preserve accuracy. </para>
         /// </summary>
         DEPTH_RIGHT,
         /// <summary>
-        /// Color rendering of the normals mapped on right sensor. As a ZEDMat, MAT_TYPE is set to MAT_8U_C4.
+        /// Color rendering of the normals mapped on right sensor. As a Mat, MAT_TYPE is set to MAT_8U_C4.
         /// <para>Use an Image texture for viewing only. For measurements, use a Measure type instead
         /// (ZEDCamera.RetrieveMeasure()) to preserve accuracy. </para>
         /// </summary>
-        NORMALS_RIGHT
+        NORMALS_RIGHT,
+        /// <summary>
+        /// Depth map in millimeter. Each pixel  contains 1 unsigned short. As a Mat, MAT_TYPE is set to MAT_U16_C1.
+        /// </summary>
+        DEPTH_U16_MM,
+        /// <summary>
+        /// Depth map in millimeter for right sensor. Each pixel  contains 1 unsigned short. As a Mat, MAT_TYPE is set to MAT_U16_C1.
+        /// </summary>
+        DEPTH_U16_MM_RIGHT
     };
 
     ///\ingroup  Video_group
@@ -2112,6 +2132,12 @@ namespace sl
         /// Defines if the body fitting will be applied.
         /// </summary>
         public bool enableBodyFitting;
+        /// <summary>
+        /// Defines a upper depth range for detections.
+        /// Defined in  UNIT set at  sl.Camera.Open.
+        /// Default value is set to sl.Initparameters.depthMaximumDistance (can not be higher).
+        /// </summary>
+        public float maxRange;
     };
 
     ///\ingroup Object_group
@@ -2242,7 +2268,15 @@ namespace sl
         /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
 		public float[] positionCovariance;// covariance matrix of the 3d position, represented by its upper triangular matrix value
-	};
+
+        /// <summary>
+        ///  Per keypoint detection confidence, can not be lower than the \ref ObjectDetectionRuntimeParameters.detectionConfidenceThreshold.
+        ///  Not available with DETECTION_MODEL.MULTI_CLASS_BOX.
+        ///  in some cases, eg. body partially out of the image or missing depth data, some keypoint can not be detected, they will have non finite values.
+        /// </summary>
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 18)]
+        public float[] keypointConfidence;
+    };
 
     ///\ingroup Object_group
 	/// <summary>

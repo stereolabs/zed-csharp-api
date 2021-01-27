@@ -14,5 +14,6 @@ var structsl_1_1ObjectData =
     [ "boundingBox", "structsl_1_1ObjectData.html#af7a9c33fcc2b58a49b7ff6d41f773b43", null ],
     [ "headBoundingBox", "structsl_1_1ObjectData.html#acbd2c80a57dd8d03747a3e2f55696625", null ],
     [ "keypoints", "structsl_1_1ObjectData.html#a8d9d764bdae64416edae7201350bdc1f", null ],
-    [ "positionCovariance", "structsl_1_1ObjectData.html#a15cc1913649303dcfbc4c57f3380188f", null ]
+    [ "positionCovariance", "structsl_1_1ObjectData.html#a15cc1913649303dcfbc4c57f3380188f", null ],
+    [ "keypointConfidence", "structsl_1_1ObjectData.html#ac7d21668ff3fdabd037887183c447f40", null ]
 ];

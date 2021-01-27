@@ -37,7 +37,7 @@ var searchData=
   ['close_88',['Close',['../classsl_1_1Camera.html#a7f7a3199c392465d0767c6506c1af5b4',1,'sl::Camera']]],
   ['codec_89',['codec',['../structsl_1_1StreamingParameters.html#af8f476e6495fbecae55ca91e5ba05658',1,'sl::StreamingParameters']]],
   ['compressionmode_90',['compressionMode',['../structsl_1_1RecordingParameters.html#a068602c13761bed53e593c09009b8277',1,'sl::RecordingParameters']]],
-  ['confidence_91',['confidence',['../structsl_1_1ObjectData.html#a058b8558da894ebfbef73d1a9b57deaa',1,'sl.ObjectData.confidence()'],['../group__Depth__group.html#gga798a8eed10c573d759ef7e5a5bcd545da87f1ba15677264359d67e2a5b34a4b68',1,'sl.CONFIDENCE()'],['../group__Video__group.html#gga77fc7bfc159040a1e2ffb074a8ad248ca87f1ba15677264359d67e2a5b34a4b68',1,'sl.CONFIDENCE()']]],
+  ['confidence_91',['confidence',['../structsl_1_1ObjectData.html#a058b8558da894ebfbef73d1a9b57deaa',1,'sl.ObjectData.confidence()'],['../group__Video__group.html#gga77fc7bfc159040a1e2ffb074a8ad248ca87f1ba15677264359d67e2a5b34a4b68',1,'sl.CONFIDENCE()'],['../group__Depth__group.html#gga798a8eed10c573d759ef7e5a5bcd545da87f1ba15677264359d67e2a5b34a4b68',1,'sl.CONFIDENCE()']]],
   ['confidencethreshold_92',['confidenceThreshold',['../classsl_1_1RuntimeParameters.html#ab248d1dafdb164fa53eb5638e5016469',1,'sl::RuntimeParameters']]],
   ['constant_93',['Constant',['../namespacesl.html#a1426214b030fcdca0e233ae25000b459',1,'sl']]],
   ['contrast_94',['CONTRAST',['../group__Video__group.html#gga7bab4c6ca4fd971055eca1fdd9f4223daf5d3a63fb203b01cb2bf903ead0e3866',1,'sl']]],

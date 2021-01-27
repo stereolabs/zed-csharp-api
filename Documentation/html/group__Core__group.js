@@ -18,6 +18,7 @@ var group__Core__group =
     [ "Mat", "classsl_1_1Mat.html", [
       [ "Mat", "classsl_1_1Mat.html#a13e4639b574685e1d9162ed953e607ed", null ],
       [ "Mat", "classsl_1_1Mat.html#aed9f759307334e4007e66860e20976a8", null ],
+      [ "Mat", "classsl_1_1Mat.html#afc1347684c53dd8b4a4b3bb0ef7f22b0", null ],
       [ "Create", "classsl_1_1Mat.html#add43baab64a9470ccef3a07ab7703cee", null ],
       [ "Create", "classsl_1_1Mat.html#a7953bbdcf11fefce6ee57c0af227425d", null ],
       [ "IsInit", "classsl_1_1Mat.html#a5b44b999b9b39ce150dd3d2e234a3dcf", null ],
@@ -129,7 +130,8 @@ var group__Core__group =
       [ "MAT_8U_C1", "group__Core__group.html#ggab12e66b9515d6772cda59cc2f7e69713ad0ee0f45eb87b47f7ff527d7284e285b", null ],
       [ "MAT_8U_C2", "group__Core__group.html#ggab12e66b9515d6772cda59cc2f7e69713adca3c27c9eb28465825ef7fe5305906c", null ],
       [ "MAT_8U_C3", "group__Core__group.html#ggab12e66b9515d6772cda59cc2f7e69713af55ab05bcdf38a25b7fdd7ba3f830d01", null ],
-      [ "MAT_8U_C4", "group__Core__group.html#ggab12e66b9515d6772cda59cc2f7e69713a0c4ac5a1bcdca64945e8b9d903771cc5", null ]
+      [ "MAT_8U_C4", "group__Core__group.html#ggab12e66b9515d6772cda59cc2f7e69713a0c4ac5a1bcdca64945e8b9d903771cc5", null ],
+      [ "MAT_16U_C1", "group__Core__group.html#ggab12e66b9515d6772cda59cc2f7e69713a73a674394a7fb3cb4c3bc544d89ad7b6", null ]
     ] ],
     [ "COPY_TYPE", "group__Core__group.html#ga6053bda451d8ca289b3e443377cfc004", [
       [ "CPU_CPU", "group__Core__group.html#gga6053bda451d8ca289b3e443377cfc004a5427b27bca3fdb41b1fa3f8c671eecfb", null ],
