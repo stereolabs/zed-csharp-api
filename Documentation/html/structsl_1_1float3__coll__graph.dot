@@ -1,7 +1,0 @@
-digraph "float3"
-{
- // LATEX_PDF_SIZE
-  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
-  node [fontname="Helvetica",fontsize="10",shape=record];
-  Node1 [label="{float3\n|+ x\l+ y\l+ z\l|+ float3()\l+ add()\l+ sub()\l+ divide()\l+ multiply()\l+ norm()\l+ dot()\l+ cross()\l}",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Represents a 3D vector of floats for use on both the CPU and GPU."];
-}
