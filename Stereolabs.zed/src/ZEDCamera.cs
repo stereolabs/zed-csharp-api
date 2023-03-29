@@ -207,7 +207,10 @@ namespace sl
         * Opening function (Opens camera and creates textures).
         */
         [DllImport(nameDll, EntryPoint = "sl_open_camera")]
-        private static extern int dllz_open(int cameraID, ref sl_initParameters parameters, System.Text.StringBuilder svoPath, System.Text.StringBuilder ipStream, int portStream, System.Text.StringBuilder output, System.Text.StringBuilder opt_settings_path, System.Text.StringBuilder opencv_calib_path);
+        private static extern int dllz_open(int cameraID, ref sl_initParameters parameters, uint serialNumber, System.Text.StringBuilder svoPath, System.Text.StringBuilder ipStream, int portStream, System.Text.StringBuilder output, System.Text.StringBuilder opt_settings_path, System.Text.StringBuilder opencv_calib_path);
+
+        [DllImport(nameDll, EntryPoint = "sl_start_publishing")]
+        private static extern void dllz_start_publishing(int cameraID, System.Text.StringBuilder jsonConfigFileName);
 
         /*
          * Close function.
@@ -263,16 +266,16 @@ namespace sl
          */
 
         [DllImport(nameDll, EntryPoint = "sl_set_camera_settings")]
-        private static extern void dllz_set_camera_settings(int id, int mode, int value);
+        private static extern ERROR_CODE dllz_set_camera_settings(int id, int mode, int value);
 
         [DllImport(nameDll, EntryPoint = "sl_get_camera_settings")]
-        private static extern int dllz_get_camera_settings(int id, int mode);
+        private static extern ERROR_CODE dllz_get_camera_settings(int id, VIDEO_SETTINGS settingToRetrieve, ref int value);
 
         [DllImport(nameDll, EntryPoint = "sl_set_roi_for_aec_agc")]
-        private static extern int dllz_set_roi_for_aec_agc(int id, int side, Rect roi,bool reset);
+        private static extern ERROR_CODE dllz_set_roi_for_aec_agc(int id, int side, Rect roi,bool reset);
 
         [DllImport(nameDll, EntryPoint = "sl_get_roi_for_aec_agc")]
-        private static extern int dllz_get_roi_for_aec_agc(int id, int side, ref Rect roi);
+        private static extern ERROR_CODE dllz_get_roi_for_aec_agc(int id, int side, ref Rect roi);
 
         [DllImport(nameDll, EntryPoint = "sl_get_input_type")]
         private static extern int dllz_get_input_type(int cameraID);
@@ -506,38 +509,53 @@ namespace sl
         /*
         * Objects Detection functions (starting v3.0)
         */
+
+        [DllImport(nameDll, EntryPoint = "sl_enable_body_tracking")]
+        private static extern int dllz_enable_body_tracking(int cameraID, ref BodyTrackingParameters bodyTrackingParameters);
+
+        [DllImport(nameDll, EntryPoint = "sl_get_body_tracking_parameters")]
+        private static extern IntPtr dllz_get_body_tracking_parameters(int cameraID);
+
+        [DllImport(nameDll, EntryPoint = "sl_pause_body_tracking")]
+        private static extern IntPtr dllz_pause_body_tracking(int cameraID, bool status, uint instanceID);
+
+        [DllImport(nameDll, EntryPoint = "sl_disable_body_tracking")]
+        private static extern IntPtr dllz_disable_body_tracking(int cameraID, uint instanceID, bool forceDisableAllInstances);
+
         [DllImport(nameDll, EntryPoint = "sl_check_AI_model_status")]
         private static extern IntPtr dllz_check_AI_model_status(AI_MODELS model, int gpu_id);
 
         [DllImport(nameDll, EntryPoint = "sl_optimize_AI_model")]
         private static extern int dllz_optimize_AI_model(AI_MODELS model, int gpu_id);
 
-        [DllImport(nameDll, EntryPoint = "sl_enable_objects_detection")]
-        private static extern int dllz_enable_objects_detection(int cameraID, ref ObjectDetectionParameters od_params); 
+        [DllImport(nameDll, EntryPoint = "sl_enable_object_detection")]
+        private static extern int dllz_enable_object_detection(int cameraID, ref ObjectDetectionParameters od_params); 
 
         [DllImport(nameDll, EntryPoint = "sl_get_object_detection_parameters")]
         private static extern IntPtr dllz_get_object_detection_parameters(int cameraID);
 
-        [DllImport(nameDll, EntryPoint = "sl_disable_objects_detection")]
-        private static extern void dllz_disable_objects_detection(int cameraID);
+        [DllImport(nameDll, EntryPoint = "sl_disable_object_detection")]
+        private static extern void dllz_disable_object_detection(int cameraID, uint instanceID, bool forceDisableAllInstances);
 
-        [DllImport(nameDll, EntryPoint = "sl_pause_objects_detection")]
-        private static extern void dllz_pause_objects_detection(int cameraID, bool status);
+        [DllImport(nameDll, EntryPoint = "sl_pause_object_detection")]
+        private static extern void dllz_pause_object_detection(int cameraID, bool status, uint instanceID);
 
         [DllImport(nameDll, EntryPoint = "sl_ingest_custom_box_objects")]
         private static extern int dllz_ingest_custom_box_objects(int cameraID, int nb_objects, CustomBoxObjectData[] objects_in);
 
         [DllImport(nameDll, EntryPoint = "sl_retrieve_objects")]
-        private static extern int dllz_retrieve_objects_data(int cameraID, ref ObjectDetectionRuntimeParameters od_params, IntPtr objs);
+        private static extern int dllz_retrieve_objects_data(int cameraID, ref ObjectDetectionRuntimeParameters od_params, IntPtr objs, uint instanceID);
+
+        [DllImport(nameDll, EntryPoint = "sl_retrieve_bodies")]
+        private static extern int dllz_retrieve_bodies_data(int cameraID, ref BodyTrackingRuntimeParameters bt_params, IntPtr objs, uint instanceID);
 
         [DllImport(nameDll, EntryPoint = "sl_update_objects_batch")]
         private static extern int dllz_update_objects_batch(int cameraID, out int nbBatches);
 
-        [DllImport(nameDll, EntryPoint = "sl_get_objects_batch_data")]
+        [DllImport(nameDll, EntryPoint = "sl_get_objects_batch_csharp")]
         private static extern int dllz_get_objects_batch_data(int cameraID, int batch_index, ref int numData, ref int id, ref OBJECT_CLASS label, ref OBJECT_SUBCLASS sublabel, ref OBJECT_TRACKING_STATE trackingState,
             [In, Out] Vector3[] position, [In, Out] float[,] positionCovariances, [In, Out] Vector3[] velocities, [In, Out] ulong[] timestamps, [In, Out] Vector2[,] boundingBoxes2D, [In, Out] Vector3[,] boundingBoxes,
-            [In, Out] float[] confidences, [In, Out] OBJECT_ACTION_STATE[] actionStates, [In, Out] Vector2[,] keypoints2D, [In, Out] Vector3[,] keypoints, [In, Out] Vector2[,] headBoundingBoxes2D, [In, Out] Vector3[,] headBoundingBoxes, [In, Out] Vector3[] headPositions,
-            [In, Out] float[,] keypointsConfidences);
+            [In, Out] float[] confidences, [In, Out] OBJECT_ACTION_STATE[] actionStates, [In, Out] Vector2[,] headBoundingBoxes2D, [In, Out] Vector3[,] headBoundingBoxes, [In, Out] Vector3[] headPositions);
         /*
         * Save utils function
         */
@@ -560,7 +578,6 @@ namespace sl
         /*
          * Change the coordinate system of a transform matrix.
         */
-
         [DllImport(nameDll, EntryPoint = "sl_convert_coordinate_system")]
         private static extern int dllz_convert_coordinate_system(ref Quaternion rotation, ref Vector3 translation, sl.COORDINATE_SYSTEM coordSystemSrc, sl.COORDINATE_SYSTEM coordSystemDest);
 
@@ -746,6 +763,14 @@ namespace sl
             /// This parameter only impacts the LIVE mode.
             /// </summary>
             public float openTimeoutSec;
+            /// <summary>
+            /// Define the behavior of the automatic camera recovery during grab() function call. When async is enabled and there's an issue with the communication with the camera
+            /// the grab() will exit after a short period and return the ERROR_CODE::CAMERA_REBOOTING warning.The recovery will run in the background until the correct communication is restored.
+            /// When async_grab_camera_recovery is false, the grab() function is blocking and will return only once the camera communication is restored or the timeout is reached.
+            /// The default behavior is synchronous (false), like previous ZED SDK versions
+            /// </summary>
+            [MarshalAs(UnmanagedType.U1)]
+            public bool asyncGrabCameraRecovery;
 
             /// <summary>
             /// Copy constructor.
@@ -772,6 +797,7 @@ namespace sl
                 sensorsRequired = init.sensorsRequired;
                 enableImageEnhancement = init.enableImageEnhancement;
                 openTimeoutSec = init.openTimeoutSec;
+                asyncGrabCameraRecovery = init.asyncGrabCameraRecovery;
             }
         }
 
@@ -782,10 +808,6 @@ namespace sl
         struct sl_RuntimeParameters
         {
             /// <summary>
-            /// Defines the algorithm used for depth map computation, more info : \ref SENSING_MODE definition.
-            /// </summary>
-            public sl.SENSING_MODE sensingMode;
-            /// <summary>
             /// Provides 3D measures (point cloud and normals) in the desired reference frame (default is REFERENCE_FRAME_CAMERA).
             /// </summary>
             public sl.REFERENCE_FRAME measure3DReferenceFrame;
@@ -794,6 +816,12 @@ namespace sl
             /// </summary>
             [MarshalAs(UnmanagedType.U1)]
             public bool enableDepth;
+            /// <summary>
+            /// Defines if the depth map should be completed or not, similar to the removed SENSING_MODE::FILL.
+            /// Warning: Enabling this will override the confidence values confidenceThreshold and textureConfidenceThreshold as well as removeSaturatedAreas
+            /// </summary>
+            [MarshalAs(UnmanagedType.U1)]
+            public bool enableFillMode;
             /// <summary>
             ///  Defines the confidence threshold for the depth. Based on stereo matching score.
             /// </summary>
@@ -813,9 +841,9 @@ namespace sl
             /// </summary>
             public sl_RuntimeParameters(RuntimeParameters rt)
             {
-                sensingMode = rt.sensingMode;
                 measure3DReferenceFrame = rt.measure3DReferenceFrame;
                 enableDepth = rt.enableDepth;
+                enableFillMode = rt.enableFillMode;
                 confidenceThreshold = rt.confidenceThreshold;
                 textureConfidenceThreshold = rt.textureConfidenceThreshold;
                 removeSaturatedAreas = rt.removeSaturatedAreas;
@@ -881,7 +909,7 @@ namespace sl
 
             sl_initParameters initP = new sl_initParameters(initParameters); //DLL-friendly version of InitParameters.
             initP.coordinateSystem = initParameters.coordinateSystem; //Left-hand
-            int v = dllz_open(CameraID, ref initP,
+            int v = dllz_open(CameraID, ref initP, GetCameraInformation().serialNumber , 
                 new System.Text.StringBuilder(initParameters.pathSVO, initParameters.pathSVO.Length),
                 new System.Text.StringBuilder(initParameters.ipStream, initParameters.ipStream.Length),
                 initParameters.portStream,
@@ -999,7 +1027,8 @@ namespace sl
                 sdkVerbose = sl_parameters.sdkVerbose,
                 depthStabilization = sl_parameters.depthStabilization,
                 sensorsRequired = sl_parameters.sensorsRequired,
-                openTimeoutSec = sl_parameters.openTimeoutSec
+                openTimeoutSec = sl_parameters.openTimeoutSec,
+                asyncGrabCameraRecovery = sl_parameters.asyncGrabCameraRecovery
             };
             return parameters;
         }
@@ -1018,11 +1047,12 @@ namespace sl
             sl_RuntimeParameters sl_parameters = (sl_RuntimeParameters)Marshal.PtrToStructure(p, typeof(sl_RuntimeParameters));
             RuntimeParameters parameters = new RuntimeParameters()
             {
-                sensingMode = sl_parameters.sensingMode,
                 textureConfidenceThreshold = sl_parameters.textureConfidenceThreshold,
                 measure3DReferenceFrame = sl_parameters.measure3DReferenceFrame,
                 enableDepth = sl_parameters.enableDepth,
                 confidenceThreshold = sl_parameters.confidenceThreshold,
+                enableFillMode = sl_parameters.enableFillMode,
+                removeSaturatedAreas = sl_parameters.removeSaturatedAreas,
             };
             return parameters;
         }
@@ -1091,41 +1121,42 @@ namespace sl
         public int GetCameraSettings(VIDEO_SETTINGS settings)
         {
             AssertCameraIsReady();
-            return dllz_get_camera_settings(CameraID, (int)settings);
-            //return cameraSettingsManager.GetCameraSettings(CameraID, settings);
+            int ret = -1;
+            dllz_get_camera_settings(CameraID, settings, ref ret);
+            return ret;
         }
 
         /// <summary>
         /// Overloaded function for CAMERA_SETTINGS.AEC_AGC_ROI (requires Rect as input)
         /// </summary>
-        /// <param name="settings"> Must be set to CAMERA_SETTINGS.AEC_AGC_ROI. Otherwise will return -1.</param>
+        /// <param name="settings"> Must be set to CAMERA_SETTINGS.AEC_AGC_ROI. Otherwise will return ERROR_CODE.FAILURE.</param>
         /// <param name="side"> defines left=0 or right=1 or both=2 sensor target</param>
         /// <param name="roi">the roi defined as a sl.Rect</param>
         /// <param name="reset">Defines if the target must be reset to full sensor</param>
         /// <returns>ERROR_CODE.SUCCESS if ROI has been applied. Other ERROR_CODE otherwise.</returns>
-        public int SetCameraSettings(VIDEO_SETTINGS settings, SIDE side, Rect roi, bool reset = false)
+        public ERROR_CODE SetCameraSettings(VIDEO_SETTINGS settings, SIDE side, Rect roi, bool reset = false)
         {
             AssertCameraIsReady();
             if (settings == VIDEO_SETTINGS.AEC_AGC_ROI)
                 return dllz_set_roi_for_aec_agc(CameraID, (int)side, roi, reset);
             else
-                return -1;
+                return ERROR_CODE.FAILURE;
         }
 
         /// <summary>
         /// Overloaded function for CAMERA_SETTINGS.AEC_AGC_ROI (requires Rect as input)
         /// </summary>
-        /// <param name="settings"> Must be set to CAMERA_SETTINGS.AEC_AGC_ROI. Otherwise will return -1.</param>
+        /// <param name="settings"> Must be set to CAMERA_SETTINGS.AEC_AGC_ROI. Otherwise will return ERROR_CODE.FAILURE.</param>
         /// <param name="side"> defines left=0 or right=1 or both=2 sensor target.</param>
         /// <param name="roi"> Roi that will be filled.</param>
         /// <returns> ERROR_CODE.SUCCESS if ROI has been applied. Other ERROR_CODE otherwise.</returns>
-        public int GetCameraSettings(VIDEO_SETTINGS settings, SIDE side, ref Rect roi)
+        public ERROR_CODE GetCameraSettings(VIDEO_SETTINGS settings, SIDE side, ref Rect roi)
         {
             AssertCameraIsReady();
             if (settings == VIDEO_SETTINGS.AEC_AGC_ROI)
                 return dllz_get_roi_for_aec_agc(CameraID, (int)side, ref roi);
             else
-                return -1;
+                return ERROR_CODE.FAILURE;
         }
 
         /// <summary>
@@ -1142,7 +1173,7 @@ namespace sl
             SetCameraSettings(sl.VIDEO_SETTINGS.SATURATION, sl.Camera.saturationDefault);
             SetCameraSettings(sl.VIDEO_SETTINGS.SHARPNESS, sl.Camera.sharpnessDefault);
             SetCameraSettings(sl.VIDEO_SETTINGS.GAMMA, sl.Camera.gammaDefault);
-            SetCameraSettings(sl.VIDEO_SETTINGS.AUTO_WHITEBALANCE, 1);
+            SetCameraSettings(sl.VIDEO_SETTINGS.WHITEBALANCE_AUTO, 1);
             SetCameraSettings(sl.VIDEO_SETTINGS.AEC_AGC, 1);
             SetCameraSettings(sl.VIDEO_SETTINGS.LED_STATUS, 1);
 
@@ -2554,17 +2585,42 @@ namespace sl
         public sl.ERROR_CODE EnableObjectDetection(ref ObjectDetectionParameters od_params)
         {
             sl.ERROR_CODE objDetectStatus = ERROR_CODE.FAILURE;
-            objDetectStatus = (sl.ERROR_CODE)dllz_enable_objects_detection(CameraID, ref od_params);
+            objDetectStatus = (sl.ERROR_CODE)dllz_enable_object_detection(CameraID, ref od_params);
 
             return objDetectStatus;
         }
 
         /// <summary>
-        /// Disable object detection module and release the resources.
+        /// Enable body tracking module
         /// </summary>
-        public void DisableObjectDetection()
+        /// <param name="bt_params">Body Tracking parameters</param>
+        /// <returns> returns an ERROR_CODE that indicates the type of error </returns>
+        public sl.ERROR_CODE EnableBodyTracking(ref BodyTrackingParameters bt_params)
         {
-            dllz_disable_objects_detection(CameraID);
+            sl.ERROR_CODE btStatus = ERROR_CODE.FAILURE;
+            btStatus = (sl.ERROR_CODE)dllz_enable_body_tracking(CameraID, ref bt_params);
+
+            return btStatus;
+        }
+
+        /// <summary>
+        /// Disable object detection module and release the resources.
+        /// instanceID : Id of the object detection instance. Used when multiple instances of the OD module are enabled at the same time.
+        /// disableAllInstance : should disable all instances of the object detection module or just instanceID.
+        /// </summary>
+        public void DisableObjectDetection(uint instanceID = 0, bool disableAllInstance = false)
+        {
+            dllz_disable_object_detection(CameraID, instanceID, disableAllInstance);
+        }
+
+        /// <summary>
+        /// Disable body tracking module and release the resources.
+        /// instanceID : Id of the body tracking instance. Used when multiple instances of the BT module are enabled at the same time.
+        /// disableAllInstance : should disable all instances of the body tracking module or just instanceID.
+        /// </summary>
+        public void DisableBodyTracking(uint instanceID = 0, bool disableAllInstance = false)
+        {
+            dllz_disable_body_tracking(CameraID, instanceID, disableAllInstance);
         }
 
         /// <summary>
@@ -2585,12 +2641,42 @@ namespace sl
         }
 
         /// <summary>
-        /// Pause or Unpause the object detection
+        ///  Get the body tracking parameters
         /// </summary>
-        /// <param name="status"></param>
-        public void PauseObjectDetection(bool status)
+        /// <returns></returns>
+        public sl.BodyTrackingParameters GetBodyTrackingParameters()
         {
-            dllz_pause_objects_detection(CameraID, status);
+            IntPtr p = dllz_get_body_tracking_parameters(CameraID);
+
+            if (p == IntPtr.Zero)
+            {
+                return new BodyTrackingParameters();
+            }
+            BodyTrackingParameters parameters = (BodyTrackingParameters)Marshal.PtrToStructure(p, typeof(BodyTrackingParameters));
+
+            return parameters;
+        }
+
+        /// <summary>
+        /// Pause or Unpause the object detection.
+        /// The retrieveObjects function will keep on returning the last objects detected while in pause.
+        /// </summary>
+        /// <param name="status">True : Pause the OD. False : Unpause the OD.</param>
+        /// <param name="instanceID">Id of the Object detection instance. Used when multiple instances of the OD module are enabled at the same time.</param>
+        public void PauseObjectDetection(bool status, uint instanceID = 0)
+        {
+            dllz_pause_object_detection(CameraID, status, instanceID);
+        }
+
+        /// <summary>
+        /// Pause or Unpause the body tracking.
+        /// The RetrieveBodies function will keep on returning the last bodies detected while in pause.
+        /// </summary>
+        /// <param name="status">True : Pause the BT. False : Unpause the BT.</param>
+        /// <param name="instanceID">Id of the Body Tracking instance. Used when multiple instances of the BT module are enabled at the same time.</param>
+        public void PauseBodyTracking(bool status, uint instanceID = 0)
+        {
+            dllz_pause_body_tracking(CameraID, status, instanceID);
         }
 
         public sl.ERROR_CODE IngestCustomBoxObjects(List<CustomBoxObjectData> objects_in)
@@ -2599,15 +2685,16 @@ namespace sl
         }
 
         /// <summary>
-        /// Retrieve object detection data
+        /// Retrieve objects detected by the object detection module. To retrieve Body Tracking data use RetrieveBodies.
         /// </summary>
+        /// <param name="objs"> Retrieved objects. </param>
         /// <param name="od_params"> Object detection runtime parameters </param>
-        /// <param name="objFrame"> ObjectsFrameSDK that contains all the detection data </param>
+        /// <param name="instanceID">Id of the Object detection instance. Used when multiple instances of the OD module are enabled at the same time.</param>
         /// <returns> returns an ERROR_CODE that indicates the type of error </returns>
-        public sl.ERROR_CODE RetrieveObjects(ref Objects objs, ref ObjectDetectionRuntimeParameters od_params)
+        public sl.ERROR_CODE RetrieveObjects(ref Objects objs, ref ObjectDetectionRuntimeParameters od_params, uint instanceID = 0)
         {
             IntPtr p = Marshal.AllocHGlobal(System.Runtime.InteropServices.Marshal.SizeOf<sl.Objects>());
-            sl.ERROR_CODE err = (sl.ERROR_CODE)dllz_retrieve_objects_data(CameraID, ref od_params, p);
+            sl.ERROR_CODE err = (sl.ERROR_CODE)dllz_retrieve_objects_data(CameraID, ref od_params, p, instanceID);
 
             if (p != IntPtr.Zero)
             {
@@ -2615,7 +2702,34 @@ namespace sl
                 Marshal.FreeHGlobal(p);
                 return err;
             }
-            else{
+            else
+            {
+                Marshal.FreeHGlobal(p);
+                return sl.ERROR_CODE.FAILURE;
+            }
+
+        }
+
+        /// <summary>
+        /// Retrieve bodies detected by the Body Tracking module. To retrieve Body Tracking data use RetrieveBodies.
+        /// </summary>
+        /// <param name="objs"> Retrieved bodies. </param>
+        /// <param name="bt_params"> Body Tracking runtime parameters </param>
+        /// <param name="instanceID">Id of the Body Tracking instance. Used when multiple instances of the BT module are enabled at the same time.</param>
+        /// <returns> returns an ERROR_CODE that indicates the type of error </returns>
+        public sl.ERROR_CODE RetrieveBodies(ref Bodies objs, ref BodyTrackingRuntimeParameters bt_params, uint instanceID = 0)
+        {
+            IntPtr p = Marshal.AllocHGlobal(System.Runtime.InteropServices.Marshal.SizeOf<sl.Bodies>());
+            sl.ERROR_CODE err = (sl.ERROR_CODE)dllz_retrieve_bodies_data(CameraID, ref bt_params, p, instanceID);
+
+            if (p != IntPtr.Zero)
+            {
+                objs = (sl.Bodies)Marshal.PtrToStructure(p, typeof(sl.Bodies));
+                Marshal.FreeHGlobal(p);
+                return err;
+            }
+            else
+            {
                 Marshal.FreeHGlobal(p);
                 return sl.ERROR_CODE.FAILURE;
             }
@@ -2645,8 +2759,8 @@ namespace sl
         {
             return (sl.ERROR_CODE)dllz_get_objects_batch_data(CameraID, batch_index, ref objectsBatch.numData, ref objectsBatch.id , ref objectsBatch.label, ref objectsBatch.sublabel,
                 ref objectsBatch.trackingState, objectsBatch.positions, objectsBatch.positionCovariances, objectsBatch.velocities, objectsBatch.timestamps, objectsBatch.boundingBoxes2D,
-                objectsBatch.boundingBoxes, objectsBatch.confidences, objectsBatch.actionStates, objectsBatch.keypoints2D, objectsBatch.keypoints, objectsBatch.headBoundingBoxes2D,
-                objectsBatch.headBoundingBoxes, objectsBatch.headPositions, objectsBatch.keypointConfidences);
+                objectsBatch.boundingBoxes, objectsBatch.confidences, objectsBatch.actionStates, objectsBatch.headBoundingBoxes2D,
+                objectsBatch.headBoundingBoxes, objectsBatch.headPositions);
         }
         ///@}
 

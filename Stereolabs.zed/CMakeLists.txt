@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.8)
 project(Stereolabs.zed CSharp)
 
 
@@ -7,18 +7,18 @@ add_library(${PROJECT_NAME} SHARED
     src/ZEDCamera.cs
     src/ZEDCommon.cs
     src/ZEDMat.cs
+    src/ZEDFusion.cs
 )
 
 # Set the target platform to x64, since ZED SDK does not support 32-bits arch
 target_compile_options(${PROJECT_NAME} PRIVATE "/platform:x64" )
 
 # Set the .NET Framework version for the target.
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    DOTNET_SDK "Microsoft.NET.Sdk"
-    DOTNET_TARGET_FRAMEWORK "net6.0")
+set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.6.1")
 
 # Set the C# language version, otherwise default 3.0 is taken
 set(CMAKE_CSharp_FLAGS "/langversion:7")
+
 
 # Set configuration type as Class Library
 set_property(TARGET ${PROJECT_NAME} PROPERTY VS_CONFIGURATION_TYPE ClassLibrary)
@@ -26,8 +26,13 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY VS_CONFIGURATION_TYPE ClassLibrary)
 # Add DotNet references
 set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_REFERENCES
         "Microsoft.CSharp"
-        "System.Core"
+        "PresentationCore"
+        "PresentationFramework"
         "System"
         "System.Numerics"
+)
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_DOCUMENTATION_FILE
+        "${PROJECT_NAME}.xml"
 )
 

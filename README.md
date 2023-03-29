@@ -17,6 +17,26 @@ This project is made for .NET6 and ZED SDK 3.8.
 - [C wrapper](https://github.com/stereolabs/zed-c-api) of the ZED SDK
 - [ZED SDK **3.8**](https://www.stereolabs.com/developers/release/) and its dependency ([CUDA](https://developer.nvidia.com/cuda-downloads))
 
+## From NuGet
+
+The C# API is available as a Nuget Package on Nuget.org.
+
+| Package | Description | Link |
+|---------|-------------|------|
+|**sl_zed_interface**| C interface of the ZED SDK | [![NuGet version](https://badge.fury.io/nu/sl_zed_interface.svg)](https://badge.fury.io/nu/sl_zed_interface) |
+|**Stereolabs.zed**| .NET Wrapper that imports the functions from the interface | [![NuGet version](https://badge.fury.io/nu/Stereolabs.zed.svg)](https://badge.fury.io/nu/Stereolabs.zed) |
+
+## Add the package to your Project
+
+To add a NuGet pacakge to your project, please follow this [documentation](https://learn.microsoft.com/en-us/nuget/quickstart/install-and-use-a-package-in-visual-studio).
+
+# From Sources
+
+It is also possible to build the wrapper from the sources. The C# wrapper made of two libraries :
+
+- The C# wrapper called Stereolabs.zed.dll. It defines all the functions of the ZED SDK in C#.
+- The C wrapper called zed-c-api. This native dll binds all the C# functions to the ZED SDK (written in C++). This wrapper is available here : https://github.com/stereolabs/zed-c-api
+
 ### Build the C# wrapper
 
 - Open cmake-gui.
@@ -33,17 +53,17 @@ You can directly open the solution by clicking on [*Open Project*] or by closing
 
 - A Visual Studio solution has been generated. Open **Stereolabs.ZED.sln** and set it in `Release` mode.
 
-#### Built the C wrapper
+#### Build the C wrapper
 
 The Csharp wrapper is using the [C wrapper](https://github.com/stereolabs/zed-c-api) to interface with the ZED SDK.
 Therefore, you also need to build it following the same step as before.
 
-## Add the wrapper to your .Net6 Project
+## Add the wrapper to your Project
 
-- Open your .Net6 project in Visual studio
+- Open yourproject in Visual studio
 - Right click on your project in the Solution Window and select `Add ` ->  `Project Reference`.
 - Click on  `Browse ` and select the Stereolabs.ZED.dll you just created before. Add it in your project.
-- For the moment you also need to manually copy the c wrapper (sl_zed_c.dll) at the same location, in your .Net6 project.
+- For the moment you also need to manually copy the c wrapper (sl_zed_c.dll) at the same location, in yourproject.
 
 ### Usage
 
