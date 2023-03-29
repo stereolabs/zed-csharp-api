@@ -2,7 +2,6 @@
 
 This package lets you use the ZED stereo camera in C#. The C# API is a wrapper around the ZED SDK which is written in C++ optimized code. We make the ZED SDK accessible from external C# code.
 
-This project is made for .NET6 and ZED SDK 3.8.
 
 ## Getting started
 
@@ -13,9 +12,9 @@ This project is made for .NET6 and ZED SDK 3.8.
 
 - **Windows** 10 64bits or later
 - Visual Studio 2017 with C# extensions
-- Cmake 3.23 at least (Support of .NET6)
+- Cmake 3.23 at least
 - [C wrapper](https://github.com/stereolabs/zed-c-api) of the ZED SDK
-- [ZED SDK **3.8**](https://www.stereolabs.com/developers/release/) and its dependency ([CUDA](https://developer.nvidia.com/cuda-downloads))
+- [ZED SDK **4.0**](https://www.stereolabs.com/developers/release/) and its dependency ([CUDA](https://developer.nvidia.com/cuda-downloads))
 
 ## From NuGet
 
