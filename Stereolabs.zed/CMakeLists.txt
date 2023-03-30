@@ -7,6 +7,7 @@ add_library(${PROJECT_NAME} SHARED
     src/ZEDCamera.cs
     src/ZEDCommon.cs
     src/ZEDMat.cs
+    src/ZEDFusion.cs
 )
 
 # Set the target platform to x64, since ZED SDK does not support 32-bits arch
@@ -29,5 +30,9 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_REFERENCES
         "PresentationFramework"
         "System"
         "System.Numerics"
+)
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_DOCUMENTATION_FILE
+        "${PROJECT_NAME}.xml"
 )
 

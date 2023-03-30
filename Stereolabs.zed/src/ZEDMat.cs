@@ -2,8 +2,6 @@
 using System;
 using System.Runtime.InteropServices;
 
-
-
 namespace sl
 {
     /// <summary>
@@ -243,7 +241,11 @@ namespace sl
         /// <summary>
         /// Unsigned short 1 channel.
         /// </summary>
-        MAT_16U_C1
+        MAT_16U_C1,
+        /// <summary>
+        /// signed char 4 channels.
+        /// </summary>
+        MAT_S8_C4
     };
 
     /// \ingroup Core_group
@@ -279,11 +281,11 @@ namespace sl
         /// <summary>
         /// Store on memory accessible by the CPU. 
         /// </summary>
-        CPU = 1,
+        CPU = 0,
         /// <summary>
         /// Store on memory accessible by the GPU. 
         /// </summary>
-        GPU = 2
+        GPU = 1
 
     };
 
@@ -301,131 +303,131 @@ namespace sl
         #region DLL Calls
         const string nameDll = sl.ZEDCommon.NameDLL;
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_create_new")]
-        private static extern IntPtr dllz_mat_create_new(sl.Resolution resolution, int type, int mem);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_create_new_empty")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_create_new")]
+        private static extern IntPtr dllz_mat_create_new(int width, int height, int type, int mem);
+        [DllImport(nameDll, EntryPoint = "sl_mat_create_new_empty")]
         private static extern IntPtr dllz_mat_create_new_empty();
 
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_is_init")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_is_init")]
         private static extern bool dllz_mat_is_init(System.IntPtr ptr);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_free")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_free")]
         private static extern bool dllz_mat_free(System.IntPtr ptr, int type);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_get_infos")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_get_infos")]
         private static extern bool dllz_mat_get_infos(System.IntPtr ptr, byte[] buffer);
 
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_get_value_float")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_get_value_float")]
         private static extern int dllz_mat_get_value_float(System.IntPtr ptr, int x, int y, out float value, int mem);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_get_value_float2")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_get_value_float2")]
         private static extern int dllz_mat_get_value_float2(System.IntPtr ptr, int x, int y, out float2 value, int mem);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_get_value_float3")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_get_value_float3")]
         private static extern int dllz_mat_get_value_float3(System.IntPtr ptr, int x, int y, out float3 value, int mem);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_get_value_float4")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_get_value_float4")]
         private static extern int dllz_mat_get_value_float4(System.IntPtr ptr, int x, int y, out float4 value, int mem);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_get_value_uchar")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_get_value_uchar")]
         private static extern int dllz_mat_get_value_uchar(System.IntPtr ptr, int x, int y, out byte value, int mem);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_get_value_uchar2")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_get_value_uchar2")]
         private static extern int dllz_mat_get_value_uchar2(System.IntPtr ptr, int x, int y, out char2 value, int mem);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_get_value_uchar3")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_get_value_uchar3")]
         private static extern int dllz_mat_get_value_uchar3(System.IntPtr ptr, int x, int y, out char3 value, int mem);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_get_value_uchar4")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_get_value_uchar4")]
         private static extern int dllz_mat_get_value_uchar4(System.IntPtr ptr, int x, int y, out char4 value, int mem);
 
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_set_value_float")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_set_value_float")]
         private static extern int dllz_mat_set_value_float(System.IntPtr ptr, int x, int y, ref float value, int mem);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_set_value_float2")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_set_value_float2")]
         private static extern int dllz_mat_set_value_float2(System.IntPtr ptr, int x, int y, ref float2 value, int mem);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_set_value_float3")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_set_value_float3")]
         private static extern int dllz_mat_set_value_float3(System.IntPtr ptr, int x, int y, ref float3 value, int mem);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_set_value_float4")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_set_value_float4")]
         private static extern int dllz_mat_set_value_float4(System.IntPtr ptr, int x, int y, ref float4 value, int mem);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_set_value_uchar")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_set_value_uchar")]
         private static extern int dllz_mat_set_value_uchar(System.IntPtr ptr, int x, int y, ref byte value, int mem);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_set_value_uchar2")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_set_value_uchar2")]
         private static extern int dllz_mat_set_value_uchar2(System.IntPtr ptr, int x, int y, ref char2 value, int mem);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_set_value_uchar3")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_set_value_uchar3")]
         private static extern int dllz_mat_set_value_uchar3(System.IntPtr ptr, int x, int y, ref char3 value, int mem);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_set_value_uchar4")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_set_value_uchar4")]
         private static extern int dllz_mat_set_value_uchar4(System.IntPtr ptr, int x, int y, ref char4 value, int mem);
 
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_set_to_float")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_set_to_float")]
         private static extern int dllz_mat_set_to_float(System.IntPtr ptr, ref float value, int mem);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_set_to_float2")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_set_to_float2")]
         private static extern int dllz_mat_set_to_float2(System.IntPtr ptr, ref float2 value, int mem);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_set_to_float3")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_set_to_float3")]
         private static extern int dllz_mat_set_to_float3(System.IntPtr ptr, ref float3 value, int mem);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_set_to_float4")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_set_to_float4")]
         private static extern int dllz_mat_set_to_float4(System.IntPtr ptr, ref float4 value, int mem);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_set_to_uchar")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_set_to_uchar")]
         private static extern int dllz_mat_set_to_uchar(System.IntPtr ptr,  ref byte value, int mem);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_set_to_uchar2")]          
+        [DllImport(nameDll, EntryPoint = "sl_mat_set_to_uchar2")]          
         private static extern int dllz_mat_set_to_uchar2(System.IntPtr ptr, ref char2 value, int mem);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_set_to_uchar3")]          
+        [DllImport(nameDll, EntryPoint = "sl_mat_set_to_uchar3")]          
         private static extern int dllz_mat_set_to_uchar3(System.IntPtr ptr, ref char3 value, int mem);
-        [DllImport(nameDll, EntryPoint = "dllz_mat_set_to_uchar4")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_set_to_uchar4")]
         private static extern int dllz_mat_set_to_uchar4(System.IntPtr ptr, ref char4 value, int mem);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_update_cpu_from_gpu")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_update_cpu_from_gpu")]
         private static extern int dllz_mat_update_cpu_from_gpu(System.IntPtr ptr);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_update_gpu_from_cpu")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_update_gpu_from_cpu")]
         private static extern int dllz_mat_update_gpu_from_cpu(System.IntPtr ptr);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_read")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_read")]
         private static extern int dllz_mat_read(System.IntPtr ptr, string filePath);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_write")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_write")]
         private static extern int dllz_mat_write(System.IntPtr ptr, string filePath,int compression_level);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_copy_to")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_copy_to")]
         private static extern int dllz_mat_copy_to(System.IntPtr ptr, System.IntPtr dest, int cpyType);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_get_width")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_get_width")]
         private static extern int dllz_mat_get_width(System.IntPtr ptr);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_get_height")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_get_height")]
         private static extern int dllz_mat_get_height(System.IntPtr ptr);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_get_channels")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_get_channels")]
         private static extern int dllz_mat_get_channels(System.IntPtr ptr);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_get_memory_type")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_get_memory_type")]
         private static extern int dllz_mat_get_memory_type(System.IntPtr ptr);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_get_pixel_bytes")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_get_pixel_bytes")]
         private static extern int dllz_mat_get_pixel_bytes(System.IntPtr ptr);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_get_step")]
-        private static extern int dllz_mat_get_step(System.IntPtr ptr);
+        [DllImport(nameDll, EntryPoint = "sl_mat_get_step")]
+        private static extern int dllz_mat_get_step(System.IntPtr ptr, int mem);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_get_step_bytes")]
-        private static extern int dllz_mat_get_step_bytes(System.IntPtr ptr);
+        [DllImport(nameDll, EntryPoint = "sl_mat_get_step_bytes")]
+        private static extern int dllz_mat_get_step_bytes(System.IntPtr ptr, int mem);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_get_width_bytes")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_get_width_bytes")]
         private static extern int dllz_mat_get_width_bytes(System.IntPtr ptr);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_is_memory_owner")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_is_memory_owner")]
         private static extern bool dllz_mat_is_memory_owner(System.IntPtr ptr);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_get_resolution")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_get_resolution")]
         private static extern sl.Resolution dllz_mat_get_resolution(System.IntPtr ptr);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_alloc")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_alloc")]
         private static extern void dllz_mat_alloc(System.IntPtr ptr, int width, int height, int type, int mem);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_set_from")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_set_from")]
         private static extern int dllz_mat_set_from(System.IntPtr ptr, System.IntPtr source, int copyType);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_get_ptr")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_get_ptr")]
         private static extern System.IntPtr dllz_mat_get_ptr(System.IntPtr ptr, int mem);
 
-        [DllImport(nameDll, EntryPoint = "dllz_mat_clone")]
+        [DllImport(nameDll, EntryPoint = "sl_mat_clone")]
         private static extern void dllz_mat_clone(System.IntPtr ptr, System.IntPtr ptrSource);
 
         #endregion
@@ -473,7 +475,7 @@ namespace sl
         /// Choose depending on where you'll need to access it from.</param>
         public Mat(sl.Resolution resolution, MAT_TYPE type, MEM mem = MEM.CPU)
         {
-            _matInternalPtr = dllz_mat_create_new(resolution, (int)(type), (int)(mem));
+            _matInternalPtr = dllz_mat_create_new((int)resolution.width, (int)resolution.height, (int)(type), (int)(mem));
         }
 
         /// <summary>
@@ -486,7 +488,7 @@ namespace sl
         /// Choose depending on where you'll need to access it from.</param>
         public void Create(sl.Resolution resolution, MAT_TYPE type, MEM mem = MEM.CPU)
         {
-            _matInternalPtr = dllz_mat_create_new(resolution, (int)(type), (int)(mem));
+            _matInternalPtr = dllz_mat_create_new((int)resolution.width, (int)resolution.height, (int)(type), (int)(mem));
         }
 
         /// <summary>
@@ -500,7 +502,7 @@ namespace sl
         /// Choose depending on where you'll need to access it from.</param>
         public void Create(uint width, uint height, MAT_TYPE type, MEM mem = MEM.CPU)
         {
-            _matInternalPtr = dllz_mat_create_new(new sl.Resolution(width, height), (int)(type), (int)(mem));
+            _matInternalPtr = dllz_mat_create_new((int)width, (int)height, (int)(type), (int)(mem));
         }
 
         /// <summary>
@@ -623,18 +625,18 @@ namespace sl
         ///  Returns the memory 'step' in number/length of elements - how many values make up each row of pixels.
         /// </summary>
         /// <returns>Step length.</returns>
-        public int GetStep()
+        public int GetStep(sl.MEM mem = sl.MEM.CPU)
         {
-            return dllz_mat_get_step(_matInternalPtr);
+            return dllz_mat_get_step(_matInternalPtr, (int)mem);
         }
 
         /// <summary>
         /// Returns the memory 'step' in bytes - how many bytes make up each row of pixels.
         /// </summary>
         /// <returns></returns>
-        public int GetStepBytes()
+        public int GetStepBytes(sl.MEM mem = sl.MEM.CPU)
         {
-            return dllz_mat_get_step_bytes(_matInternalPtr);
+            return dllz_mat_get_step_bytes(_matInternalPtr, (int)mem);
         }
 
         /// <summary>
@@ -727,8 +729,8 @@ namespace sl
         /// <summary>
         /// Returns the value of a specific point in the matrix. (MAT_32F_C1)
         /// </summary>
-        /// <param name="x">Row the point is in.</param>
-        /// <param name="y">Column the point is in.</param>
+        /// <param name="x">Column the point is in.</param>
+        /// <param name="y">Row the point is in.</param>
         /// <param name="value">Gets filled with the current value.</param>
         /// <param name="mem">Whether point is on CPU memory or GPU memory.</param>
         /// <returns>Error code indicating if the get was successful, or why it wasn't.</returns>
@@ -739,8 +741,8 @@ namespace sl
         /// <summary>
         /// Returns the value of a specific point in the matrix. (MAT_32F_C2)
         /// </summary>
-        /// <param name="x">Row the point is in.</param>
-        /// <param name="y">Column the point is in.</param>
+        /// <param name="x">Column the point is in.</param>
+        /// <param name="y">Row the point is in.</param>
         /// <param name="value">Gets filled with the current value.</param>
         /// <param name="mem">Whether point is on CPU memory or GPU memory.</param>
         /// <returns>Error code indicating if the get was successful, or why it wasn't.</returns>
@@ -751,8 +753,8 @@ namespace sl
         /// <summary>
         /// Returns the value of a specific point in the matrix. (MAT_32F_C3)
         /// </summary>
-        /// <param name="x">Row the point is in.</param>
-        /// <param name="y">Column the point is in.</param>
+        /// <param name="x">Column the point is in.</param>
+        /// <param name="y">Row the point is in.</param>
         /// <param name="value">Gets filled with the current value.</param>
         /// <param name="mem">Whether point is on CPU memory or GPU memory.</param>
         /// <returns>Error code indicating if the get was successful, or why it wasn't.</returns>
@@ -763,8 +765,8 @@ namespace sl
         /// <summary>
         /// Returns the value of a specific point in the matrix. (MAT_32F_C4)
         /// </summary>
-        /// <param name="x">Row the point is in.</param>
-        /// <param name="y">Column the point is in.</param>
+        /// <param name="x">Column the point is in.</param>
+        /// <param name="y">Row the point is in.</param>
         /// <param name="value">Gets filled with the current value.</param>
         /// <param name="mem">Whether point is on CPU memory or GPU memory.</param>
         /// <returns>Error code indicating if the get was successful, or why it wasn't.</returns>
@@ -775,8 +777,8 @@ namespace sl
         /// <summary>
         /// Returns the value of a specific point in the matrix. (MAT_TYPE_8U_C1)
         /// </summary>
-        /// <param name="x">Row the point is in.</param>
-        /// <param name="y">Column the point is in.</param>
+        /// <param name="x">Column the point is in.</param>
+        /// <param name="y">Row the point is in.</param>
         /// <param name="value">Gets filled with the current value.</param>
         /// <param name="mem">Whether point is on CPU memory or GPU memory.</param>
         /// <returns>Error code indicating if the get was successful, or why it wasn't.</returns>
@@ -787,8 +789,8 @@ namespace sl
         /// <summary>
         /// Returns the value of a specific point in the matrix. (MAT_TYPE_8U_C2)
         /// </summary>
-        /// <param name="x">Row the point is in.</param>
-        /// <param name="y">Column the point is in.</param>
+        /// <param name="x">Column the point is in.</param>
+        /// <param name="y">Row the point is in.</param>
         /// <param name="value">Gets filled with the current value.</param>
         /// <param name="mem">Whether point is on CPU memory or GPU memory.</param>
         /// <returns>Error code indicating if the get was successful, or why it wasn't.</returns>
@@ -799,8 +801,8 @@ namespace sl
         /// <summary>
         /// Returns the value of a specific point in the matrix. (MAT_TYPE_8U_C3)
         /// </summary>
-        /// <param name="x">Row the point is in.</param>
-        /// <param name="y">Column the point is in.</param>
+        /// <param name="x">Column the point is in.</param>
+        /// <param name="y">Row the point is in.</param>
         /// <param name="value">Gets filled with the current value.</param>
         /// <param name="mem">Whether point is on CPU memory or GPU memory.</param>
         /// <returns>Error code indicating if the get was successful, or why it wasn't.</returns>
@@ -811,8 +813,8 @@ namespace sl
         /// <summary>
         /// Returns the value of a specific point in the matrix. (MAT_TYPE_8U_C4)
         /// </summary>
-        /// <param name="x">Row the point is in.</param>
-        /// <param name="y">Column the point is in.</param>
+        /// <param name="x">Column the point is in.</param>
+        /// <param name="y">Row the point is in.</param>
         /// <param name="value">Gets filled with the current value.</param>
         /// <param name="mem">Whether point is on CPU memory or GPU memory.</param>
         /// <returns>Error code indicating if the get was successful, or why it wasn't.</returns>
@@ -827,8 +829,8 @@ namespace sl
         /// <summary>
         /// Sets a value to a specific point in the matrix. (MAT_32F_C1)
         /// </summary>
-        /// <param name="x">Row the point is in.</param>
-        /// <param name="y">Column the point is in.</param>
+        /// <param name="x">Column the point is in.</param>
+        /// <param name="y">Row the point is in.</param>
         /// <param name="value">Value to which the point will be set.</param>
         /// <param name="mem">Whether point is on CPU memory or GPU memory.</param>
         /// <returns>Error code indicating if the set was successful, or why it wasn't.</returns>
@@ -839,8 +841,8 @@ namespace sl
         /// <summary>
         /// Sets a value to a specific point in the matrix. (MAT_32F_C2)
         /// </summary>
-        /// <param name="x">Row the point is in.</param>
-        /// <param name="y">Column the point is in.</param>
+        /// <param name="x">Column the point is in.</param>
+        /// <param name="y">Row the point is in.</param>
         /// <param name="value">Value to which the point will be set.</param>
         /// <param name="mem">Whether point is on CPU memory or GPU memory.</param>
         /// <returns>Error code indicating if the set was successful, or why it wasn't.</returns>
@@ -851,8 +853,8 @@ namespace sl
         /// <summary>
         /// Sets a value to a specific point in the matrix. (MAT_32F_C3)
         /// </summary>
-        /// <param name="x">Row the point is in.</param>
-        /// <param name="y">Column the point is in.</param>
+        /// <param name="x">Column the point is in.</param>
+        /// <param name="y">Row the point is in.</param>
         /// <param name="value">Value to which the point will be set.</param>
         /// <param name="mem">Whether point is on CPU memory or GPU memory.</param>
         /// <returns>Error code indicating if the set was successful, or why it wasn't.</returns>
@@ -863,8 +865,8 @@ namespace sl
         /// <summary>
         /// Sets a value to a specific point in the matrix. (MAT_32F_C4)
         /// </summary>
-        /// <param name="x">Row the point is in.</param>
-        /// <param name="y">Column the point is in.</param>
+        /// <param name="x">Column the point is in.</param>
+        /// <param name="y">Row the point is in.</param>
         /// <param name="value">Value to which the point will be set.</param>
         /// <param name="mem">Whether point is on CPU memory or GPU memory.</param>
         /// <returns>Error code indicating if the set was successful, or why it wasn't.</returns>
@@ -875,8 +877,8 @@ namespace sl
         /// <summary>
         /// Sets a value to a specific point in the matrix. (MAT_TYPE_8U_C1)
         /// </summary>
-        /// <param name="x">Row the point is in.</param>
-        /// <param name="y">Column the point is in.</param>
+        /// <param name="x">Column the point is in.</param>
+        /// <param name="y">Row the point is in.</param>
         /// <param name="value">Value to which the point will be set.</param>
         /// <param name="mem">Whether point is on CPU memory or GPU memory.</param>
         /// <returns>Error code indicating if the set was successful, or why it wasn't.</returns>
@@ -887,8 +889,8 @@ namespace sl
         /// <summary>
         /// Sets a value to a specific point in the matrix. (MAT_TYPE_8U_C2)
         /// </summary>
-        /// <param name="x">Row the point is in.</param>
-        /// <param name="y">Column the point is in.</param>
+        /// <param name="x">Column the point is in.</param>
+        /// <param name="y">Row the point is in.</param>
         /// <param name="value">Value to which the point will be set.</param>
         /// <param name="mem">Whether point is on CPU memory or GPU memory.</param>
         /// <returns>Error code indicating if the set was successful, or why it wasn't.</returns>
@@ -899,8 +901,8 @@ namespace sl
         /// <summary>
         /// Sets a value to a specific point in the matrix. (MAT_TYPE_8U_C3)
         /// </summary>
-        /// <param name="x">Row the point is in.</param>
-        /// <param name="y">Column the point is in.</param>
+        /// <param name="x">Column the point is in.</param>
+        /// <param name="y">Row the point is in.</param>
         /// <param name="value">Value to which the point will be set.</param>
         /// <param name="mem">Whether point is on CPU memory or GPU memory.</param>
         /// <returns>Error code indicating if the set was successful, or why it wasn't.</returns>
@@ -911,8 +913,8 @@ namespace sl
         /// <summary>
         /// Sets a value to a specific point in the matrix. (MAT_TYPE_8U_C4)
         /// </summary>
-        /// <param name="x">Row the point is in.</param>
-        /// <param name="y">Column the point is in.</param>
+        /// <param name="x">Column the point is in.</param>
+        /// <param name="y">Row the point is in.</param>
         /// <param name="value">Value to which the point will be set.</param>
         /// <param name="mem">Whether point is on CPU memory or GPU memory.</param>
         /// <returns>Error code indicating if the set was successful, or why it wasn't.</returns>
