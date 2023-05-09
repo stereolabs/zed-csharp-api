@@ -54,7 +54,7 @@ namespace sl
         private static extern FUSION_ERROR_CODE dllz_fusion_enable_positional_tracking(ref PositionalTrackingFusionParameters ptfParams);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_get_position")]
-        private static extern POSITIONAL_TRACKING_STATE dllz_fusion_get_position(ref Pose pose, REFERENCE_FRAME referenceFrame, COORDINATE_SYSTEM coordinateSystem, UNIT unit, ref CameraIdentifier uuid, SL_POSITION_TYPE retrieveType);
+        private static extern POSITIONAL_TRACKING_STATE dllz_fusion_get_position(ref Pose pose, REFERENCE_FRAME referenceFrame, COORDINATE_SYSTEM coordinateSystem, UNIT unit, ref CameraIdentifier uuid, POSITION_TYPE retrieveType);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_disable_positional_tracking")]
         private static extern void dllz_fusion_disable_positional_tracking();
@@ -146,7 +146,7 @@ namespace sl
             return dllz_fusion_enable_positional_tracking(ref ptfParams);
         }
 
-        public POSITIONAL_TRACKING_STATE GetPositionFusion(ref Pose pose, REFERENCE_FRAME referenceFrame, COORDINATE_SYSTEM coordinateSystem, UNIT unit, ref CameraIdentifier uuid, SL_POSITION_TYPE retrieveType)
+        public POSITIONAL_TRACKING_STATE GetPositionFusion(ref Pose pose, REFERENCE_FRAME referenceFrame, COORDINATE_SYSTEM coordinateSystem, UNIT unit, ref CameraIdentifier uuid, POSITION_TYPE retrieveType)
         {
             return dllz_fusion_get_position(ref pose, referenceFrame, coordinateSystem, unit, ref uuid, retrieveType);
         }

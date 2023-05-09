@@ -85,7 +85,7 @@ namespace sl
     /// <summary>
     /// Change the type of outputed position for the Fusion positional tracking (raw data or fusion data projected into zed camera).
     /// </summary>
-    public enum SL_POSITION_TYPE
+    public enum POSITION_TYPE
     {
         /// <summary>
         /// The output position will be the raw position data
@@ -3733,45 +3733,57 @@ namespace sl
     public enum FUSION_ERROR_CODE
     {
         /// <summary>
+        /// All data from all sources were consumed, no new process available.
+        /// </summary>
+        NO_NEW_DATA_AVAILABLE = -10,
+        /// <summary>
+        /// Problem was detected with ingested timestamp
+        /// </summary>
+        INVALID_TIMESTAMP = -9,
+        /// <summary>
+        /// Problem was detected with ingested covariance 
+        /// </summary>
+        INVALID_COVARIANCE = -8,
+        /// <summary>
         /// The requested body tracking model is not available
         /// </summary>
-        SL_FUSION_ERROR_CODE_WRONG_BODY_FORMAT = -7,
+        WRONG_BODY_FORMAT = -7,
         /// <summary>
         /// The following module was not enabled
         /// </summary>
-        SL_FUSION_ERROR_CODE_NOT_ENABLE = -6,
+        NOT_ENABLE = -6,
         /// <summary>
         /// Some source are provided by SVO and some sources are provided by LIVE stream 
         /// </summary>
-        SL_FUSION_ERROR_CODE_INPUT_FEED_MISMATCH = -5,
+        INPUT_FEED_MISMATCH = -5,
         /// <summary>
         /// Connection timed out ... impossible to reach the sender... this may be due to ZedHub absence
         /// </summary>
-        SL_FUSION_ERROR_CODE_CONNECTION_TIMED_OUT = -4,
+        CONNECTION_TIMED_OUT = -4,
         /// <summary>
         /// Detect multiple instance of SHARED_MEMORY communicator ... only one is authorised
         /// </summary>
-        SL_FUSION_ERROR_CODE_MEMORY_ALREADY_USED = -3,
+        MEMORY_ALREADY_USED = -3,
         /// <summary>
         /// The IP format provided is wrong, please provide IP in this format a.b.c.d where (a, b, c, d) are numbers between 0 and 255.
         /// </summary>
-        SL_FUSION_ERROR_CODE_BAD_IP_ADDRESS = -2,
+        BAD_IP_ADDRESS = -2,
         /// <summary>
         /// Standard code for unsuccessful behavior.
         /// </summary>
-        SL_FUSION_ERROR_CODE_FAILURE = -1,
+        FAILURE = -1,
         /// <summary>
         /// 
         /// </summary>
-        SL_FUSION_ERROR_CODE_SUCCESS = 0,
+        SUCCESS = 0,
         /// <summary>
         /// Some big differences has been observed between senders FPS.
         /// </summary>
-        SL_FUSION_ERROR_CODE_FUSION_ERRATIC_FPS = 1,
+        ERRATIC_FPS = 1,
         /// <summary>
         /// At least one sender has fps lower than 10 FPS.
         /// </summary>
-        SL_FUSION_ERROR_CODE_FUSION_FPS_TOO_LOW = 2
+        FPS_TOO_LOW = 2
     }
 
     public struct InitFusionParameters
