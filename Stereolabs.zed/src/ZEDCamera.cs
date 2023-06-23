@@ -870,6 +870,7 @@ namespace sl
             public bool enableIMUFusion;
             public float depthMinRange;
             public bool setGravityAsOrigin;
+            public sl.POSITIONAL_TRACKING_MODE mode;
         };
 
         /// <summary>
@@ -1075,7 +1076,8 @@ namespace sl
                 setAsStatic = sl_positionalTracking.setAsStatic,
                 setFloorAsOrigin = sl_positionalTracking.setFloorAsOrigin,
                 depthMinRange = sl_positionalTracking.depthMinRange,
-                setGravityAsOrigin = sl_positionalTracking.setGravityAsOrigin
+                setGravityAsOrigin = sl_positionalTracking.setGravityAsOrigin,
+                mode = sl_positionalTracking.mode
             };
 
             return trackingParams;
@@ -1513,6 +1515,7 @@ namespace sl
             sl_tracking_params.setFloorAsOrigin = positionalTrackingParameters.setFloorAsOrigin;
             sl_tracking_params.depthMinRange = positionalTrackingParameters.depthMinRange;
             sl_tracking_params.setGravityAsOrigin = positionalTrackingParameters.setGravityAsOrigin;
+            sl_tracking_params.mode = positionalTrackingParameters.mode;
 
             trackingStatus = (sl.ERROR_CODE)dllz_enable_tracking(CameraID, ref sl_tracking_params, new System.Text.StringBuilder(positionalTrackingParameters.areaFilePath, positionalTrackingParameters.areaFilePath.Length));
             return trackingStatus;
@@ -2733,7 +2736,6 @@ namespace sl
                 Marshal.FreeHGlobal(p);
                 return sl.ERROR_CODE.FAILURE;
             }
-
         }
 
 

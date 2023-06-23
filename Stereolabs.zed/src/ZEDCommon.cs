@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Documents;
 using System.Windows.Controls;
+using System.Reflection;
 
 /// \defgroup Video_group Video Module
 /// \defgroup Depth_group Depth Sensing Module
@@ -456,7 +457,11 @@ namespace sl
         /// Area localization file that describes the surroundings, saved from a previous tracking session.
         /// </summary>
         public string areaFilePath = "";
-
+        /// <summary>
+        /// Positional tracking mode used. Can be used to improve accuracy in some type of scene at the cost of longer runtime
+        /// default : POSITIONAL_TRACKING_MODE::STANDARD
+        /// </summary>
+        public sl.POSITIONAL_TRACKING_MODE mode = sl.POSITIONAL_TRACKING_MODE.STANDARD;
     }
     /// \ingroup PositionalTracking_group
     /// <summary>
@@ -531,6 +536,24 @@ namespace sl
         /// </summary>
         SEARCHING_FLOOR_PLANE
     }
+
+    ///\ingroup PositionalTracking_group
+    /// <summary>
+    /// Lists the mode of positional tracking that can be used.
+    /// </summary>
+    public enum POSITIONAL_TRACKING_MODE
+    {
+        /// <summary>
+        /// Default mode, best compromise in performance and accuracy
+        /// </summary>
+        STANDARD,
+        /// <summary>
+        /// Improve accuracy in more challening scenes such as outdoor repetitive patterns like extensive field. 
+        /// Curently works best with ULTRA depth mode, requires more compute power
+        /// </summary>
+        QUALITY
+    }
+
 
     /// \ingroup PositionalTracking_group
     /// <summary>
@@ -1997,10 +2020,16 @@ namespace sl
         /// </summary>
         public SPATIAL_MAP_TYPE map_type;
         /// <summary>
+        ///  Control the integration rate of the current depth into the mapping process.
+        /// This parameter controls how many times a stable 3D points should be seen before it is integrated into the spatial mapping.
+        /// Default value is 0, this will define the stability counter based on the mesh resolution, the higher the resolution, the higher the stability counter.
+        /// </summary>
+        public int stabilityCounter = 0;
+        /// <summary>
         /// Constructor
         /// </summary>
         public SpatialMappingParameters(float resolutionMeter = 0.05f, float rangeMeter = 0.0f, bool saveTexture = false, SPATIAL_MAP_TYPE map_type = SPATIAL_MAP_TYPE.MESH,
-                                        bool useChunkOnly = false, int maxMemoryUsage = 2048, bool reverseVertexOrder = false)
+                                        bool useChunkOnly = false, int maxMemoryUsage = 2048, bool reverseVertexOrder = false, int stabilityCounter = 0)
         {
             this.resolutionMeter = resolutionMeter;
             this.rangeMeter = rangeMeter;
@@ -2009,6 +2038,7 @@ namespace sl
             this.useChunkOnly = useChunkOnly;
             this.maxMemoryUsage = maxMemoryUsage;
             this.reverseVertexOrder = reverseVertexOrder;
+            this.stabilityCounter = stabilityCounter;
         }
         /// <summary>
         /// Returns the resolution corresponding to the given MAPPING_RESOLUTION preset.
@@ -2699,6 +2729,13 @@ namespace sl
         /// it is useful for example to remove unstable fitting results when a skeleton is partially occluded
         /// </summary>
         public int minimumKeypointsThreshold;
+
+        /// <summary>
+        ///  This value controls the smoothing of the fitted fused skeleton.
+        /// it is ranged from 0 (low smoothing) and 1 (high smoothing)
+        /// Default is 0
+        /// </summary>
+        public float skeletonSmoothing;
     };
 
     ///\ingroup Object_group
@@ -2711,7 +2748,7 @@ namespace sl
         /// <summary>
         /// Object identification number, used as a reference when tracking the object through the frames.
         /// </summary>
-        public int id; //person ID
+        public int id; 
         /// <summary>
         ///Unique ID to help identify and track AI detections. Can be either generated externally, or using \ref ZEDCamera.generateUniqueId() or left empty
         /// </summary>
