@@ -437,10 +437,10 @@ namespace sl
         private static extern int dllz_update_chunks(int cameraID, int[] nbVerticesInSubemeshes, int[] nbTrianglesInSubemeshes, ref int nbSubmeshes, int[] updatedIndices, ref int nbVertices, ref int nbTriangles, int nbSubmesh);
 
         [DllImport(nameDll, EntryPoint = "sl_retrieve_mesh")]
-        private static extern int dllz_retrieve_mesh(int cameraID, [In, Out] Vector3[] vertices, int[] triangles, [In, Out] Vector2[] uvs, IntPtr texture, int nbSubmesh);
+        private static extern int dllz_retrieve_mesh(int cameraID, [In, Out] Vector3[] vertices, [In, Out] int[] triangles, [In, Out] byte[] colors, [In, Out] Vector2[] uvs, IntPtr texture, int nbSubmesh);
 
         [DllImport(nameDll, EntryPoint = "sl_retrieve_chunks")]
-        private static extern int dllz_retrieve_chunks(int cameraID, [In, Out] Vector3[] vertices, int[] triangles, [In, Out] Vector2[] uvs, IntPtr texture, int maxSubmesh);
+        private static extern int dllz_retrieve_chunks(int cameraID, [In, Out] Vector3[] vertices, [In, Out] int[] triangles, [In, Out] byte[] colors, [In, Out] Vector2[] uvs, IntPtr texture, int maxSubmesh);
 
         [DllImport(nameDll, EntryPoint = "sl_extract_whole_spatial_map")]
         private static extern int dllz_extract_whole_spatial_map(int cameraID);
@@ -889,6 +889,7 @@ namespace sl
             [MarshalAs(UnmanagedType.U1)]
             public bool reverseVertexOrder;
             public SPATIAL_MAP_TYPE mapType;
+            public int stabilityCounter;
         };
 
         /// <summary>
@@ -1746,6 +1747,7 @@ namespace sl
             map_params.maxMemoryUsage = 4096;
             map_params.useChunkOnly = spatialMappingParameters.useChunkOnly; //spatialMappingParameters.map_type == SPATIAL_MAP_TYPE.MESH ? true : false;
             map_params.reverseVertexOrder = spatialMappingParameters.reverseVertexOrder;
+            map_params.stabilityCounter = spatialMappingParameters.stabilityCounter;
 
             sl.ERROR_CODE spatialMappingStatus = ERROR_CODE.FAILURE;
             spatialMappingStatus = (sl.ERROR_CODE)dllz_enable_spatial_mapping(CameraID, ref map_params);
@@ -1793,7 +1795,8 @@ namespace sl
                 map_type = sl_parameters.mapType,
                 reverseVertexOrder = sl_parameters.reverseVertexOrder,
                 useChunkOnly = sl_parameters.useChunkOnly,
-                maxMemoryUsage = sl_parameters.maxMemoryUsage
+                maxMemoryUsage = sl_parameters.maxMemoryUsage,
+                stabilityCounter = sl_parameters.stabilityCounter
             };
             return parameters;
         }
@@ -1842,11 +1845,12 @@ namespace sl
         /// </summary>
         /// <param name="vertices">Vertices of the mesh.</param>
         /// <param name="triangles">Triangles, formatted as the index of each triangle's three vertices in the vertices array.</param>
+        /// <param name="colors"> (b, g, r) colors of the vertices.</param>
         /// <param name="nbSubmeshMax">Maximum number of submeshes that can be handled.</param>
         /// <returns>Error code indicating if the retrieval was successful, and why it wasn't otherwise.</returns>
-        public sl.ERROR_CODE RetrieveMesh(Vector3[] vertices, int[] triangles, int nbSubmeshMax, Vector2[] uvs, IntPtr textures)
+        public sl.ERROR_CODE RetrieveMesh(Vector3[] vertices, int[] triangles, byte[] colors, int nbSubmeshMax, Vector2[] uvs, IntPtr textures)
         {
-            return (sl.ERROR_CODE)dllz_retrieve_mesh(CameraID, vertices, triangles, uvs, textures, nbSubmeshMax);
+            return (sl.ERROR_CODE)dllz_retrieve_mesh(CameraID, vertices, triangles, colors, uvs, textures, nbSubmeshMax);
         }
 
         /// <summary>
@@ -1857,18 +1861,19 @@ namespace sl
         /// <returns>Error code indicating if the update was successful, and why it wasn't otherwise.</returns>
         public sl.ERROR_CODE RetrieveMesh(ref Mesh mesh)
         {
-            ERROR_CODE err = RetrieveMesh(mesh.vertices, mesh.triangles, (int)Constant.MAX_SUBMESH, mesh.uvs, mesh.textures);
+            ERROR_CODE err = RetrieveMesh(mesh.vertices, mesh.triangles, mesh.colors, (int)Constant.MAX_SUBMESH, mesh.uvs, mesh.textures);
             int verticesOffset = 0;
             int trianglesOffset = 0;
+            int colorsOffset = 0;
 
             for (int i = 0; i < mesh.nbUpdatedSubmesh; i++)
             {
-                SetMesh(ref mesh, i, ref verticesOffset, ref trianglesOffset);
+                SetMesh(ref mesh, i, ref verticesOffset, ref trianglesOffset, ref colorsOffset);
             }
             return err;
         }
         /// <summary>
-        /// Retrieve all chunks of the generated mesh.Call UpdateMesh() before calling this. Used for mesh vizualisation.
+        /// Retrieve all chunks of the generated mesh.
         /// </summary>
         /// <param name="mesh">The mesh to be filled with the generated spatial map.</param>
         /// <returns></returns>
@@ -1878,14 +1883,16 @@ namespace sl
 
             mesh.vertices = new Vector3[mesh.nbVertices];
             mesh.triangles = new int[mesh.nbTriangles * 3];
+            mesh.colors = new byte[mesh.nbVertices * 3];
 
-            ERROR_CODE err = (sl.ERROR_CODE)dllz_retrieve_chunks(CameraID, mesh.vertices, mesh.triangles, mesh.uvs, mesh.textures, (int)Constant.MAX_SUBMESH);
+            ERROR_CODE err = (sl.ERROR_CODE)dllz_retrieve_chunks(CameraID, mesh.vertices, mesh.triangles, mesh.colors, mesh.uvs, mesh.textures, (int)Constant.MAX_SUBMESH);
             int verticesOffset = 0;
             int trianglesOffset = 0;
+            int colorsOffset = 0;
 
             for (int i = 0; i < mesh.nbUpdatedSubmesh; i++)
             {
-                SetMesh(ref mesh, i, ref verticesOffset, ref trianglesOffset);
+                SetMesh(ref mesh, i, ref verticesOffset, ref trianglesOffset, ref colorsOffset);
             }
             return err;
 
@@ -1897,8 +1904,9 @@ namespace sl
         /// <param name="indexUpdate">Index of the submesh/chunk to be updated.</param>
         /// <param name="verticesOffset">Starting index in the vertices stack.</param>
         /// <param name="trianglesOffset">Starting index in the triangles stack.</param>
+        /// <param name="colorsOffset">Starting index in the colors stack.</param>
         /// <param name="uvsOffset">Starting index in the UVs stack.</param>
-        private void SetMesh(ref Mesh mesh, int indexUpdate, ref int verticesOffset, ref int trianglesOffset)
+        private void SetMesh(ref Mesh mesh, int indexUpdate, ref int verticesOffset, ref int trianglesOffset, ref int colorsOffset)
         {
             if (!mesh.chunks.TryGetValue(indexUpdate, out Chunk subMesh)) //Use the existing chunk/submesh if already in the dictionary. Otherwise, make a new one.
             {
@@ -1914,16 +1922,25 @@ namespace sl
             {
                 subMesh.vertices = new Vector3[mesh.nbVerticesInSubmesh[indexUpdate]];
             }
+            if (subMesh.colors == null || subMesh.colors.Length != 3 * mesh.nbVerticesInSubmesh[indexUpdate])
+            {
+                subMesh.colors = new byte[3* mesh.nbVerticesInSubmesh[indexUpdate]];
+            }
+
 
             //Clear the old mesh data.
             Array.Clear(subMesh.vertices, 0, subMesh.vertices.Length);
             Array.Clear(subMesh.triangles, 0, subMesh.triangles.Length);
+            Array.Clear(subMesh.colors, 0, subMesh.colors.Length);
 
             //Copy data retrieved from the ZED SDK into the current chunk.
             System.Array.Copy(mesh.vertices, verticesOffset, subMesh.vertices, 0, mesh.nbVerticesInSubmesh[indexUpdate]);
             verticesOffset += mesh.nbVerticesInSubmesh[indexUpdate];
             System.Buffer.BlockCopy(mesh.triangles, trianglesOffset * sizeof(int), subMesh.triangles, 0, 3 * mesh.nbTrianglesInSubmesh[indexUpdate] * sizeof(int)); //Block copy has better performance than Array.
             trianglesOffset += 3 * mesh.nbTrianglesInSubmesh[indexUpdate];
+
+            System.Buffer.BlockCopy(mesh.colors, colorsOffset, subMesh.colors, 0, 3 *mesh.nbVerticesInSubmesh[indexUpdate]);
+            colorsOffset += 3 * mesh.nbVerticesInSubmesh[indexUpdate];
 
             mesh.chunks[indexUpdate] = subMesh;
         }
@@ -1939,6 +1956,7 @@ namespace sl
             //Resize the mesh buffer according to how many vertices are needed.
             mesh.vertices = new Vector3[mesh.nbVertices]; //Allocation is faster than resizing.
             mesh.triangles = new int[mesh.nbTriangles * 3];
+            mesh.colors = new byte[mesh.nbVertices * 3];
             return RetrieveMesh(ref mesh);
         }
         /// <summary>

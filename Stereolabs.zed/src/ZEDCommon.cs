@@ -1994,11 +1994,11 @@ namespace sl
         /// <summary>
         /// Spatial mapping resolution in meters.
         /// </summary>
-        public float resolutionMeter;
+        public float resolutionMeter = 0.0f;
         /// <summary>
         /// Depth range in meters.
         /// </summary>
-        public float rangeMeter;
+        public float rangeMeter = 0.05f;
         /// <summary>
         /// Set to true if you want to be able to apply the texture to your mesh after its creation.
         /// </summary>
@@ -2018,7 +2018,7 @@ namespace sl
         /// <summary>
         /// The type of spatial map to be created. This dictates the format that will be used for the mapping(e.g. mesh, point cloud). See \ref SPATIAL_MAP_TYPE
         /// </summary>
-        public SPATIAL_MAP_TYPE map_type;
+        public SPATIAL_MAP_TYPE map_type = SPATIAL_MAP_TYPE.MESH;
         /// <summary>
         ///  Control the integration rate of the current depth into the mapping process.
         /// This parameter controls how many times a stable 3D points should be seen before it is integrated into the spatial mapping.
@@ -2375,6 +2375,10 @@ namespace sl
         /// </summary>
         public int[] triangles = new int[(int)Constant.MAX_SUBMESH];
         /// <summary>
+        /// Contains the colors of the vertices.
+        /// </summary>
+        public byte[] colors = new byte[(int)Constant.MAX_SUBMESH];
+        /// <summary>
         /// UVs defines the 2D projection of each vertices onto the Texture.
         /// Values are normalized [0;1], starting from the bottom left corner of the texture (as requested by opengl).
         /// In order to display a textured mesh you need to bind the Texture and then draw each triangles by picking its uv values.
@@ -2419,6 +2423,10 @@ namespace sl
         /// Triangles (or faces) contains the index of its three vertices. It corresponds to the 3 vertices of the triangle {v1, v2, v3}.
         /// </summary>
         public int[] triangles;
+        /// <summary>
+        /// Colors of the vertices.
+        /// </summary>
+        public byte[] colors;
     }
 
     /// <summary>
