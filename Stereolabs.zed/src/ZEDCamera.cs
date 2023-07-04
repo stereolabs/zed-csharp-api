@@ -771,6 +771,15 @@ namespace sl
             /// </summary>
             [MarshalAs(UnmanagedType.U1)]
             public bool asyncGrabCameraRecovery;
+            /// <summary>
+            /// Define a computation upper limit to the grab frequency.
+            /// This can be useful to get a known constant fixed rate or limit the computation load while keeping a short exposure time by setting a high camera capture framerate.
+            /// The value should be inferior to the InitParameters::camera_fps and strictly positive.It has no effect when reading an SVO file.
+            /// This is an upper limit and won't make a difference if the computation is slower than the desired compute capping fps.
+            /// \note Internally the grab function always tries to get the latest available image while respecting the desired fps as much as possible.
+            /// </summary>
+            public float grabComputeCappingFPS;
+
 
             /// <summary>
             /// Copy constructor.
@@ -798,6 +807,7 @@ namespace sl
                 enableImageEnhancement = init.enableImageEnhancement;
                 openTimeoutSec = init.openTimeoutSec;
                 asyncGrabCameraRecovery = init.asyncGrabCameraRecovery;
+                grabComputeCappingFPS = init.grabComputeCappingFPS;
             }
         }
 
@@ -1030,7 +1040,9 @@ namespace sl
                 depthStabilization = sl_parameters.depthStabilization,
                 sensorsRequired = sl_parameters.sensorsRequired,
                 openTimeoutSec = sl_parameters.openTimeoutSec,
-                asyncGrabCameraRecovery = sl_parameters.asyncGrabCameraRecovery
+                asyncGrabCameraRecovery = sl_parameters.asyncGrabCameraRecovery,
+                grabComputeCappingFPS = sl_parameters.grabComputeCappingFPS
+
             };
             return parameters;
         }

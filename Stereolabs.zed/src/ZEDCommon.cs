@@ -4,9 +4,6 @@ using System.Runtime.InteropServices;
 using System.Numerics;
 using System;
 using System.Collections.Generic;
-using System.Windows.Documents;
-using System.Windows.Controls;
-using System.Reflection;
 
 /// \defgroup Video_group Video Module
 /// \defgroup Depth_group Depth Sensing Module
@@ -1353,6 +1350,15 @@ namespace sl
         /// The default behavior is synchronous (false), like previous ZED SDK versions
         /// </summary>
         public bool asyncGrabCameraRecovery;
+        /// <summary>
+        /// Define a computation upper limit to the grab frequency.
+        /// This can be useful to get a known constant fixed rate or limit the computation load while keeping a short exposure time by setting a high camera capture framerate.
+        /// The value should be inferior to the InitParameters::camera_fps and strictly positive.It has no effect when reading an SVO file.
+        /// This is an upper limit and won't make a difference if the computation is slower than the desired compute capping fps.
+        /// \note Internally the grab function always tries to get the latest available image while respecting the desired fps as much as possible.
+        /// </summary>
+        public float grabComputeCappingFPS = 0;
+
 
         /// <summary>
         /// Constructor. Sets default initialization parameters.
@@ -1385,6 +1391,7 @@ namespace sl
             this.optionalOpencvCalibrationFile = "";
             this.openTimeoutSec = 5.0f;
             this.asyncGrabCameraRecovery = false;
+            this.grabComputeCappingFPS = 0;
         }
 
     }
