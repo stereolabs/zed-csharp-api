@@ -4,9 +4,6 @@ using System.Runtime.InteropServices;
 using System.Numerics;
 using System;
 using System.Collections.Generic;
-using System.Windows.Documents;
-using System.Windows.Controls;
-using System.Reflection;
 
 /// \defgroup Video_group Video Module
 /// \defgroup Depth_group Depth Sensing Module
@@ -1353,6 +1350,15 @@ namespace sl
         /// The default behavior is synchronous (false), like previous ZED SDK versions
         /// </summary>
         public bool asyncGrabCameraRecovery;
+        /// <summary>
+        /// Define a computation upper limit to the grab frequency.
+        /// This can be useful to get a known constant fixed rate or limit the computation load while keeping a short exposure time by setting a high camera capture framerate.
+        /// The value should be inferior to the InitParameters::camera_fps and strictly positive.It has no effect when reading an SVO file.
+        /// This is an upper limit and won't make a difference if the computation is slower than the desired compute capping fps.
+        /// \note Internally the grab function always tries to get the latest available image while respecting the desired fps as much as possible.
+        /// </summary>
+        public float grabComputeCappingFPS = 0;
+
 
         /// <summary>
         /// Constructor. Sets default initialization parameters.
@@ -1385,6 +1391,7 @@ namespace sl
             this.optionalOpencvCalibrationFile = "";
             this.openTimeoutSec = 5.0f;
             this.asyncGrabCameraRecovery = false;
+            this.grabComputeCappingFPS = 0;
         }
 
     }
@@ -3045,12 +3052,12 @@ namespace sl
         /// <summary>
         /// A set of useful points representing the human body, expressed in 2D. We use a classic 18 points representation, the points semantic and order is given by BODY_PARTS.
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 70)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 38)]
         public Vector2[] keypoints2D;
         /// <summary>
         /// A set of useful points representing the human body, expressed in 3D. We use a classic 18 points representation, the points semantic and order is given by BODY_PARTS.
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 70)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 38)]
         public Vector3[] keypoints;// 3D position of the joints of the skeleton
 
         /// <summary>
@@ -3058,7 +3065,7 @@ namespace sl
         ///  Not available with DETECTION_MODEL.MULTI_CLASS_BOX.
         ///  in some cases, eg. body partially out of the image or missing depth data, some keypoint can not be detected, they will have non finite values.
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 70)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 38)]
         public float[] keypointConfidence;
 
         /// <summary>
@@ -3066,19 +3073,19 @@ namespace sl
         ///  Not available with DETECTION_MODEL.MULTI_CLASS_BOX.
         ///  in some cases, eg. body partially out of the image or missing depth data, some keypoint can not be detected, they will have non finite values.
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 70)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 38)]
         public CovarMatrix[] keypointCovariances;
 
         /// <summary>
         /// Global position per joint in the coordinate frame of the requested skeleton format.
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 70)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 38)]
         public Vector3[] localPositionPerJoint;
         /// <summary>
         /// Local orientation per joint in the coordinate frame of the requested skeleton format.
         /// The orientation is represented by a quaternion.
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 70)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 38)]
         public Quaternion[] localOrientationPerJoint;
         /// <summary>
         /// Global root position.
@@ -3129,21 +3136,23 @@ namespace sl
         /// Simple body model, including simplified face and tracking wrists and ankle positions.
         /// No hands nor feet tracking available with this model.
         /// </summary>
-        POSE_18,
+        BODY_18,
         /// <summary>
         /// Body model, including feet, simplified face and simplified hands.
         /// This body model does not provide wrist/ankle rotations.
         /// </summary>
-        POSE_34,
+        BODY_34,
         /// <summary>
         /// Body model, including feet, simplified face and simplified hands
         /// </summary>
-        POSE_38,
+        BODY_38,
+#if false
         /// <summary>
         /// Body model, including feet, simplified face and detailed hands
         /// </summary>
-        POSE_70
-    };
+        BODY_70
+#endif     
+        };
 
     public enum BODY_KEYPOINTS_SELECTION
     {
@@ -3340,6 +3349,7 @@ namespace sl
         /// related to sl.DETECTION_MODEL.HUMAN_BODY_ACCURATE
         /// </summary>
         HUMAN_BODY_38_ACCURATE_DETECTION,
+#if false
         /// <summary>
         /// related to sl.DETECTION_MODEL.HUMAN_BODY_FAST
         /// </summary>
@@ -3352,6 +3362,7 @@ namespace sl
         /// related to sl.DETECTION_MODEL.HUMAN_BODY_ACCURATE
         /// </summary>
         HUMAN_BODY_70_ACCURATE_DETECTION,
+#endif
         /// <summary>
         /// related to sl.DETECTION_MODEL.PERSON_HEAD
         /// </summary>
@@ -3509,10 +3520,11 @@ namespace sl
         LAST
     };
 
+#if false
     ///\ingroup Object_group
-	/// <summary>
-	/// ssemantic of human body parts and order keypoints for BODY_FORMAT.POSE_70.
-	/// </summary>
+    /// <summary>
+    /// ssemantic of human body parts and order keypoints for BODY_FORMAT.POSE_70.
+    /// </summary>
     public enum BODY_70_PARTS
     {
         PELVIS,
@@ -3592,7 +3604,7 @@ namespace sl
 
     };
 
-
+#endif
     ///\ingroup Object_group
     /// <summary>
     /// Contains batched data of a detected object
@@ -3767,13 +3779,13 @@ namespace sl
 
 
 
-    #endregion
+#endregion
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////  Fusion API ///////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    #region Fusion API Module
+#region Fusion API Module
 
     public enum FUSION_ERROR_CODE
     {
@@ -3985,13 +3997,13 @@ namespace sl
         public CameraMetrics[] cameraIndividualStats;
     };
 
-    #endregion
+#endregion
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////  GNSS API ////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    #region GNSS API
+#region GNSS API
 
     public struct GNSSData
     {
@@ -4052,5 +4064,5 @@ namespace sl
         public string UTMZone;
     }
 
-    #endregion
+#endregion
 }// end namespace sl
