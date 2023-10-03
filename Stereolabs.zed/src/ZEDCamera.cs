@@ -482,7 +482,7 @@ namespace sl
         private static extern IntPtr dllz_find_floor_plane(int cameraID, out Quaternion rotation, out Vector3 translation, Quaternion priorQuaternion, Vector3 priorTranslation);
 
         [DllImport(nameDll, EntryPoint = "sl_find_plane_at_hit")]
-        private static extern IntPtr dllz_find_plane_at_hit(int cameraID, Vector2 HitPixel, bool refine);
+        private static extern IntPtr dllz_find_plane_at_hit(int cameraID, Vector2 HitPixel, ref sl_PlaneDetectionParameters plane_params, bool refine);
 
         [DllImport(nameDll, EntryPoint = "sl_convert_floorplane_to_mesh")]
         private static extern int dllz_convert_floorplane_to_mesh(int cameraID, [In, Out] Vector3[] vertices, int[] triangles, out int numVertices, out int numTriangles);
@@ -780,7 +780,6 @@ namespace sl
             /// </summary>
             public float grabComputeCappingFPS;
 
-
             /// <summary>
             /// Copy constructor.
             /// </summary>
@@ -900,6 +899,16 @@ namespace sl
             public bool reverseVertexOrder;
             public SPATIAL_MAP_TYPE mapType;
             public int stabilityCounter;
+        };
+
+        /// <summary>
+        /// DLL-friendly version of PlaneDetectionParameters (found in ZEDCommon.cs).
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential)]
+        struct sl_PlaneDetectionParameters
+        {
+            public float maxDistanceThreshold;
+            public float normalSimilarityThreshold;
         };
 
         /// <summary>
@@ -1042,7 +1051,6 @@ namespace sl
                 openTimeoutSec = sl_parameters.openTimeoutSec,
                 asyncGrabCameraRecovery = sl_parameters.asyncGrabCameraRecovery,
                 grabComputeCappingFPS = sl_parameters.grabComputeCappingFPS
-
             };
             return parameters;
         }
@@ -1726,7 +1734,7 @@ namespace sl
         /// <summary>
         /// Defines a region of interest to focus on for all the SDK, discarding other parts.
         /// </summary>
-        /// <param name="roiMask">the Mat defining the requested region of interest, all pixel set to 0 will be discard. If empty, set all pixels as valid, otherwise should fit the resolution of the current instance and its type should be U8_C1.</param>
+        /// <param name="roiMask">the Mat defining the requested region of interest, pixels lower than 127 will be discard. If empty, set all pixels as valid, otherwise should fit the resolution of the current instance and its type should be U8_C1/C3/C4.</param>
         /// <returns></returns>
         public ERROR_CODE SetRegionOfInterest(sl.Mat roiMask)
         {
@@ -2273,13 +2281,17 @@ namespace sl
         /// <param name="screenPos">Point on the ZED image to check for a plane.</param>
         /// <returns></returns>
         [Obsolete("This Method is Deprecated, use FindPlaneAtHit instead", false)]
-        public sl.ERROR_CODE findPlaneAtHit(ref PlaneData plane, Vector2 coord)
+        public sl.ERROR_CODE findPlaneAtHit(ref PlaneData plane, Vector2 coord, ref PlaneDetectionParameters planeDetectionParameters)
         {
             IntPtr p = IntPtr.Zero;
             Quaternion out_quat = Quaternion.Identity;
             Vector3 out_trans = Vector3.Zero;
 
-            p = dllz_find_plane_at_hit(CameraID, coord, false);
+            sl_PlaneDetectionParameters plane_params = new sl_PlaneDetectionParameters();
+            plane_params.maxDistanceThreshold = planeDetectionParameters.maxDistanceThreshold;
+            plane_params.normalSimilarityThreshold= planeDetectionParameters.normalSimilarityThreshold;
+
+            p = dllz_find_plane_at_hit(CameraID, coord, ref plane_params, false);
             plane.Bounds = new Vector3[256];
 
             if (p != IntPtr.Zero)
@@ -2297,13 +2309,17 @@ namespace sl
         /// <param name="plane">Data on the detected plane.</param>
         /// <param name="screenPos">Point on the ZED image to check for a plane.</param>
         /// <returns></returns>
-        public sl.ERROR_CODE FindPlaneAtHit(ref PlaneData plane, Vector2 coord)
+        public sl.ERROR_CODE FindPlaneAtHit(ref PlaneData plane, Vector2 coord, ref PlaneDetectionParameters planeDetectionParameters)
         {
             IntPtr p = IntPtr.Zero;
             Quaternion out_quat = Quaternion.Identity;
             Vector3 out_trans = Vector3.Zero;
 
-            p = dllz_find_plane_at_hit(CameraID, coord, false);
+            sl_PlaneDetectionParameters plane_params = new sl_PlaneDetectionParameters();
+            plane_params.maxDistanceThreshold = planeDetectionParameters.maxDistanceThreshold;
+            plane_params.normalSimilarityThreshold = planeDetectionParameters.normalSimilarityThreshold;
+
+            p = dllz_find_plane_at_hit(CameraID, coord, ref plane_params, false);
             plane.Bounds = new Vector3[256];
 
             if (p != IntPtr.Zero)

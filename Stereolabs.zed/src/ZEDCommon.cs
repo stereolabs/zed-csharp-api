@@ -12,6 +12,7 @@ using System.Collections.Generic;
 /// \defgroup PositionalTracking_group Positional Tracking Module
 /// \defgroup Object_group Object Detection Module
 /// \defgroup Sensors_group Sensors Module
+/// \defgroup Fusion_group Fusion Module
 
 namespace sl
 {
@@ -80,20 +81,23 @@ namespace sl
         }
     };
 
+    /// \ingroup Fusion_group
     /// <summary>
-    /// Change the type of outputed position for the Fusion positional tracking (raw data or fusion data projected into zed camera).
+    /// Change the type of outputted position (raw data or fusion data projected into zed camera).
     /// </summary>
     public enum POSITION_TYPE
     {
         /// <summary>
-        /// The output position will be the raw position data
+        /// The output position will be the raw position data.
         /// </summary>
         RAW = 0,
         /// <summary>
-        /// The output position will be the fused position projected into the requested camera repository
+        /// The output position will be the fused position projected into the requested camera repository.
         /// </summary>
         FUSION,
-        LAST
+        ///@cond SHOWHIDDEN 
+        SL_POSITION_TYPE_LAST
+        ///@endcond
     };
 
     /// <summary>
@@ -396,6 +400,41 @@ namespace sl
         /// Device Sensors configuration as defined in \ref SensorsConfiguration.
         /// </summary>
         public SensorsConfiguration sensorsConfiguration;
+    };
+
+    /// \ingroup Video_group
+    /// <summary>
+    /// Defines the input type used in the ZED SDK. Can be used to select a specific camera with ID or serial number, or a svo file
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct InputType
+    {
+        /// <summary>
+        /// The current input type.
+        /// </summary>
+        public INPUT_TYPE inputType;
+        /// <summary>
+        /// Serial Number of the camera
+        /// </summary>
+	    uint serialNumber;
+        /// <summary>
+        /// Id of the camera
+        /// </summary>
+        uint id;
+        /// <summary>
+        /// path to the SVO file
+        /// </summary>
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+        char[] svoInputFilename;
+        /// <summary>
+        /// Ip address of the streaming camera
+        /// </summary>
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+        char[] streamInputIp;
+        /// <summary>
+        /// port of the streaming camera
+        /// </summary>
+        ushort streamInputPort;
     };
 
     #endregion
@@ -1039,7 +1078,7 @@ namespace sl
         /// <summary>
         /// Distortion coefficients.
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U8, SizeConst = 5)]
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U8, SizeConst = 12)]
         public double[] disto;
 
         /// <summary>
@@ -1058,6 +1097,10 @@ namespace sl
         /// Camera's current resolution.
         /// </summary>
         public Resolution resolution;
+        /// <summary>
+        /// Real focal length in millimeters
+        /// </summary>
+        public float focalLengthMetric;
     };
 
     ///\ingroup Depth_group
@@ -1353,6 +1396,7 @@ namespace sl
         /// <summary>
         /// Define a computation upper limit to the grab frequency.
         /// This can be useful to get a known constant fixed rate or limit the computation load while keeping a short exposure time by setting a high camera capture framerate.
+
         /// The value should be inferior to the InitParameters::camera_fps and strictly positive.It has no effect when reading an SVO file.
         /// This is an upper limit and won't make a difference if the computation is slower than the desired compute capping fps.
         /// \note Internally the grab function always tries to get the latest available image while respecting the desired fps as much as possible.
@@ -1658,7 +1702,8 @@ namespace sl
 
     ///\ingroup  Video_group
     /// <summary>
-    /// Represents the available resolution options.
+    /// Represents the available resolution options.\n
+    /// Warning: All resolution are not available for every camera. You can find the available resolutions for each camera in <a href="https://www.stereolabs.com/docs/video/camera-controls#selecting-a-resolution">our documentation</a>.
     /// </summary>
     public enum RESOLUTION
     {
@@ -1671,7 +1716,7 @@ namespace sl
         /// </summary>
         HD1080,
         /// <summary>
-        /// 1920*1200 (x2), available framerates: 30,60 fps. (ZED-X(M) only).
+        /// 1920*1200. Supported frame rates: 15, 30, 60 fps.
         /// </summary>
         HD1200,
         /// <summary>
@@ -1679,7 +1724,7 @@ namespace sl
         /// </summary>
         HD720,
         /// <summary>
-        /// 960*600 (x2), available framerates: 60, 120 fps. (ZED-X(M) only).
+        /// 960*600. Supported frame rates: 15, 30, 60, 120 fps.
         /// </summary>
         HDSVGA,
         /// <summary>
@@ -1687,7 +1732,7 @@ namespace sl
         /// </summary>
         VGA,
         /// <summary>
-        /// Select the resolution compatible with camera, on ZEDX HD1200, HD720 otherwise.
+        /// Select the resolution compatible with camera, on ZED X HD1200, HD720 otherwise.
         /// </summary>
         AUTO
     };
@@ -1992,6 +2037,26 @@ namespace sl
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     #region Spatial Mapping Module
+
+    ///\ingroup SpatialMapping_group
+    /// <summary>
+    /// Sets the plane detection parameters.
+    /// </summary>
+    public class PlaneDetectionParameters
+    {
+        /// <summary>
+        /// Controls the spread of plane by checking the position difference.
+        /// Default is 0.15 meters.
+        /// </summary>
+        public float maxDistanceThreshold = 0.15f;
+
+        /// <summary>
+        /// Controls the spread of plane by checking the angle difference.
+        /// Default is 15 degrees.
+        /// </summary>
+        public float normalSimilarityThreshold = 15.0f;
+    }
+
     ///\ingroup SpatialMapping_group
     /// <summary>
     /// Sets the spatial mapping parameters.
@@ -3096,6 +3161,7 @@ namespace sl
     /// <summary>
     /// Contains the result of the body detection module.
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct Bodies
     {
         /// <summary>
@@ -3609,6 +3675,7 @@ namespace sl
     /// <summary>
     /// Contains batched data of a detected object
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public class ObjectsBatch
     {
         /// <summary>
@@ -3779,50 +3846,42 @@ namespace sl
 
 
 
-#endregion
+    #endregion
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////  Fusion API ///////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#region Fusion API Module
+    #region Fusion API Module
 
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Lists the types of error that can be raised by the Fusion.
+    /// </summary>
     public enum FUSION_ERROR_CODE
     {
         /// <summary>
-        /// All data from all sources were consumed, no new process available.
-        /// </summary>
-        NO_NEW_DATA_AVAILABLE = -10,
-        /// <summary>
-        /// Problem was detected with ingested timestamp
-        /// </summary>
-        INVALID_TIMESTAMP = -9,
-        /// <summary>
-        /// Problem was detected with ingested covariance 
-        /// </summary>
-        INVALID_COVARIANCE = -8,
-        /// <summary>
-        /// The requested body tracking model is not available
+        /// Senders are using different body formats. Consider changing them.
         /// </summary>
         WRONG_BODY_FORMAT = -7,
         /// <summary>
-        /// The following module was not enabled
+        /// The following module was not enabled.
         /// </summary>
         NOT_ENABLE = -6,
         /// <summary>
-        /// Some source are provided by SVO and some sources are provided by LIVE stream 
+        /// Some sources are provided by SVO and others by LIVE stream.
         /// </summary>
         INPUT_FEED_MISMATCH = -5,
         /// <summary>
-        /// Connection timed out ... impossible to reach the sender... this may be due to ZedHub absence
+        /// Connection timed out. Unable to reach the sender. Verify the sender's IP/port.
         /// </summary>
         CONNECTION_TIMED_OUT = -4,
         /// <summary>
-        /// Detect multiple instance of SHARED_MEMORY communicator ... only one is authorised
+        /// Intra-process shared memory allocation issue. Multiple connections to the same data.
         /// </summary>
         MEMORY_ALREADY_USED = -3,
         /// <summary>
-        /// The IP format provided is wrong, please provide IP in this format a.b.c.d where (a, b, c, d) are numbers between 0 and 255.
+        /// The provided IP address format is incorrect. Please provide the IP in the format 'a.b.c.d', where (a, b, c, d) are numbers between 0 and 255.
         /// </summary>
         BAD_IP_ADDRESS = -2,
         /// <summary>
@@ -3830,113 +3889,227 @@ namespace sl
         /// </summary>
         FAILURE = -1,
         /// <summary>
-        /// 
+        /// Standard code for successful behavior.
         /// </summary>
         SUCCESS = 0,
         /// <summary>
-        /// Some big differences has been observed between senders FPS.
+        /// Significant differences observed between sender's FPS.
         /// </summary>
         ERRATIC_FPS = 1,
         /// <summary>
-        /// At least one sender has fps lower than 10 FPS.
+        /// At least one sender has an FPS lower than 10 FPS.
         /// </summary>
-        FPS_TOO_LOW = 2
+        FPS_TOO_LOW = 2,
+        /// <summary>
+        /// Problem detected with ingested timestamp. Sample data will be ignored.
+        /// </summary>
+        INVALID_TIMESTAMP = 3,
+        /// <summary>
+        /// Problem detected with ingested covariance. Sample data will be ignored.
+        /// </summary>
+        INVALID_COVARIANCE = 4,
+        /// <summary>
+        /// All data from all sources has been consumed. No new data is available for processing.
+        /// </summary>
+        NO_NEW_DATA_AVAILABLE = 5
     }
 
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Lists the types of error that can be raised during the Fusion by senders.
+    /// </summary>
+    public enum SENDER_ERROR_CODE
+    {
+        /// <summary>
+        /// The sender has been disconnected.
+        /// </summary>
+        DISCONNECTED = -1,
+        /// <summary>
+        ///  Standard code for successful behavior.
+        /// </summary>
+        SUCCESS = 0,
+        /// <summary>
+        /// The sender encountered a grab error.
+        /// </summary>
+        GRAB_ERROR = 1,
+        /// <summary>
+        /// The sender does not run with a constant frame rate.
+        /// </summary>
+        ERRATIC_FPS = 2,
+        /// <summary>
+        /// The frame rate of the sender is lower than 10 FPS.
+        /// </summary>
+        FPS_TOO_LOW = 3
+    }
+
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Holds the options used to initialize the \ref Fusion object.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct InitFusionParameters
     {
         /// <summary>
-        /// This parameter allows you to select the unit to be used for all metric values of the SDK. (depth, point cloud, tracking, mesh, and others).
-	    /// default : "UNIT::MILLIMETER"
+        /// This parameter allows you to select the unit to be used for all metric values of the SDK (depth, point cloud, tracking, mesh, and others).
+	    /// Default : \ref UNIT "UNIT::MILLIMETER"
         /// </summary>
         public UNIT coordinateUnits;
 
         /// <summary>
-        /// Positional tracking, point clouds and many other features require a given COORDINATE_SYSTEM to be used as reference.
-        /// This parameter allows you to select the COORDINATE_SYSTEM used by the Camera to return its measures.
-    	/// This defines the order and the direction of the axis of the coordinate system.
-    	/// default : "COORDINATE_SYSTEM::IMAGE"
+        /// Positional tracking, point clouds and many other features require a given \ref COORDINATE_SYSTEM to be used as reference.
+        /// This parameter allows you to select the \ref COORDINATE_SYSTEM used by the \ref Camera to return its measures.
+    	/// \n This defines the order and the direction of the axis of the coordinate system.
+    	/// \n Default : \ref COORDINATE_SYSTEM "COORDINATE_SYSTEM::IMAGE"
         /// </summary>
         public COORDINATE_SYSTEM coordinateSystem;
 
         /// <summary>
-        /// Allows users to extract some stats of the Fusion API like drop frame of each camera, latency, etc.
+        /// It allows users to extract some stats of the Fusion API like drop frame of each camera, latency, etc...
         /// </summary>
+        [MarshalAs(UnmanagedType.U1)]
         public bool outputPerformanceMetrics;
 
         /// <summary>
-        /// Show logs or not.
+        /// Enable the verbosity mode of the SDK.
         /// </summary>
+        [MarshalAs(UnmanagedType.U1)]
         public bool verbose;
 
         /// <summary>
-        /// If specified, changes the number of periods necessary for a source to go into timeout without data. For example, if you set this to 5,
-	    /// if any source does not receive data during 5 periods, these sources will go into timeout and will be ignored.
+        /// If specified change the number of period necessary for a source to go in timeout without data. For example, if you set this to 5
+        /// then, if any source do not receive data during 5 period, these sources will go to timeout and will be ignored.	    /// if any source does not receive data during 5 periods, these sources will go into timeout and will be ignored.
         /// </summary>
         public uint timeoutPeriodsNumber;
     }
-    
+
+    /// \ingroup Fusion_group
     /// <summary>
-    /// 
+    /// Lists the types of communications available for Fusion app.
     /// </summary>
-    public struct PositionalTrackingFusionParameters
+    public enum COMM_TYPE
     {
         /// <summary>
-        /// If the GNSS should be enabled.
+        /// The sender and receiver are on the samed local network and communicate by RTP, communication can be affected by the network load.
         /// </summary>
-        public bool enableGNSSFusion;
-
+        LOCAL_NETWORK, 
         /// <summary>
-        /// Distance necessary for initializing the transformation between the cameras coordinate system and the GNSS coordinate system (north aligned).
+        /// Both sender and receiver are declared by the same process, can be in different threads, this communication is optimized.
         /// </summary>
-        public float gnssInitialisationDistance;
+        INTRA_PROCESS 
+    };
 
-        /// <summary>
-        /// Value used by Fusion for ignoring high covariance input GNSS data.
-        /// </summary>
-        public float gnssIgnoreThreshold;
-    }
-
-    public struct InitCameraFusionParameters
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Holds the communication parameter to configure the connection between senders and receiver
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct CommunicationParameters
     {
-        public float depthMaximumDistance;
-        public float detectionConfidenceThreshold;
-        public int sdkGpuId;
-        public int confidenceThreshold;
-    }
+        /// <summary>
+        /// Type of communication
+        /// </summary>
+        public COMM_TYPE communicationType;
+        /// <summary>
+        /// The comm port used for streaming the data
+        /// </summary>
+	    uint ipPort;
+        /// <summary>
+        /// The IP address of the sender
+        /// </summary>
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+        char[] ipAdd;
+    };
 
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Stores the Fusion configuration, can be read from /write to a Json file.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct FusionConfiguration
+    {
+        /// <summary>
+        /// The serial number of the used ZED camera.
+        /// </summary>
+        int serialnumber;
+        /// <summary>
+        /// The communication parameters to connect this camera to the Fusion.
+        /// </summary>
+        public CommunicationParameters commParam;
+        /// <summary>
+        /// The WORLD position of the camera for Fusion.
+        /// </summary>
+        public Vector3 position;
+        /// <summary>
+        /// The WORLD rotation of the camera for Fusion.
+        /// </summary>
+        public Quaternion rotation;
+        /// <summary>
+        /// The input type for the current camera.
+        /// </summary>
+        public INPUT_TYPE inputType;
+    };
+
+
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Holds the options used to initialize the body tracking module of the \ref Fusion.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct BodyTrackingFusionParameters
     {
         /// <summary>
-        /// Defines if the object detection will track objects across images.
+        /// Defines if the object detection will track objects across images flow.
+        ///
+        /// Default: true
         /// </summary>
+        [MarshalAs(UnmanagedType.U1)]
         public bool enableTracking;
 
         /// <summary>
         /// Defines if the body fitting will be applied.
+        ///
+        /// Default: false
+        /// \note If you enable it and the camera provides data as BODY_18 the fused body format will be BODY_34.
         /// </summary>
+        [MarshalAs(UnmanagedType.U1)]
         public bool enableBodyFitting;
     }
 
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Holds the options used to change the behavior of the body tracking module at runtime.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct BodyTrackingFusionRuntimeParameters
     {
         /// <summary>
-        /// If the fused skeleton has less than skeletonMinimumAllowedKeypoints keypoints, it will be discarded. Default is -1.
+        /// If the fused skeleton has less than skeleton_minimum_allowed_keypoints keypoints, it will be discarded.
+        ///
+        /// Default: -1.
         /// </summary>
         public int skeletonMinimumAllowedKeypoints;
 
         /// <summary>
-        /// If a skeleton was detected in less than skeletonMinimumAllowedCameras cameras, it will be discarded.
+        /// If a skeleton was detected in less than skeleton_minimum_allowed_camera cameras, it will be discarded.
+        ///
+        /// Default: -1.
         /// </summary>
         public int skeletonMinimumAllowedCameras;
 
         /// <summary>
 	    /// This value controls the smoothing of the tracked or fitted fused skeleton.
-        /// It ranges from 0 (low smoothing) and 1 (high smoothing).
+        ///
+        /// It is ranged from 0 (low smoothing) and 1 (high smoothing).
+        /// \n Default: 0.
         /// </summary>
         public float skeletonSmoothing;
     }
 
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Used to identify a specific camera in the Fusion API
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct CameraIdentifier
     {
         /// <summary>
@@ -3945,124 +4118,336 @@ namespace sl
         public ulong sn;
     }
 
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Holds the metrics of a sender in the fusion process.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct CameraMetrics
     {
         public CameraIdentifier uuid;
 
         /// <summary>
-        /// Gives the fps of the received datas
+        /// FPS of the received data.
         /// </summary>
-        public float received_fps;
+        public float receivedFps;
 
         /// <summary>
-        /// Gives the latency (in second) of the received datas
+        /// Latency (in seconds) of the received data.
         /// </summary>
-        public float received_latency;
+        public float receivedLatency;
 
         /// <summary>
-        /// Gives the latency (in second) after Fusion synchronization
+        /// Latency (in seconds) after Fusion synchronization.
         /// </summary>
-        public float synced_latency;
+        public float syncedLatency;
 
         /// <summary>
-        /// If no data present is set to false
+        /// If no data present is set to false.
         /// </summary>
-        public bool is_present;
+        [MarshalAs(UnmanagedType.U1)]
+        public bool isPresent;
 
         /// <summary>
-        /// Percent of detection par image during the last second in %, a low values means few detections occurs lately
+        /// Percent of detection par image during the last second in %, a low value means few detections occurs lately.
         /// </summary>
-        public float ratio_detection;
+        public float ratioDetection;
 
         /// <summary>
-        /// Percent of detection par image during the last second in %, a low values means few detections occurs lately
+        /// Average time difference for the current fused data.
         /// </summary>
-        public float delta_ts;
+        public float deltaTs;
 
     }
 
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Holds the metrics of the fusion process.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct FusionMetrics
     {
         /// <summary>
-        /// Mean number of camera that provides data during the past second
+        /// Mean number of camera that provides data during the past second.
         /// </summary>
-        public float mean_camera_fused;
+        public float meanCameraFused;
 
         /// <summary>
-        /// Mean number of camera that provides data during the past second
+        /// Standard deviation of the data timestamp fused, the lower the better.
         /// </summary>
-        public float mean_stdev_between_camera;
+        public float meanStdevBetweenCamera;
 
+        /// <summary>
+        /// Sender metrics.
+        /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = (int)(Constant.MAX_FUSED_CAMERAS))]
         public CameraMetrics[] cameraIndividualStats;
     };
 
-#endregion
+    #endregion
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////  GNSS API ////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#region GNSS API
+    #region GNSS API
 
-    public struct GNSSData
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Current state of GNSS fusion.
+    /// </summary>
+    public enum GNSS_CALIBRATION_STATE
     {
-        // longitude in radian
-        public double longitude;
-         // latitude in radian
-        public double latitude;
-         // altitude in meter
-        public double altitude;
-         // Timestamp
-        public ulong ts;
-
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 9)]
-        public double[] position_covariance;
-         
-        public double longitude_std;
-        public double latitude_std;
-        public double altitude_std;
-    }
-
-    public struct GeoPose
-    {
-        public Vector3 translation;
-	    public Quaternion rotation;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 36)]
-        public float[] pose_covariance;
-        public double horizontal_accuracy;
-        public double vertical_accuracy;
-        public double latidude;
-        public double longitude;
-        public double altitude;
-        public double east;
-        public double down;
-        public double north;
-        public double heading;
+        /// <summary>
+        /// The GNSS/VIO calibration has not been completed yet. Please continue moving the robot while ingesting GNSS data to perform the calibration.
+        /// </summary>
+        GNSS_CALIBRATION_STATE_NOT_CALIBRATED = 0,
+        /// <summary>
+        /// The GNSS/VIO calibration is completed.
+        /// </summary>
+        GNSS_CALIBRATION_STATE_CALIBRATED = 1,
+        /// <summary>
+        /// A GNSS/VIO re-calibration is in progress in the background. Current geo-tracking services may not be entirely accurate.
+        /// </summary>
+        GNSS_CALIBRATION_STATE_RE_CALIBRATION_IN_PROGRESS = 2
     };
 
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Contains all GNSS data to be used for positional tracking as prior.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct GNSSData
+    {
+        /// <summary>
+        /// Longitude in radian
+        /// </summary>
+        public double longitude;
+        /// <summary>
+        /// Latitude in radian
+        /// </summary>
+        public double latitude;
+        /// <summary>
+        /// Altitude in meter
+        /// </summary>
+        public double altitude;
+        /// <summary>
+        /// Timestamp of GNSS position, must be aligned with camera time reference.
+        /// </summary>
+        public ulong ts;
+        /// <summary>
+        /// Position covariance in meter must be expressed in ENU coordinate system.
+	    /// For eph, epv GNSS sensors, set it as follow: {eph*eph, 0, 0, 0, eph*eph, 0, 0, 0, epv*epv}.
+        /// </summary>
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 9)]
+        public double[] positionCovariance;
+        /// <summary>
+        /// Longitude standard deviation.
+        /// </summary>
+        public double longitudeStd;
+        /// <summary>
+        /// Latitude standard deviation.
+        /// </summary>
+        public double latitudeStd;
+        /// <summary>
+        /// Altitude standard deviation.
+        /// </summary>
+        public double altitudeStd;
+    }
+
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Holds Geo reference position.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct GeoPose
+    {
+        /// <summary>
+        /// The translation defining the pose in ENU.
+        /// </summary>
+        public Vector3 translation;
+        /// <summary>
+        /// The rotation defining the pose in ENU.
+        /// </summary>
+        public Quaternion rotation;
+        /// <summary>
+        /// The pose covariance in ENU.
+        /// </summary>
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 36)]
+        public float[] poseCovariance;
+        /// <summary>
+        /// The horizontal accuracy.
+        /// </summary>
+        public double horizontalAccuracy;
+        /// <summary>
+        /// The vertical accuracy.
+        /// </summary>
+        public double verticalAccuracy;
+        /// <summary>
+        /// The latitude, longitude, altitude.
+        /// </summary>
+        public LatLng latCoordinate;
+        /// <summary>
+        /// The heading.
+        /// </summary>
+        public double heading;
+        /// <summary>
+        /// The timestamp of GeoPose.
+        /// </summary>
+        public ulong timestamp;
+    };
+
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Represents a world position in ECEF format.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct ECEF
     {
+        /// <summary>
+        /// x coordinate of ECEF.
+        /// </summary>
         public double x;
+        /// <summary>
+        /// y coordinate of ECEF.
+        /// </summary>
         public double y;
+        /// <summary>
+        /// z coordinate of ECEF.
+        /// </summary>
         public double z;
     }
 
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Represents a world position in LatLng format.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct LatLng
     {
+        /// <summary>
+        /// Latitude in radian.
+        /// </summary>
         public double latitude;
+        /// <summary>
+        /// Longitude in radian.
+        /// </summary>
         public double longitude;
+        /// <summary>
+        /// Altitude in meter.
+        /// </summary>
         public double altitude;
     }
 
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Represents a world position in UTM format.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct UTM
     {
+        /// <summary>
+        /// Northing coordinate.
+        /// </summary>
         public double northing;
+        /// <summary>
+        /// Easting coordinate.
+        /// </summary>
         public double easting;
+        /// <summary>
+        /// Gamma coordinate.
+        /// </summary>
         public double gamma;
+        /// <summary>
+        /// UTMZone of the coordinate.
+        /// </summary>
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
         public string UTMZone;
     }
 
-#endregion
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Holds the options used for calibrating GNSS / VIO.
+    /// </summary>
+    public class GNSSCalibrationParameters
+    {
+        /// <summary>
+        /// This parameter defines the target yaw uncertainty at which the calibration process between GNSS and VIO concludes.
+        /// The unit of this parameter is in radian.
+        /// 
+        /// Default: 0.1 radians
+        /// </summary>
+        public float targetYawUncertainty = 0.1f;
+        /// <summary>
+        /// When this parameter is enabled (set to true), the calibration process between GNSS and VIO accounts for the uncertainty in the determined translation, thereby facilitating the calibration termination. 
+        /// The maximum allowable uncertainty is controlled by the 'target_translation_uncertainty' parameter.
+	    ///
+        /// Default: false
+        /// </summary>
+        public bool enableTranslationUncertaintyTarget = false;
+        /// <summary>
+        /// This parameter defines the target translation uncertainty at which the calibration process between GNSS and VIO concludes.
+        ///
+        /// Default: 10e-2 (10 centimeters)
+        /// </summary>
+        public float targetTranslationUncertainty = 10e-2f;
+        /// <summary>
+        /// This parameter determines whether reinitialization should be performed between GNSS and VIO fusion when a significant disparity is detected between GNSS data and the current fusion data.
+        /// It becomes particularly crucial during prolonged GNSS signal loss scenarios.
+        /// 
+        /// Default: true
+        /// </summary>
+        public bool enableReinitialization = true;
+        /// <summary>
+        /// This parameter determines the threshold for GNSS/VIO reinitialization.
+        /// If the fused position deviates beyond out of the region defined by the product of the GNSS covariance and the gnss_vio_reinit_threshold, a reinitialization will be triggered.
+        /// 
+        /// Default: 5
+        /// </summary>
+        public float gnssVioReinitThreshold = 5;
+        /// <summary>
+        /// If this parameter is set to true, the fusion algorithm will used a rough VIO / GNSS calibration at first and then refine it.
+        /// This allow you to quickly get a fused position.
+        ///
+        ///  Default: true
+        /// </summary>     
+        public bool enableRollingCalibration = true;
+
+        public GNSSCalibrationParameters(float targetYawUncertainty_ = 0.1f, bool enableTranslationUncertaintyTarget_ = false, float targetTranslationUncertainty_ = 0.01f,
+            bool enableReinitialization_ = true, float gnssVioReinitThreshold_ = 5, bool enableRollingCalibration_ = true)
+        {
+            targetYawUncertainty = targetYawUncertainty_;
+            enableTranslationUncertaintyTarget = enableTranslationUncertaintyTarget_;
+            targetTranslationUncertainty = targetTranslationUncertainty_;
+            enableReinitialization = enableReinitialization_;
+            gnssVioReinitThreshold = gnssVioReinitThreshold_;
+            enableRollingCalibration = enableRollingCalibration_;
+        }
+    };
+
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Holds the options used for initializing the positional tracking fusion module.
+    /// </summary>
+    public class PositionalTrackingFusionParameters
+    {
+        /// <summary>
+        /// This attribute is responsible for enabling or not GNSS positional tracking fusion.
+        /// </summary>
+        public bool enableGNSSFusion = false;
+        /// <summary>
+        /// Control the VIO / GNSS calibration process.
+        /// </summary>
+        public GNSSCalibrationParameters gnssCalibrationParameters;
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public PositionalTrackingFusionParameters()
+        {
+            enableGNSSFusion = false;
+            gnssCalibrationParameters = new GNSSCalibrationParameters();
+        }
+    }
+
+    #endregion
 }// end namespace sl
