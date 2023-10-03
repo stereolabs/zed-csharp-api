@@ -37,8 +37,17 @@ namespace sl
         [DllImport(nameDll, EntryPoint = "sl_fusion_subscribe")]
         private static extern FUSION_ERROR_CODE dllz_fusion_subscribe(ref CameraIdentifier uuid, System.Text.StringBuilder jsonConfigFileName, ref Vector3 poseTranslation, ref System.Numerics.Quaternion poseRotation);
 
+        [DllImport(nameDll, EntryPoint = "sl_fusion_unsubscribe")]
+        private static extern FUSION_ERROR_CODE dllz_fusion_unsubscribe(ref CameraIdentifier uuid);
+
         [DllImport(nameDll, EntryPoint = "sl_fusion_update_pose")]
         private static extern FUSION_ERROR_CODE dllz_fusion_update_pose(ref CameraIdentifier uuid, ref Vector3 poseTranslation, ref System.Numerics.Quaternion poseRotation);
+
+        [DllImport(nameDll, EntryPoint = "sl_fusion_retrieve_image")]
+        private static extern FUSION_ERROR_CODE dllz_fusion_retrieve_image(System.IntPtr ptr, ref CameraIdentifier uuid, int width, int height);
+
+        [DllImport(nameDll, EntryPoint = "sl_fusion_retrieve_measure")]
+        private static extern FUSION_ERROR_CODE dllz_fusion_retrieve_measure(System.IntPtr ptr, ref CameraIdentifier uuid, MEASURE measure, int width, int height);
 
         /************************************************************************
          * Body Tracking Fusion
@@ -244,6 +253,16 @@ namespace sl
         }
 
         /// <summary>
+        /// Remove the specified camera from data provider.
+        /// </summary>
+        /// <param name="uuid">The requested camera identifier.</param>
+        /// <returns>FUSION_ERROR_CODE "SUCCESS" if it goes as it should, otherwise it returns an FUSION_ERROR_CODE.</returns>
+        public FUSION_ERROR_CODE Unsubscribe(ref CameraIdentifier uuid)
+        {
+            return dllz_fusion_unsubscribe(ref uuid);
+        }
+
+        /// <summary>
         /// updates the camera World pose
         /// </summary>
         /// <param name="uuid"></param>
@@ -254,6 +273,33 @@ namespace sl
         {
             return dllz_fusion_update_pose(ref uuid, ref poseTranslation, ref poseRotation);
         }
+
+        /// <summary>
+        /// Returns the current sl.VIEW.LEFT of the specified camera, the data is synchronized.
+        /// </summary>
+        /// <param name="mat">the CPU BGRA image of the requested camera.</param>
+        /// <param name="uuid">the requested camera identifier.</param>
+        /// <param name="resolution">the requested resolution of the output image, can be lower or equal (default) to the original image resolution.</param>
+        /// <returns>FUSION_ERROR_CODE "SUCCESS" if it goes as it should, otherwise it returns an FUSION_ERROR_CODE.</returns>
+        public FUSION_ERROR_CODE RetrieveImage(Mat mat, ref CameraIdentifier uuid, Resolution resolution = new sl.Resolution())
+        {
+            return dllz_fusion_retrieve_image(mat.MatPtr, ref uuid, (int)resolution.width, (int)resolution.height);
+        }
+
+        /// <summary>
+        /// Returns the current measure of the specified camera, the data is synchronized.
+        /// </summary>
+        /// <param name="mat">the CPU data of the requested camera.</param>
+        /// <param name="uuid">the requested camera identifier.</param>
+        /// <param name="type">the requested measure type, by default DEPTH (F32_C1)</param>
+        /// Only MEASURE: DEPTH, XYZ, XYZRGBA, XYZBGRA, XYZARGB, XYZABGR, DEPTH_U16_MM are available.
+        /// <param name="resolution">the requested resolution of the output image, can be lower or equal (default) to the original image resolution.</param>
+        /// <returns>FUSION_ERROR_CODE "SUCCESS" if it goes as it should, otherwise it returns an FUSION_ERROR_CODE.</returns>
+        public FUSION_ERROR_CODE RetrieveMeasure(Mat mat, ref CameraIdentifier uuid, MEASURE measure = MEASURE.DEPTH, Resolution resolution = new sl.Resolution())
+        {
+            return dllz_fusion_retrieve_measure(mat.MatPtr, ref uuid, measure, (int)resolution.width, (int)resolution.height);
+        }
+
 
         /************************************************************************
          * Body Tracking Fusion

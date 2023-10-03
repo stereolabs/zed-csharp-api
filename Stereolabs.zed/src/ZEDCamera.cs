@@ -3,14 +3,15 @@
 using System.Collections.Generic;
 using System;
 using System.Runtime.InteropServices;
-using System.Reflection;
 using System.Numerics;
 
 namespace sl
 {
     ///\ingroup  Video_group
     /// <summary>
-    /// This class is the main interface with the camera and the SDK features, such as: video, depth, tracking, mapping, and more.
+    /// This class serves as the primary interface between the camera and the various features provided by the SDK.
+    ///
+    /// It enables seamless integration and access to a wide array of capabilities, including video streaming, depth sensing, object tracking, mapping, and much more.
     /// </summary>
     public class Camera
     {
@@ -22,11 +23,15 @@ namespace sl
         const string nameDll = sl.ZEDCommon.NameDLL;
 
         /// <summary>
-        /// Width of the textures in pixels. Corresponds to the ZED's current resolution setting.
+        /// Width of the textures in pixels.
+        ///
+        /// It corresponds to the camera's current resolution setting.
         /// </summary>
         private int imageWidth;
         /// <summary>
-        /// Width of the images returned by the ZED in pixels. Corresponds to the ZED's current resolution setting.
+        /// Width of the images returned by the camera in pixels.
+        ///
+        /// It corresponds to the camera's current resolution setting.
         /// </summary>
         public int ImageWidth
         {
@@ -40,11 +45,15 @@ namespace sl
         private const float Rad2Deg = 57.29578F;
 
         /// <summary>
-        /// Height of the textures in pixels. Corresponds to the ZED's current resolution setting.
+        /// Height of the textures in pixels.
+        ///
+        /// It corresponds to the camera's current resolution setting.
         /// </summary>
         private int imageHeight;
         /// <summary>
-        /// Height of the images returned by the ZED in pixels. Corresponds to the ZED's current resolution setting.
+        /// Height of the images returned by the camera in pixels.
+        ///
+        /// It corresponds to the camera's current resolution setting.
         /// </summary>
         public int ImageHeight
         {
@@ -65,15 +74,17 @@ namespace sl
         private RESOLUTION currentResolution;
 
         /// <summary>
-        /// Desired FPS from the ZED camera. This is the maximum FPS for the ZED's current
-        /// resolution unless a lower setting was specified in Open().
-        /// Maximum values are bound by the ZED's output, not system performance.
+        /// Desired FPS from the ZED camera.
+        ///
+        /// This is the maximum FPS for the camera's current resolution unless a lower setting was specified in Open().
+        /// Maximum values are bound by the camera's output, not system performance.
         /// </summary>
         private uint fpsMax = 60; //Defaults to HD720 resolution's output.
         /// <summary>
-        /// Desired FPS from the ZED camera. This is the maximum FPS for the ZED's current
-        /// resolution unless a lower setting was specified in Open().
-        /// Maximum values are bound by the ZED's output, not system performance.
+        /// Desired FPS from the ZED camera.
+        /// 
+        /// This is the maximum FPS for the camera's current resolution unless a lower setting was specified in Open().
+        /// \n Maximum values are bound by the camera's output, not system performance.
         /// </summary>
         public float GetRequestedCameraFPS()
         {
@@ -81,52 +92,56 @@ namespace sl
         }
 
         /// <summary>
-        /// Camera's stereo baseline (distance between the cameras). Extracted from calibration files.
+        /// Baseline of the camera (distance between the cameras).
+        ///
+        /// Extracted from calibration files.
         /// </summary>
         private float baseline = 0.0f;
         /// <summary>
-        /// Camera's stereo baseline (distance between the cameras). Extracted from calibration files.
+        /// Baseline of the camera (distance between the cameras).
+        ///
+        /// Extracted from calibration files.
         /// </summary>
         public float Baseline
         {
             get { return baseline; }
         }
         /// <summary>
-        /// ZED's current horizontal field of view in degrees.
+        /// Current horizontal field of view in degrees of the camera.
         /// </summary>
         private float fov_H = 0.0f;
         /// <summary>
-        /// ZED's current vertical field of view in degrees.
+        /// Current vertical field of view in degrees of the camera.
         /// </summary>
         private float fov_V = 0.0f;
         /// <summary>
-        /// ZED's current horizontal field of view in degrees.
+        /// Current horizontal field of view in degrees of the camera.
         /// </summary>
         public float HorizontalFieldOfView
         {
             get { return fov_H; }
         }
         /// <summary>
-        /// ZED's current vertical field of view in degrees.
+        /// Current vertical field of view in degrees of the camera.
         /// </summary>
         public float VerticalFieldOfView
         {
             get { return fov_V; }
         }
         /// <summary>
-        /// Structure containing information about all the sensors available in the current device
+        /// Structure containing information about all the sensors available in the current device.
         /// </summary>
         private SensorsConfiguration sensorsConfiguration;
         /// <summary>
-        /// Stereo parameters for current ZED camera prior to rectification (distorted).
+        /// Stereo parameters for the current camera prior to rectification (distorted).
         /// </summary>
         private CalibrationParameters calibrationParametersRaw;
         /// <summary>
-        /// Stereo parameters for current ZED camera after rectification (undistorted).
+        /// Stereo parameters for the current camera after rectification (undistorted).
         /// </summary>
         private CalibrationParameters calibrationParametersRectified;
         /// <summary>
-        /// Camera model - ZED or ZED Mini.
+        /// Model of the camera.
         /// </summary>
         private sl.MODEL cameraModel;
 
@@ -154,7 +169,7 @@ namespace sl
             get { return calibrationParametersRectified; }
         }
         /// <summary>
-        /// Camera model - ZED or ZED Mini.
+        /// Model of the camera.
         /// </summary>
         public sl.MODEL CameraModel
         {
@@ -210,7 +225,10 @@ namespace sl
         private static extern int dllz_open(int cameraID, ref sl_initParameters parameters, uint serialNumber, System.Text.StringBuilder svoPath, System.Text.StringBuilder ipStream, int portStream, System.Text.StringBuilder output, System.Text.StringBuilder opt_settings_path, System.Text.StringBuilder opencv_calib_path);
 
         [DllImport(nameDll, EntryPoint = "sl_start_publishing")]
-        private static extern void dllz_start_publishing(int cameraID, System.Text.StringBuilder jsonConfigFileName);
+        private static extern ERROR_CODE dllz_start_publishing(int cameraID, ref CommunicationParameters commParams);
+
+        [DllImport(nameDll, EntryPoint = "sl_stop_publishing")]
+        private static extern ERROR_CODE dllz_stop_publishing(int cameraID);
 
         /*
          * Close function.
@@ -265,11 +283,20 @@ namespace sl
          * Camera control functions.
          */
 
+        [DllImport(nameDll, EntryPoint = "sl_is_camera_setting_supported")]
+        private static extern bool dllz_is_camera_setting_supported(int id, VIDEO_SETTINGS setting);
+
         [DllImport(nameDll, EntryPoint = "sl_set_camera_settings")]
         private static extern ERROR_CODE dllz_set_camera_settings(int id, int mode, int value);
 
+        [DllImport(nameDll, EntryPoint = "sl_set_camera_settings_min_max")]
+        private static extern ERROR_CODE dllz_set_camera_settings_min_max(int id, int mode, int minvalue, int maxvalue);
+
         [DllImport(nameDll, EntryPoint = "sl_get_camera_settings")]
         private static extern ERROR_CODE dllz_get_camera_settings(int id, VIDEO_SETTINGS settingToRetrieve, ref int value);
+
+        [DllImport(nameDll, EntryPoint = "sl_get_camera_settings_min_max")]
+        private static extern ERROR_CODE dllz_get_camera_settings_min_max(int id, VIDEO_SETTINGS settingToRetrieve, ref int minvalue, ref int maxvalue);
 
         [DllImport(nameDll, EntryPoint = "sl_set_roi_for_aec_agc")]
         private static extern ERROR_CODE dllz_set_roi_for_aec_agc(int id, int side, Rect roi,bool reset);
@@ -351,6 +378,8 @@ namespace sl
         [DllImport(nameDll, EntryPoint = "sl_get_svo_position")]
         private static extern int dllz_get_svo_position(int cameraID);
 
+        [DllImport(nameDll, EntryPoint = "sl_get_svo_position_at_timestamp")]
+        private static extern int dllz_get_svo_position_at_timestamp(int cameraID, ulong timestamp);
 
         [DllImport(nameDll, EntryPoint = "sl_get_confidence_threshold")]
         private static extern int dllz_get_confidence_threshold(int cameraID);
@@ -408,6 +437,15 @@ namespace sl
 
         [DllImport(nameDll, EntryPoint = "sl_set_region_of_interest")]
         private static extern int dllz_sl_set_region_of_interest(int cameraID, IntPtr roiMask);
+
+        [DllImport(nameDll, EntryPoint = "sl_get_region_of_interest")]
+        private static extern int dllz_get_region_of_interest(int cameraID, IntPtr roiMask, int width, int height);
+
+        [DllImport(nameDll, EntryPoint = "sl_start_region_of_interest_auto_detection")]
+        private static extern int dllz_start_region_of_interest_auto_detection(int cameraID, ref RegionOfInterestParameters roiParams);
+
+        [DllImport(nameDll, EntryPoint = "sl_get_region_of_interest_auto_detection_status")]
+        private static extern int dllz_get_region_of_interest_auto_detection_status(int cameraID);
 
         /*
         * Spatial Mapping functions.
@@ -637,7 +675,8 @@ namespace sl
         }
 
         /// <summary>
-        /// Gets the max FPS for each resolution setting. Higher FPS will cause lower GPU performance.
+        /// Gets the max FPS for each resolution setting.
+        /// Higher FPS will cause lower GPU performance.
         /// </summary>
         /// <param name="reso"></param>
         /// <returns>The resolution</returns>
@@ -651,9 +690,9 @@ namespace sl
         }
 
         /// <summary>
-        /// Generate a UUID like unique ID to help identify and track AI detections.
+        /// Generate a UUID like unique id to help identify and track AI detections.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A UUID like unique id.</returns>
         public static string GenerateUniqueID()
         {
             byte[] array = new byte[37];
@@ -663,7 +702,9 @@ namespace sl
         }
 
         /// <summary>
-        /// Constructor that creates an empty Camera object;
+        /// Default constructor.
+        ///
+        /// Creates an empty Camera object.
         /// </summary>
         /// <param name="id"></param>
         public Camera(int id)
@@ -779,6 +820,15 @@ namespace sl
             /// \note Internally the grab function always tries to get the latest available image while respecting the desired fps as much as possible.
             /// </summary>
             public float grabComputeCappingFPS;
+            /// <summary>
+            /// Enable or disable the image validity verification.
+            /// This will perform additional verification on the image to identify corrupted data.This verification is done in the grab function and requires some computations.
+            /// If an issue is found, the grab function will output a warning as sl.ERROR_CODE.CORRUPTED_FRAME.
+            /// This version doesn't detect frame tearing currently.
+            ///  \n default: disabled
+            /// </summary>
+            [MarshalAs(UnmanagedType.U1)]
+            public bool enableImageValidityCheck;
 
             /// <summary>
             /// Copy constructor.
@@ -807,6 +857,7 @@ namespace sl
                 openTimeoutSec = init.openTimeoutSec;
                 asyncGrabCameraRecovery = init.asyncGrabCameraRecovery;
                 grabComputeCappingFPS = init.grabComputeCappingFPS;
+                enableImageValidityCheck = init.enableImageValidityCheck;
             }
         }
 
@@ -912,12 +963,15 @@ namespace sl
         };
 
         /// <summary>
-        /// Checks if the ZED camera is plugged in and  opens it.
+        /// Opens the ZED camera from the provided InitParameters.
+        ///
+        /// The method will also check the hardware requirements and run a self-calibration.
         /// </summary>
-        /// <param name="initParameters">Class with all initialization settings.
-        /// A newly-instantiated InitParameters will have recommended default values.</param>
-        /// <returns>ERROR_CODE: The error code gives information about the internal connection process.
-        /// If SUCCESS is returned, the camera is ready to use. Every other code indicates an error.</returns>
+        /// <param name="initParameters">A structure containing all the initial parameters. Default: a preset of InitParameters.
+        /// </param>
+        /// <returns>
+        /// An error code giving information about the internal process. If \ref ERROR_CODE "ERROR_CODE.SUCCESS" is returned, the camera is ready to use. Every other code indicates an error and the program should be stopped.
+        /// </returns>
         public ERROR_CODE Open(ref InitParameters initParameters)
         {
             //Update values with what we're about to pass to the camera.
@@ -961,6 +1015,7 @@ namespace sl
 
         /// <summary>
         /// Closes the camera.
+        ///
         /// Once destroyed, you need to recreate a camera instance to restart again.
         /// </summary>
         public void Close()
@@ -970,13 +1025,15 @@ namespace sl
         }
 
         /// <summary>
-        /// Grabs a new image, rectifies it, and computes the disparity map and (optionally) the depth map.
-        /// The grabbing function is typically called in the main loop in a separate thread.
-        /// </summary><remarks>For more info, read about the SDK function it calls:
-        /// https://www.stereolabs.com/docs/api/classsl_1_1Camera.html#afa3678a18dd574e162977e97d7cbf67b </remarks>
-        /// <param name="runtimeParameters">Struct holding all grab parameters. </param>
-        /// <returns>the function returns false if no problem was encountered,
-        /// true otherwise.</returns>
+        /// This method will grab the latest images from the camera, rectify them, and compute the
+        /// \ref retrieveMeasure() "measurements" based on the \ref RuntimeParameters provided (depth, point cloud, tracking, etc.).
+        ///
+        /// The grabbing method is typically called in the main loop in a separate thread.
+        /// \note For more info, read about the SDK method it calls:
+        /// <a href="https://www.stereolabs.com/docs/api/classsl_1_1Camera.html#afa3678a18dd574e162977e97d7cbf67b">grab</a>.
+        /// </remarks>
+        /// <param name="runtimeParameters">A structure containing all the runtime parameters. Default: a preset of RuntimeParameters.</param>
+        /// <returns>false if no problem was encountered, true otherwise.</returns>
         public sl.ERROR_CODE Grab(ref sl.RuntimeParameters runtimeParameters)
         {
             sl_RuntimeParameters rt_params = new sl_RuntimeParameters(runtimeParameters);
@@ -984,9 +1041,27 @@ namespace sl
         }
 
         /// <summary>
-        /// Return the INPUT_TYPE currently used
+        /// Set this camera as a data provider for the Fusion module.
         /// </summary>
-        /// <returns></returns>
+        /// <param name="jsonConfigFileName"></param>
+        /// <returns>ERROR_CODE "ERROR_CODE.SUCCESS" if everything went fine, \ref ERROR_CODE "ERROR_CODE.FAILURE" otherwise.</returns>
+        public ERROR_CODE StartPublishing(ref CommunicationParameters commParams)
+        {
+            return dllz_start_publishing(CameraID, ref commParams);
+        }
+
+        /// <summary>
+        /// Set this camera as normal camera(without data providing).
+        /// </summary>
+        public ERROR_CODE StopPublishing()
+        {
+            return dllz_stop_publishing(CameraID);
+        }
+
+        /// <summary>
+        /// Return the sl.INPUT_TYPE currently used.
+        /// </summary>
+        /// <returns>The current sl.INPUT_TYPE.</returns>
         public sl.INPUT_TYPE GetInputType()
         {
             return (sl.INPUT_TYPE)dllz_get_input_type(CameraID);
@@ -995,29 +1070,32 @@ namespace sl
         ///@name Video
 
         /// <summary>
-        /// Retrieves an image texture from the ZED SDK and loads it into a ZEDMat. Use this to get an individual
-        /// texture from the last grabbed frame in a human-viewable format. Image textures work for when you want the result to be visible,
+        /// Retrieves an image texture from the ZED SDK and loads it into a sl.Mat.
+        ///
+        /// Use this to get an individual texture from the last grabbed frame in a human-viewable format. Image textures work for when you want the result to be visible,
         /// such as the direct RGB image from the camera, or a greyscale image of the depth. However it will lose accuracy if used
         /// to show measurements like depth or confidence, unlike measure textures.
-        /// </summary><remarks>
-        /// If you want to access the texture via script, you'll usually want to specify CPU memory. Then you can use
+        /// \note If you want to access the texture via script, you'll usually want to specify CPU memory. Then you can use
         /// Marshal.Copy to move them into a new byte array, which you can load into a Texture2D. Note that you may need to
         /// change the color space and/or flip the image.
-        /// RetrieveMeasure() calls Camera::retrieveMeasure() in the C++ SDK. For more info, read:
-        /// https://www.stereolabs.com/docs/api/classsl_1_1Camera.html#a01dce4f0af6f8959a9c974ffaca656b5
-        /// </remarks>
-        /// <param name="mat">ZEDMat to fill with the new texture.</param>
+        /// 
+        /// \n\note For more info, read about the SDK method it calls:
+        /// <a href="https://www.stereolabs.com/docs/api/classsl_1_1Camera.html#a01dce4f0af6f8959a9c974ffaca656b5">retrieveImage</a>.
+        /// </summary>
+        /// <param name="mat">sl.Mat to fill with the new texture.</param>
         /// <param name="view">Image type (left RGB, right depth map, etc.)</param>
         /// <param name="mem">Whether the image should be on CPU or GPU memory.</param>
         /// <param name="resolution">Resolution of the texture.</param>
-        /// <returns>Error code indicating if the retrieval was successful, and why it wasn't otherwise.</returns>
+        /// <returns>sl.ERROR_CODE indicating if the retrieval was successful, and why it wasn't otherwise.</returns>
         public sl.ERROR_CODE RetrieveImage(sl.Mat mat, sl.VIEW view, sl.MEM mem = sl.MEM.CPU, sl.Resolution resolution = new sl.Resolution())
         {
             return (sl.ERROR_CODE)(dllz_retrieve_image(CameraID, mat.MatPtr, (int)view, (int)mem, (int)resolution.width, (int)resolution.height));
         }
 
         /// <summary>
-        /// Returns the init parameters used. Correspond to the structure send when the open() function was called.
+        /// Returns the InitParameters associated with the Camera object.
+        ///
+        /// It corresponds to the structure given as argument to \ref Open() method.
         /// </summary>
         /// <returns>InitParameters containing the parameters used to initialize the Camera object.</returns>
         public InitParameters GetInitParameters()
@@ -1050,14 +1128,17 @@ namespace sl
                 sensorsRequired = sl_parameters.sensorsRequired,
                 openTimeoutSec = sl_parameters.openTimeoutSec,
                 asyncGrabCameraRecovery = sl_parameters.asyncGrabCameraRecovery,
-                grabComputeCappingFPS = sl_parameters.grabComputeCappingFPS
+                grabComputeCappingFPS = sl_parameters.grabComputeCappingFPS,
+                enableImageValidityCheck = sl_parameters.enableImageValidityCheck
             };
             return parameters;
         }
         /// <summary>
-        /// Returns the runtime parameters used. Correspond to the structure send when the grab() function was called.
+        /// Returns the RuntimeParameters used.
+        ///
+        ///  It corresponds to the structure given as argument to the \ref Grab() method.
         /// </summary>
-        /// <returns>RuntimeParameters containing the parameters that defines the behavior of the grab.</returns>
+        /// <returns>RuntimeParameters containing the parameters that define the behavior of the \ref Grab method.</returns>
         public RuntimeParameters GetRuntimeParameters()
         {
             IntPtr p = dllz_get_runtime_parameters(CameraID);
@@ -1079,6 +1160,12 @@ namespace sl
             return parameters;
         }
 
+        /// <summary>
+        /// Returns the PositionalTrackingParameters used.
+        ///
+        ///  It corresponds to the structure given as argument to the EnablePositionalTracking() method.
+        /// </summary>
+        /// <returns>PositionalTrackingParameters containing the parameters used for positional tracking initialization.</returns>
         public PositionalTrackingParameters GetPositionalTrackingParameters()
         {
             IntPtr p = dllz_get_positional_tracking_parameters(CameraID);
@@ -1105,10 +1192,10 @@ namespace sl
         }
 
         /// <summary>
-        /// Get sl.Resolion from a RESOLUTION enum
+        /// Gets the corresponding sl.Resolution from an sl.RESOLUTION.
         /// </summary>
-        /// <param name="resolution"></param>
-        /// <returns></returns>
+        /// <param name="resolution">The wanted sl.RESOLUTION.</param>
+        /// <returns>The sl.Resolution corresponding to sl.RESOLUTION given as argument.</returns>
         public static sl.Resolution GetResolution(RESOLUTION resolution)
         {
             sl.Resolution res = new sl.Resolution();
@@ -1116,31 +1203,66 @@ namespace sl
             {
                 case RESOLUTION.HD2K: res = new sl.Resolution(2208, 1242); break;
                 case RESOLUTION.HD1080: res = new sl.Resolution(1920, 1080); break;
+                case RESOLUTION.HD1200: res = new sl.Resolution(1920, 1200); break;
                 case RESOLUTION.HD720: res = new sl.Resolution(1280, 720); break;
                 case RESOLUTION.VGA: res = new sl.Resolution(672, 376); break;
+                case RESOLUTION.HDSVGA: res = new sl.Resolution(960, 600); break;
             }
             return res;
         }
 
+        /// <summary>
+        /// Test if the video setting is supported by the camera.
+        /// </summary>
+        /// <param name="setting">The video setting to test.</param>
+        /// <returns>true if the \ref VIDEO_SETTINGS is supported by the camera, false otherwise.</returns>
+        public bool IsCameraSettingSupported(VIDEO_SETTINGS setting)
+        {
+            return dllz_is_camera_setting_supported(CameraID, setting);
+        }
 
         /// <summary>
-        /// Sets a value in the ZED's camera settings.
+        /// Sets the min and max range values of the requested \ref VIDEO_SETTINGS "camera setting" (used for settings with a range).
         /// </summary>
-        /// <param name="settings">Setting to be changed (brightness, contrast, gain, exposure, etc.)</param>
-        /// <param name="value">New value.</param>
-        /// <param name="usedefault">True to set the settings to their default values.</param>
+        /// <param name="settings">The setting to be set.</param>
+        /// <param name="minvalue">The min value of the range to set.</param>
+        /// <param name="maxvalue">The min value of the range to set.</param>
+        public void SetCameraSettings(VIDEO_SETTINGS settings, int minvalue, int maxvalue)
+        {
+            AssertCameraIsReady();
+            dllz_set_camera_settings_min_max(CameraID, (int)settings, minvalue, maxvalue);
+        }
+
+        /// <summary>
+        /// Returns the current range of the requested \ref VIDEO_SETTINGS "camera setting".
+        /// </summary>
+        /// <param name="settings">Setting to be retrieved (setting with range value).</param>
+        /// <param name="minvalue">Will be set to the value of the lower bound of the range of the setting.</param>
+        /// <param name="maxvalue">Will be set to the value of the higher bound of the range of the setting.</param>
+        /// <returns>An sl.ERROR_CODE to indicate if the method was successful.</returns>
+        public sl.ERROR_CODE GetCameraSettings(VIDEO_SETTINGS settings, ref int minvalue, ref int maxvalue)
+        {
+            AssertCameraIsReady();
+            int ret = -1;
+            return dllz_get_camera_settings_min_max(CameraID, settings, ref minvalue, ref maxvalue);
+        }
+
+        /// <summary>
+        /// Sets the value of the requested \ref VIDEO_SETTINGS "camera setting" (gain, brightness, hue, exposure, etc.).
+        /// </summary>
+        /// <param name="settings">The setting to be set.</param>
+        /// <param name="value">The value to set. Default: auto mode</param>
         public void SetCameraSettings(VIDEO_SETTINGS settings, int value)
         {
             AssertCameraIsReady();
-            //cameraSettingsManager.SetCameraSettings(CameraID, settings, value);
             dllz_set_camera_settings(CameraID, (int)settings, value);
         }
 
         /// <summary>
-        /// Gets the value of a given setting from the ZED camera.
+        /// Returns the current value of the requested \ref VIDEO_SETTINGS "camera setting" (gain, brightness, hue, exposure, etc.).
         /// </summary>
-        /// <param name="settings">Setting to be retrieved (brightness, contrast, gain, exposure, etc.)</param>
-        /// <returns>The current value for the corresponding setting. Returns -1 if encounters an error.</returns>
+        /// <param name="settings">Setting to be retrieved (brightness, contrast, gain, exposure, etc.).</param>
+        /// <returns>The value of the requested \ref VIDEO_SETTINGS "camera setting".</returns>
         public int GetCameraSettings(VIDEO_SETTINGS settings)
         {
             AssertCameraIsReady();
@@ -1150,13 +1272,13 @@ namespace sl
         }
 
         /// <summary>
-        /// Overloaded function for CAMERA_SETTINGS.AEC_AGC_ROI (requires Rect as input)
+        /// Overloaded method for VIDEO_SETTINGS.AEC_AGC_ROI which takes a Rect as parameter.
         /// </summary>
-        /// <param name="settings"> Must be set to CAMERA_SETTINGS.AEC_AGC_ROI. Otherwise will return ERROR_CODE.FAILURE.</param>
-        /// <param name="side"> defines left=0 or right=1 or both=2 sensor target</param>
-        /// <param name="roi">the roi defined as a sl.Rect</param>
-        /// <param name="reset">Defines if the target must be reset to full sensor</param>
-        /// <returns>ERROR_CODE.SUCCESS if ROI has been applied. Other ERROR_CODE otherwise.</returns>
+        /// <param name="settings"> Must be set at VIDEO_SETTINGS.AEC_AGC_ROI, otherwise the method will have no impact.</param>
+        /// <param name="side">sl.SIDE on which to be applied for AEC/AGC computation.</param>
+        /// <param name="roi">Rect that defines the target to be applied for AEC/AGC computation. Must be given according to camera resolution.</param>
+        /// <param name="reset">Cancel the manual ROI and reset it to the full image.</param>
+        /// <returns>An sl.ERROR_CODE to indicate if the method was successful.</returns>
         public ERROR_CODE SetCameraSettings(VIDEO_SETTINGS settings, SIDE side, Rect roi, bool reset = false)
         {
             AssertCameraIsReady();
@@ -1167,12 +1289,12 @@ namespace sl
         }
 
         /// <summary>
-        /// Overloaded function for CAMERA_SETTINGS.AEC_AGC_ROI (requires Rect as input)
+        /// Overloaded method for VIDEO_SETTINGS.AEC_AGC_ROI which takes a Rect as parameter.
         /// </summary>
-        /// <param name="settings"> Must be set to CAMERA_SETTINGS.AEC_AGC_ROI. Otherwise will return ERROR_CODE.FAILURE.</param>
-        /// <param name="side"> defines left=0 or right=1 or both=2 sensor target.</param>
+        /// <param name="settings"> Must be set at VIDEO_SETTINGS.AEC_AGC_ROI, otherwise the method will have no impact.</param>
+        /// <param name="side">sl.SIDE on which to get the ROI from.</param>
         /// <param name="roi"> Roi that will be filled.</param>
-        /// <returns> ERROR_CODE.SUCCESS if ROI has been applied. Other ERROR_CODE otherwise.</returns>
+        /// <returns>An sl.ERROR_CODE to indicate if the method was successful.</returns>
         public ERROR_CODE GetCameraSettings(VIDEO_SETTINGS settings, SIDE side, ref Rect roi)
         {
             AssertCameraIsReady();
@@ -1183,7 +1305,7 @@ namespace sl
         }
 
         /// <summary>
-        /// Reset camera settings to default
+        /// Reset camera settings to default.
         /// </summary>
         public void ResetCameraSettings()
         {
@@ -1205,7 +1327,9 @@ namespace sl
 
         /// <summary>
         /// Gets the timestamp at the time the latest grabbed frame was extracted from the USB stream.
-        /// This is the closest timestamp you can get from when the image was taken. Must be called after calling grab().
+        ///
+        /// This is the closest timestamp you can get from when the image was taken.
+        /// \note Must be called after calling Grab().
         /// </summary>
         /// <returns>Current timestamp in nanoseconds. -1 means it's is not available, such as with an .SVO file without compression.</returns>
         public ulong GetCameraTimeStamp()
@@ -1214,8 +1338,9 @@ namespace sl
         }
 
         /// <summary>
-        /// Gets the current timestamp at the time the function is called. Can be compared to the camera timestamp
-        /// for synchronization, since they have the same reference (the computer's start time).
+        /// Gets the current timestamp at the time the method is called.
+        ///
+        /// Can be compared to the camera timestamp for synchronization, since they have the same reference (the computer's start time).
         /// </summary>
         /// <returns>The timestamp in nanoseconds.</returns>
         public ulong GetCurrentTimeStamp()
@@ -1224,18 +1349,28 @@ namespace sl
         }
 
         /// <summary>
-        /// Get the current position of the SVO being recorded to.
+        /// Returns the current playback position in the SVO file.
         /// </summary>
-        /// <returns>Index of the frame being recorded to.</returns>
+        /// <returns>The current frame position in the SVO file. -1 if the SDK is not reading an SVO.</returns>
         public int GetSVOPosition()
         {
             return dllz_get_svo_position(CameraID);
         }
 
         /// <summary>
-        /// Gets the total number of frames in the loaded SVO file.
+        /// Retrieves the frame index within the SVO file corresponding to the provided timestamp.
         /// </summary>
-        /// <returns>Total frames in the SVO file. Returns -1 if the SDK is not reading an SVO.</returns>
+        /// <param name="timestamp">The target timestamp for which the frame index is to be determined.</param>
+        /// <returns>The frame index within the SVO file that aligns with the given timestamp. Returns -1 if the timestamp falls outside the bounds of the SVO file.</returns>
+        public int GetSVOPositionAtTimestamp(ulong timestamp)
+        {
+            return dllz_get_svo_position_at_timestamp(CameraID, timestamp);
+        }
+
+        /// <summary>
+        /// Returns the number of frames in the SVO file.
+        /// </summary>
+        /// <returns>The total number of frames in the SVO file. -1 if the SDK is not reading a SVO.</returns>
         public int GetSVONumberOfFrames()
         {
             return dllz_get_svo_number_of_frames(CameraID);
@@ -1251,8 +1386,9 @@ namespace sl
         }
 
         /// <summary>
-        /// Returns the current camera FPS. This is limited primarily by resolution but can also be lower due to
-        /// setting a lower desired resolution in Open() or from USB connection/bandwidth issues.
+        /// Returns the current camera FPS.
+        ///
+        /// This is limited primarily by resolution but can also be lower due to setting a lower desired resolution in Open() or from USB connection/bandwidth issues.
         /// </summary>
         /// <returns>The current fps</returns>
         public float GetCameraFPS()
@@ -1263,7 +1399,7 @@ namespace sl
         /// <summary>
         /// Reports if the camera has been successfully opened.
         /// </summary>
-        /// <returns> Returns true if the ZED is already setup, otherwise false.</returns>
+        /// <returns> Returns true if the camera is already setup, otherwise false.</returns>
         public bool IsOpened()
         {
             return dllz_is_opened(CameraID);
@@ -1271,6 +1407,11 @@ namespace sl
 
         ///@}
 
+        /// <summary>
+        /// Return the calibration parameters of the camera.
+        /// </summary>
+        /// <param name="raw">Whether to return the raw or rectified calibration parameters.</param>
+        /// <returns>CalibrationParameters containing the calibration parameters requested.</returns>
         public CalibrationParameters GetCalibrationParameters(bool raw = false)
         {
             IntPtr p = dllz_get_calibration_parameters(CameraID, raw);
@@ -1291,45 +1432,45 @@ namespace sl
 
 
         /// <summary>
-        /// Gets the ZED camera model (ZED or ZED Mini).
+        /// Gets the camera model (sl.MODEL).
         /// </summary>
-        /// <returns>Model of the ZED as sl.MODEL.</returns>
+        /// <returns>Model of the camera as sl.MODEL.</returns>
         public sl.MODEL GetCameraModel()
         {
             return (sl.MODEL)dllz_get_camera_model(CameraID);
         }
 
         /// <summary>
-        /// Gets the ZED's camera firmware version.
+        /// Gets the camera firmware version.
         /// </summary>
-        /// <returns>Firmware version.</returns>
+        /// <returns>The firmware version of the camera.</returns>
         public int GetCameraFirmwareVersion()
         {
             return dllz_get_camera_firmware(CameraID);
         }
 
         /// <summary>
-        /// Gets the ZED's sensors firmware version.
+        /// Gets the sensors firmware version.
         /// </summary>
-        /// <returns>Firmware version.</returns>
+        /// <returns>The firmware version of the camera.</returns>
         public int GetSensorsFirmwareVersion()
         {
             return dllz_get_sensors_firmware(CameraID);
         }
 
         /// <summary>
-        /// Gets the ZED's serial number.
+        /// Gets the camera's serial number.
         /// </summary>
-        /// <returns>Serial number</returns>
+        /// <returns>The serial number of the camera.</returns>
         public int GetZEDSerialNumber()
         {
             return dllz_get_zed_serial(CameraID);
         }
 
         /// <summary>
-        /// Returns the ZED's vertical field of view in radians.
+        /// Returns the camera's vertical field of view in radians.
         /// </summary>
-        /// <returns>Vertical field of view.</returns>
+        /// <returns>The vertical field of view.</returns>
         public float GetFOV()
         {
             return GetCalibrationParameters(false).leftCam.vFOV * Deg2Rad;
@@ -1337,13 +1478,12 @@ namespace sl
 
         /// <summary>
         /// Perform a new self calibration process.
+        ///
         /// In some cases, due to temperature changes or strong vibrations, the stereo calibration becomes less accurate.
-        /// Use this function to update the self-calibration data and get more reliable depth values.
-        /// <remarks>The self calibration will occur at the next \ref grab() call.</remarks>
-        /// New values will then be available in \ref getCameraInformation(), be sure to get them to still have consistent 2D - 3D conversion.
+        /// \n Use this method to update the self-calibration data and get more reliable depth values.
+        /// \note The self calibration will occur at the next \ref Grab() call.
+        /// New values will then be available in \ref GetCameraInformation(), be sure to get them to still have consistent 2D - 3D conversion.
         /// </summary>
-        /// <param name="cameraID"></param>
-        /// <returns></returns>
         public void UpdateSelfCalibration()
         {
             dllz_update_self_calibration(CameraID);
@@ -1351,8 +1491,10 @@ namespace sl
 
         /// <summary>
         /// Gets the number of frames dropped since Grab() was called for the first time.
-        /// Based on camera timestamps and an FPS comparison.
-        /// </summary><remarks>Similar to the Frame Drop display in the ZED Explorer app.</remarks>
+        ///
+        /// It is based on camera timestamps and an FPS comparison.
+        /// \note It is similar to the Frame Drop display in the ZED Explorer app.
+        /// </summary>
         /// <returns>Frames dropped since first Grab() call.</returns>
         public uint GetFrameDroppedCount()
         {
@@ -1400,9 +1542,10 @@ namespace sl
 
         /// <summary>
         /// List all the streaming devices with their associated information.
-        /// This function lists all the cameras available and provides their serial number, models and other information.
+        ///
+        /// This method lists all the cameras available and provides their serial number, models and other information.
         /// </summary>
-        /// <returns>The device properties for each connected camera</returns>
+        /// <returns>The device properties for each connected camera.</returns>
         public static sl.DeviceProperties[] GetDeviceList(out int nbDevices)
         {
             sl.DeviceProperties[] deviceList = new sl.DeviceProperties[(int)Constant.MAX_CAMERA_PLUGIN];
@@ -1413,9 +1556,10 @@ namespace sl
 
         /// <summary>
         /// List all the connected devices with their associated information.
-        /// This function lists all the cameras available and provides their serial number, models and other information.
+        ///
+        /// This method lists all the cameras available and provides their serial number, models and other information.
         /// </summary>
-        /// <returns>The device properties for each connected camera</returns>
+        /// <returns>The device properties for each connected camera.</returns>
         public static sl.StreamingProperties[] GetStreamingDeviceList(out int nbDevices)
         {
             sl.StreamingProperties[] streamingDeviceList = new sl.StreamingProperties[(int)Constant.MAX_CAMERA_PLUGIN];
@@ -1425,11 +1569,11 @@ namespace sl
         }
 
         /// <summary>
-        /// Performs an hardware reset of the ZED 2.
+        /// Performs a hardware reset of the ZED 2 and the ZED 2i.
         /// </summary>
-        /// <param name="serialNumber">Serial number of the camera</param>
-        /// <param name="fullReboot"> Perform a full reboot (Sensors and Video modules)</param>
-        /// <returns>SUCCESS if everything went fine, ERROR_CODE::CAMERA_NOT_DETECTED if no camera was detected, ERROR_CODE.FAILURE otherwise.</returns>
+        /// <param name="serialNumber">Serial number of the camera to reset, or 0 to reset the first camera detected.</param>
+        /// <param name="fullReboot">Perform a full reboot (sensors and video modules) if true, otherwise only the video module will be rebooted.</param>
+        /// <returns>sl.ERROR_CODE.SUCCESS if everything went fine, sl.ERROR_CODE::CAMERA_NOT_DETECTED if no camera was detected, sl.ERROR_CODE.FAILURE otherwise.</returns>
         public static sl.ERROR_CODE Reboot(int serialNumber, bool fullReboot = true)
         {
             return (sl.ERROR_CODE)dllz_reboot(serialNumber, fullReboot);
@@ -1454,20 +1598,21 @@ namespace sl
         /// @name Depth Sensing
 
         /// <summary>
-        /// Retrieves a measure texture from the ZED SDK and loads it into a ZEDMat. Use this to get an individual
-        /// texture from the last grabbed frame with measurements in every pixel - such as a depth map, confidence map, etc.
+        /// Retrieves a measure texture from the ZED SDK and loads it into a sl.Mat.
+        /// 
+        /// Use this to get an individual texture from the last grabbed frame with measurements in every pixel - such as a depth map, confidence map, etc.
         /// Measure textures are not human-viewable but don't lose accuracy, unlike image textures.
-        /// </summary><remarks>
-        /// If you want to access the texture via script, you'll usually want to specify CPU memory. Then you can use
+        /// \note If you want to access the texture via script, you'll usually want to specify CPU memory. Then you can use
         /// Marshal.Copy to move them into a new byte array, which you can load into a Texture2D.
-        /// RetrieveMeasure() calls Camera::retrieveMeasure() in the C++ SDK. For more info, read:
-        /// https://www.stereolabs.com/docs/api/classsl_1_1Camera.html#a9e0773c0c14ce5156c1fa2fde501c13e
-        /// </remarks>
-        /// <param name="mat">ZEDMat to fill with the new texture.</param>
-        /// <param name="measure">Measure type (depth, confidence, xyz, etc.)</param>
+        /// 
+        /// \n\note For more info, read about the SDK method it calls: 
+        /// <a href="https://www.stereolabs.com/docs/api/classsl_1_1Camera.html#a9e0773c0c14ce5156c1fa2fde501c13e">retrieveMeasure</a>.
+        /// </summary>
+        /// <param name="mat">sl.Mat to fill with the new texture.</param>
+        /// <param name="measure">Measure type (depth, confidence, xyz, etc.).</param>
         /// <param name="mem">Whether the image should be on CPU or GPU memory.</param>
         /// <param name="resolution">Resolution of the texture.</param>
-        /// <returns>Error code indicating if the retrieval was successful, and why it wasn't otherwise.</returns>
+        /// <returns>sl.ERROR_CODE indicating if the retrieval was successful, and why it wasn't otherwise.</returns>
         public sl.ERROR_CODE RetrieveMeasure(sl.Mat mat, sl.MEASURE measure, sl.MEM mem = sl.MEM.CPU, sl.Resolution resolution = new sl.Resolution())
         {
             return (sl.ERROR_CODE)(dllz_retrieve_measure(CameraID, mat.MatPtr, (int)measure, (int)mem, (int)resolution.width, (int)resolution.height));
@@ -1475,6 +1620,7 @@ namespace sl
 
         /// <summary>
         /// Gets the current confidence threshold value for the disparity map (and by extension the depth map).
+        ///
         /// Values below the given threshold are removed from the depth map.
         /// </summary>
         /// <returns>Filtering value between 0 and 100.</returns>
@@ -1495,9 +1641,9 @@ namespace sl
         /// <summary>
         /// Gets the current range of perceived depth.
         /// </summary>
-        /// <param name="min">Minimum depth detected (in selected sl.UNIT)</param>
-        /// <param name="max">Maximum depth detected (in selected sl.UNIT)</param>
-        /// <returns>SUCCESS if values have been extracted. Other ERROR_CODE otherwise.</returns>
+        /// <param name="min">Minimum depth detected (in selected sl.UNIT).</param>
+        /// <param name="max">Maximum depth detected (in selected sl.UNIT).</param>
+        /// <returns>sl.ERROR_CODE.SUCCESS if values have been extracted. Other sl.ERROR_CODE otherwise.</returns>
         public sl.ERROR_CODE GetCurrentMixMaxDepth(ref float min, ref float max)
         {
             return (sl.ERROR_CODE)dllz_get_current_min_max_depth(CameraID, ref min, ref max);
@@ -1511,17 +1657,12 @@ namespace sl
         {
             return dllz_get_depth_max_range_value(CameraID);
         }
-
-        ///@}
-
-        ///@{
-        /// @name Positional Tracking
-        ///
+        
         /// <summary>
-        /// Initialize and Start the tracking functions
+        /// Initializes and starts the positional tracking processes.
         /// </summary>
-        /// <param name="positionalTrackingParameters"> struct that contains all positional tracking parameters</param>
-        /// <returns>ERROR_CODE.FAILURE if the area_file_path file wasn't found, SUCCESS otherwise.</returns>
+        /// <param name="positionalTrackingParameters">A structure containing all the specific parameters for the positional tracking. Default: a preset of PositionalTrackingParameters.</param>
+        /// <returns>sl.ERROR_CODE.FAILURE if the <b>area_file_path</b> file wasn't found, sl.ERROR_CODE.SUCCESS otherwise.</returns>
         public sl.ERROR_CODE EnablePositionalTracking(ref PositionalTrackingParameters positionalTrackingParameters)
         {
             sl.ERROR_CODE trackingStatus = sl.ERROR_CODE.CAMERA_NOT_DETECTED;
@@ -1543,18 +1684,20 @@ namespace sl
         }
 
         /// <summary>
-        ///  Stop the motion tracking, if you want to restart, call enableTracking().
+        ///  Disables the positional tracking.
         /// </summary>
-        /// <param name="path">The path to save the area file</param>
+        /// <param name="path">
+        /// If set, saves the spatial memory into an '.area' file. Default: (empty)
+        /// \n <b>path</b> is the name and path of the database, e.g. <i>path/to/file/myArea1.area"</i>.
+        /// </param>
         public void DisablePositionalTracking(string path = "")
         {
             dllz_disable_tracking(CameraID, new System.Text.StringBuilder(path, path.Length));
         }
 
         /// <summary>
-        /// Gets the current position of the camera and state of the tracking, with an optional offset to the tracking frame.
+        /// Tells if the tracking module is enabled.
         /// </summary>
-        /// <returns> true if the tracking module is enabled</returns>
         public bool IsPositionalTrackingEnabled()
         {
             return dllz_is_positional_tracking_enabled(CameraID);
@@ -1562,10 +1705,11 @@ namespace sl
 
 
         /// <summary>
-        /// Saves the current area learning file. The file will contain spatial memory data generated by the tracking.
+        /// Saves the current area learning file.
+        ///
+        /// The file will contain spatial memory data generated by the tracking.
         /// </summary>
-        /// <param name="path"></param>
-        /// <param name=""></param>
+        /// <param name="areaFilePath">Path of an '.area' file to save the spatial memory database in.</param>
         public ERROR_CODE SaveAreaMap(string areaFilePath)
         {
             return (ERROR_CODE)dllz_save_area_map(CameraID, new System.Text.StringBuilder(areaFilePath, areaFilePath.Length));
@@ -1574,18 +1718,18 @@ namespace sl
         /// <summary>
         /// Returns the state of the spatial memory export process.
         /// </summary>
-        /// <returns> The current \ref AREA_EXPORTING_STATE "state" of the spatial memory export process</returns>
+        /// <returns> The current \ref AREA_EXPORTING_STATE "state" of the spatial memory export process.</returns>
         public AREA_EXPORT_STATE GetAreaExportState()
         {
             return (AREA_EXPORT_STATE)dllz_get_area_export_state(CameraID);
         }
 
         /// <summary>
-        /// Reset tracking
+        /// Resets the tracking, and re-initializes the position with the given translation vector and rotation quaternion.
         /// </summary>
-        /// <param name="rotation"></param>
-        /// <param name="translation"></param>
-        /// <returns></returns>
+        /// <param name="rotation">Rotation to set the positional tracking to.</param>
+        /// <param name="translation">Translation to set the positional tracking to.</param>
+        /// <returns>sl.ERROR_CODE.SUCCESS if the tracking has been reset, sl.ERROR_CODE.FAILURE otherwise.</returns>
         public sl.ERROR_CODE ResetPositionalTracking(Quaternion rotation, Vector3 translation)
         {
             sl.ERROR_CODE trackingStatus = sl.ERROR_CODE.CAMERA_NOT_DETECTED;
@@ -1593,6 +1737,10 @@ namespace sl
             return trackingStatus;
         }
 
+        /// <summary>
+        /// Returns the sensor configuration of the camera.
+        /// </summary>
+        /// <returns> SensorsConfiguration containing the sensor calibration information of the camera.</returns>
         public SensorsConfiguration GetSensorsConfiguration()
         {
             IntPtr p = dllz_get_sensors_configuration(CameraID);
@@ -1607,9 +1755,12 @@ namespace sl
         }
 
         /// <summary>
-        /// Returns the calibration parameters, serial number and other information about the camera being used.
+        /// Returns the CameraInformation associated the camera being used.
+        ///
+        /// To ensure accurate calibration, it is possible to specify a custom resolution as a parameter when obtaining scaled information, as calibration parameters are resolution-dependent.
+        /// \n When reading an SVO file, the parameters will correspond to the camera used for recording.
         /// </summary>
-        /// <returns> CameraInformation containing the calibration parameters of the ZED, as well as serial number and firmware version.</returns>
+        /// <returns> CameraInformation containing the calibration parameters of the camera, as well as serial number and firmware version.</returns>
         public CameraInformation GetCameraInformation(Resolution resolution = new Resolution())
         {
             IntPtr p = dllz_get_camera_information(CameraID, (int)resolution.width, (int)resolution.height);
@@ -1624,13 +1775,13 @@ namespace sl
         }
 
         /// <summary>
-        /// Gets the position of the camera and the current state of the ZED Tracking.
+        /// Gets the position of the camera and the current state of the camera Tracking.
         /// </summary>
         /// <param name="rotation">Quaternion filled with the current rotation of the camera depending on its reference frame.</param>
         /// <param name="position">Vector filled with the current position of the camera depending on its reference frame.</param>
-        /// <param name="referenceType">Reference frame for setting the rotation/position. CAMERA gives movement relative to the last pose.
-        /// WORLD gives cumulative movements since tracking started.</param>
-        /// <returns>State of ZED's Tracking system (off, searching, ok).</returns>
+        /// <param name="referenceType">Reference frame for setting the rotation/position. REFERENCE_FRAME.CAMERA gives movement relative to the last pose.
+        /// REFERENCE_FRAME.WORLD gives cumulative movements since tracking started.</param>
+        /// <returns>The current \ref POSITIONAL_TRACKING_STATE "state" of the tracking process.</returns>
         public POSITIONAL_TRACKING_STATE GetPosition(ref Quaternion rotation, ref Vector3 position, REFERENCE_FRAME referenceType = REFERENCE_FRAME.WORLD)
         {
             return (POSITIONAL_TRACKING_STATE)dllz_get_position(CameraID, ref rotation, ref position, (int)referenceType);
@@ -1643,9 +1794,9 @@ namespace sl
         /// <param name="position">Vector filled with the current position of the camera depending on its reference frame.</param>
         /// <param name="targetQuaternion">Rotational offset applied to the tracking frame.</param>
         /// <param name="targetTranslation">Positional offset applied to the tracking frame.</param>
-        /// <param name="referenceFrame">Reference frame for setting the rotation/position. CAMERA gives movement relative to the last pose.
-        /// WORLD gives cumulative movements since tracking started.</param>
-        /// <returns>State of ZED's Tracking system (off, searching, ok).</returns>
+        /// <param name="referenceFrame">Reference frame for setting the rotation/position. REFERENCE_FRAME.CAMERA gives movement relative to the last pose.
+        /// REFERENCE_FRAME.WORLD gives cumulative movements since tracking started.</param>
+        /// <returns>The current \ref POSITIONAL_TRACKING_STATE "state" of the tracking process.</returns>
         public POSITIONAL_TRACKING_STATE GetPosition(ref Quaternion rotation, ref Vector3 translation, ref Quaternion targetQuaternion, ref Vector3 targetTranslation, REFERENCE_FRAME referenceFrame = REFERENCE_FRAME.WORLD)
         {
             return (POSITIONAL_TRACKING_STATE)dllz_get_position_at_target_frame(CameraID, ref rotation, ref translation, ref targetQuaternion, ref targetTranslation, (int)referenceFrame);
@@ -1653,14 +1804,15 @@ namespace sl
 
         /// <summary>
         /// Gets the current position of the camera and state of the tracking, with a defined tracking frame.
-        /// A tracking frame defines what part of the ZED is its center for tracking purposes. See ZEDCommon.TRACKING_FRAME.
+        ///
+        /// A tracking frame defines what part of the camera is its center for tracking purposes. See sl.TRACKING_FRAME.
         /// </summary>
         /// <param name="rotation">Quaternion filled with the current rotation of the camera depending on its reference frame.</param>
         /// <param name="position">Vector filled with the current position of the camera depending on its reference frame.</param>
-        /// <param name="trackingFrame">Center of the ZED for tracking purposes (left eye, center, right eye).</param>
-        /// <param name="referenceFrame">Reference frame for setting the rotation/position. CAMERA gives movement relative to the last pose.
-        /// WORLD gives cumulative movements since tracking started.</param>
-        /// <returns>State of ZED's Tracking system (off, searching, ok).</returns>
+        /// <param name="trackingFrame">Center of the camera for tracking purposes (left eye, center, right eye).</param>
+        /// <param name="referenceFrame">Reference frame for setting the rotation/position. REFERENCE_FRAME.CAMERA gives movement relative to the last pose.
+        /// REFERENCE_FRAME.WORLD gives cumulative movements since tracking started.</param>
+        /// <returns>The current \ref POSITIONAL_TRACKING_STATE "state" of the tracking process.</returns>
         public POSITIONAL_TRACKING_STATE GetPosition(ref Quaternion rotation, ref Vector3 translation, TRACKING_FRAME trackingFrame, REFERENCE_FRAME referenceFrame = REFERENCE_FRAME.WORLD)
         {
             Quaternion rotationOffset = Quaternion.Identity;
@@ -1685,20 +1837,21 @@ namespace sl
         /// Gets the current position of the camera and state of the tracking, filling a Pose struct useful for AR pass-through.
         /// </summary>
         /// <param name="pose">Current pose.</param>
-        /// <param name="referenceType">Reference frame for setting the rotation/position. CAMERA gives movement relative to the last pose.
-        /// WORLD gives cumulative movements since tracking started.</param>
-        /// <returns>State of ZED's Tracking system (off, searching, ok).</returns>
+        /// <param name="referenceType">Reference frame for setting the rotation/position. REFERENCE_FRAME.CAMERA gives movement relative to the last pose.
+        /// REFERENCE_FRAME.WORLD gives cumulative movements since tracking started.</param>
+        /// <returns>The current \ref POSITIONAL_TRACKING_STATE "state" of the tracking process.</returns>
         public POSITIONAL_TRACKING_STATE GetPosition(ref Pose pose, REFERENCE_FRAME referenceType = REFERENCE_FRAME.WORLD)
         {
             return (POSITIONAL_TRACKING_STATE)dllz_get_position_data(CameraID, ref pose, (int)referenceType);
         }
 
         /// <summary>
-        /// Sets a prior to the IMU orientation (not for ZED1).
+        /// Sets a prior to the IMU orientation (not for \ref MODEL "MODEL.ZED").
+        ///
         /// Prior must come from a external IMU, such as the HMD orientation and should be in a time frame
         /// that's as close as possible to the camera.
         /// </summary>
-        /// <returns>Error code status.</returns>
+        /// <returns>An sl.ERROR_CODE status.</returns>
         /// <param name="rotation">Prior rotation.</param>
         public ERROR_CODE SetIMUOrientationPrior(ref Quaternion rotation)
         {
@@ -1708,9 +1861,10 @@ namespace sl
         }
 
         /// <summary>
-        /// Gets the rotation given by the ZED-M/ZED2 IMU. Return an error if using ZED (v1) which does not contains internal sensors
+        /// Gets the rotation given by the IMU.
+        /// \note This method will return ERROR_CODE.INVALID_FUNCTION_CALL with a MODEL.ZED which does not contains internal sensors.
         /// </summary>
-        /// <returns>Error code status.</returns>
+        /// <returns>An sl.ERROR_CODE status.</returns>
         /// <param name="rotation">Rotation from the IMU.</param>
         public ERROR_CODE GetIMUOrientation(ref Quaternion rotation, TIME_REFERENCE referenceTime = TIME_REFERENCE.IMAGE)
         {
@@ -1720,10 +1874,12 @@ namespace sl
         }
 
         /// <summary>
-        /// Gets the full Sensor data from the ZED-M or ZED2 . Return an error if using ZED (v1) which does not contains internal sensors
+        /// Retrieves the SensorsData (IMU, magnetometer, barometer) at a specific time reference.
+        /// \note This method will return ERROR_CODE.INVALID_FUNCTION_CALL with a MODEL.ZED which does not contains internal sensors.
         /// </summary>
-        /// <returns>Error code status.</returns>
-        /// <param name="rotation">Rotation from the IMU.</param>
+        /// <param name="data">The SensorsData variable to store the data.</param>
+        /// <param name="referenceTime">Defines the reference from which you want the data to be expressed. Default: REFERENCE_FRAME.WORLD.</param>
+        /// <returns>An sl.ERROR_CODE status.</returns>
         public ERROR_CODE GetSensorsData(ref SensorsData data, TIME_REFERENCE referenceTime = TIME_REFERENCE.IMAGE)
         {
             sl.ERROR_CODE err = sl.ERROR_CODE.CAMERA_NOT_DETECTED;
@@ -1734,14 +1890,61 @@ namespace sl
         /// <summary>
         /// Defines a region of interest to focus on for all the SDK, discarding other parts.
         /// </summary>
-        /// <param name="roiMask">the Mat defining the requested region of interest, pixels lower than 127 will be discard. If empty, set all pixels as valid, otherwise should fit the resolution of the current instance and its type should be U8_C1/C3/C4.</param>
-        /// <returns></returns>
+        /// <param name="roiMask">
+        /// The Mat defining the requested region of interest, pixels lower than 127 will be discarded from all modules: depth, positional tracking, etc.
+        /// If empty, set all pixels as valid. The mask can be either at lower or higher resolution than the current images.
+        /// </param>
+        /// <returns>An sl.ERROR_CODE if something went wrong.</returns>
         public ERROR_CODE SetRegionOfInterest(sl.Mat roiMask)
         {
             sl.ERROR_CODE err = sl.ERROR_CODE.FAILURE;
 
             err = (sl.ERROR_CODE)dllz_sl_set_region_of_interest(CameraID, roiMask.GetPtr());
             return err;
+        }
+
+        /// <summary>
+        /// Get the previously set or computed region of interest.
+        /// </summary>
+        /// <param name="roiMask">The \ref Mat returned</param>
+        /// <param name="resolution">The optional size of the returned mask</param>
+        /// <returns>An sl.ERROR_CODE if something went wrong.</returns>
+        public ERROR_CODE GetRegionOfInterest(sl.Mat roiMask, sl.Resolution resolution = new sl.Resolution())
+        {
+            sl.ERROR_CODE err = sl.ERROR_CODE.FAILURE;
+
+            err = (sl.ERROR_CODE)dllz_get_region_of_interest(CameraID, roiMask.GetPtr(), (int)resolution.width, (int)resolution.height);
+            return err;
+        }
+
+        /// <summary>
+        /// Start the auto detection of a region of interest to focus on for all the SDK, discarding other parts.
+        /// This detection is based on the general motion of the camera combined with the motion in the scene.
+        /// The camera must move for this process, an internal motion detector is used, based on the Positional Tracking module.
+        /// It requires a few hundreds frames of motion to compute the mask.
+        ///  \note This module is expecting a static portion, typically a fairly close vehicle hood at the bottom of the image.
+        /// This module may not work correctly or detect incorrect background area, especially with slow motion, if there's no static element.
+        /// This module work asynchronously, the status can be obtained using \ref GetRegionOfInterestAutoDetectionStatus(), the result is either auto applied,
+        /// or can be retrieve using \ref GetRegionOfInterest function.
+        /// </summary>
+        /// <param name="roiParams"></param>
+        /// <returns>An sl.ERROR_CODE if something went wrong.</returns>
+        public ERROR_CODE StartRegionOfInterestAutoDetection(ref RegionOfInterestParameters roiParams)
+        {
+            sl.ERROR_CODE err = sl.ERROR_CODE.FAILURE;
+            dllz_start_region_of_interest_auto_detection(CameraID, ref roiParams);
+
+            return err;
+        }
+
+        /// <summary>
+        ///  Return the status of the automatic Region of Interest Detection.
+        ///  The automatic Region of Interest Detection is enabled by using \ref StartRegionOfInterestAutoDetection
+        /// </summary>
+        /// <returns>An sl.ERROR_CODE if something went wrong.</returns>
+        public REGION_OF_INTEREST_AUTO_DETECTION_STATE GetRegionOfInterestAutoDetectionStatus()
+        {
+            return (REGION_OF_INTEREST_AUTO_DETECTION_STATE)dllz_get_region_of_interest_auto_detection_status(CameraID);
         }
 
         ///@}
@@ -1756,7 +1959,7 @@ namespace sl
         /// Initializes and begins the spatial mapping processes.
         /// </summary>
         /// <param name="spatialMappingParameters">Spatial mapping parameters.</param>
-        /// <returns>SUCCES if everything went fine, FAILURE otherwise</returns>
+        /// <returns>sl.ERROR_CODE.SUCCESS if everything went fine, sl.ERROR_CODE.FAILURE otherwise.</returns>
         public sl.ERROR_CODE EnableSpatialMapping(ref SpatialMappingParameters spatialMappingParameters)
         {
             sl_SpatialMappingParameters map_params = new sl_SpatialMappingParameters();
@@ -1779,7 +1982,7 @@ namespace sl
         /// <param name="resolutionMeter">Spatial mapping resolution in meters.</param>
         /// <param name="maxRangeMeter">Maximum scanning range in meters.</param>
         /// <param name="saveTexture">True to scan surface textures in addition to geometry.</param>
-        /// <returns>SUCCES if everything went fine, FAILURE otherwise</returns>
+        /// <returns>sl.ERROR_CODE.SUCCESS if everything went fine, sl.ERROR_CODE.FAILURE otherwise.</returns>
         public sl.ERROR_CODE EnableSpatialMapping(SPATIAL_MAP_TYPE type = SPATIAL_MAP_TYPE.MESH, MAPPING_RESOLUTION mappingResolution = MAPPING_RESOLUTION.MEDIUM, MAPPING_RANGE mappingRange = MAPPING_RANGE.MEDIUM, bool saveTexture = false)
         {
             sl_SpatialMappingParameters map_params = new sl_SpatialMappingParameters();
@@ -1796,9 +1999,11 @@ namespace sl
         }
 
         /// <summary>
-        /// Returns the spatial mapping parameters used. Correspond to the structure send when the \ref enableSpatialMapping() function was called.
+        /// Returns the SpatialMappingParameters used.
+        /// 
+        /// It corresponds to the structure given as argument to the EnableSpatialMapping() method.
         /// </summary>
-        /// <returns>SpatialMappingParameters containing the parameters used for spatial mapping intialization.</returns>
+        /// <returns>SpatialMappingParameters containing the parameters used for spatial mapping initialization.</returns>
         public SpatialMappingParameters GetSpatialMappingParameters()
         {
             IntPtr p = dllz_get_spatial_mapping_parameters(CameraID);
@@ -1822,7 +2027,7 @@ namespace sl
         }
 
         /// <summary>
-        /// Disables the Spatial Mapping process.
+        /// Disables the spatial mapping process.
         /// </summary>
         public void DisableSpatialMapping()
         {
@@ -1832,14 +2037,14 @@ namespace sl
         /// <summary>
         /// Updates the internal version of the mesh and returns the sizes of the meshes.
         /// </summary>
-        /// <param name="nbVerticesInSubmeshes">Array of the number of vertices in each submesh.</param>
-        /// <param name="nbTrianglesInSubmeshes">Array of the number of triangles in each submesh.</param>
-        /// <param name="nbUpdatedSubmesh">Number of updated submeshes.</param>
-        /// <param name="updatedIndices">List of all submeshes updated since the last update.</param>
-        /// <param name="nbVertices">Total number of updated vertices in all submeshes.</param>
-        /// <param name="nbTriangles">Total number of updated triangles in all submeshes.</param>
-        /// <param name="nbSubmeshMax">Maximum number of submeshes that can be handled.</param>
-        /// <returns>Error code indicating if the update was successful, and why it wasn't otherwise.</returns>
+        /// <param name="nbVerticesInSubmeshes">Array of the number of vertices in each sub-mesh.</param>
+        /// <param name="nbTrianglesInSubmeshes">Array of the number of triangles in each sub-mesh.</param>
+        /// <param name="nbUpdatedSubmesh">Number of updated sub-meshes.</param>
+        /// <param name="updatedIndices">List of all sub-meshes updated since the last update.</param>
+        /// <param name="nbVertices">Total number of updated vertices in all sub-meshes.</param>
+        /// <param name="nbTriangles">Total number of updated triangles in all sub-meshes.</param>
+        /// <param name="nbSubmeshMax">Maximum number of sub-meshes that can be handled.</param>
+        /// <returns>sl.ERROR_CODE indicating if the update was successful, and why it wasn't otherwise.</returns>
         public sl.ERROR_CODE UpdateMesh(int[] nbVerticesInSubmeshes, int[] nbTrianglesInSubmeshes, ref int nbUpdatedSubmesh, int[] updatedIndices, ref int nbVertices, ref int nbTriangles, int nbSubmeshMax)
         {
             sl.ERROR_CODE err = sl.ERROR_CODE.FAILURE;
@@ -1851,7 +2056,7 @@ namespace sl
         /// Updates the internal version of the mesh and returns the sizes of the meshes.
         /// </summary>
         /// <param name="mesh">The mesh to be filled with the generated spatial map.</param>
-        /// <returns>Error code indicating if the update was successful, and why it wasn't otherwise.</returns>
+        /// <returns>sl.ERROR_CODE indicating if the update was successful, and why it wasn't otherwise.</returns>
         public sl.ERROR_CODE UpdateMesh(ref Mesh mesh)
         {
             ERROR_CODE err = UpdateMesh(mesh.nbVerticesInSubmesh, mesh.nbTrianglesInSubmesh, ref mesh.nbUpdatedSubmesh, mesh.updatedIndices, ref mesh.nbVertices, ref mesh.nbTriangles, (int)Constant.MAX_SUBMESH);
@@ -1860,25 +2065,29 @@ namespace sl
         }
 
         /// <summary>
-        /// Retrieves all chunks of the current generated mesh. Call UpdateMesh() before calling this.
+        /// Retrieves all chunks of the current generated mesh.
+        /// \note Call UpdateMesh() before calling this.
+        ///
         /// Vertex and triangle arrays must be at least of the sizes returned by UpdateMesh (nbVertices and nbTriangles).
         /// </summary>
         /// <param name="vertices">Vertices of the mesh.</param>
         /// <param name="triangles">Triangles, formatted as the index of each triangle's three vertices in the vertices array.</param>
         /// <param name="colors"> (b, g, r) colors of the vertices.</param>
-        /// <param name="nbSubmeshMax">Maximum number of submeshes that can be handled.</param>
-        /// <returns>Error code indicating if the retrieval was successful, and why it wasn't otherwise.</returns>
+        /// <param name="nbSubmeshMax">Maximum number of sub-meshes that can be handled.</param>
+        /// <returns>sl.ERROR_CODE indicating if the retrieval was successful, and why it wasn't otherwise.</returns>
         public sl.ERROR_CODE RetrieveMesh(Vector3[] vertices, int[] triangles, byte[] colors, int nbSubmeshMax, Vector2[] uvs, IntPtr textures)
         {
             return (sl.ERROR_CODE)dllz_retrieve_mesh(CameraID, vertices, triangles, colors, uvs, textures, nbSubmeshMax);
         }
 
         /// <summary>
-        /// Retrieves all chunks of the current generated mesh. Call UpdateMesh() before calling this.
+        /// Retrieves all chunks of the current generated mesh.
+        /// \note Call UpdateMesh() before calling this.
+        ///
         /// Vertex and triangle arrays must be at least of the sizes returned by UpdateMesh (nbVertices and nbTriangles).
         /// </summary>
         /// <param name="mesh">The mesh to be filled with the generated spatial map.</param>
-        /// <returns>Error code indicating if the update was successful, and why it wasn't otherwise.</returns>
+        /// <returns>sl.ERROR_CODE indicating if the retrieval was successful, and why it wasn't otherwise.</returns>
         public sl.ERROR_CODE RetrieveMesh(ref Mesh mesh)
         {
             ERROR_CODE err = RetrieveMesh(mesh.vertices, mesh.triangles, mesh.colors, (int)Constant.MAX_SUBMESH, mesh.uvs, mesh.textures);
@@ -1896,7 +2105,7 @@ namespace sl
         /// Retrieve all chunks of the generated mesh.
         /// </summary>
         /// <param name="mesh">The mesh to be filled with the generated spatial map.</param>
-        /// <returns></returns>
+        /// <returns>sl.ERROR_CODE indicating if the retrieval was successful, and why it wasn't otherwise.</returns>
         public sl.ERROR_CODE RetrieveChunks(ref Mesh mesh)
         {
             dllz_update_chunks(CameraID, mesh.nbVerticesInSubmesh, mesh.nbTrianglesInSubmesh, ref mesh.nbUpdatedSubmesh, mesh.updatedIndices, ref mesh.nbVertices, ref mesh.nbTriangles, (int)Constant.MAX_SUBMESH);
@@ -1918,10 +2127,10 @@ namespace sl
 
         }
         /// <summary>
-        /// Process data from a submesh retrieved from the ZED SDK into a chunk
+        /// Process data from a sub-mesh retrieved from the ZED SDK into a chunk
         /// </summary>
         /// <param name="mesh"> Mesh data retrieved from the zed sdk</param>
-        /// <param name="indexUpdate">Index of the submesh/chunk to be updated.</param>
+        /// <param name="indexUpdate">Index of the sub-mesh/chunk to be updated.</param>
         /// <param name="verticesOffset">Starting index in the vertices stack.</param>
         /// <param name="trianglesOffset">Starting index in the triangles stack.</param>
         /// <param name="colorsOffset">Starting index in the colors stack.</param>
@@ -1969,7 +2178,7 @@ namespace sl
         /// Retrieves the current generated mesh.
         /// </summary>
         /// <param name="mesh">The mesh to be filled with the generated spatial map.</param>
-        /// <returns></returns>
+        /// <returns>sl.ERROR_CODE indicating if the retrieval was successful, and why it wasn't otherwise.</returns>
         public sl.ERROR_CODE RetrieveSpatialMap(ref Mesh mesh)
         {
             UpdateMesh(ref mesh);
@@ -1983,12 +2192,12 @@ namespace sl
         /// Retrieves the current fused point cloud.
         /// </summary>
         /// <param name="fusedPointCloud">The Fused Point Cloud to be filled with the generated spatial map.</param>
-        /// <returns></returns>
+        /// <returns>sl.ERROR_CODE indicating if the retrieval was successful, and why it wasn't otherwise.</returns>
         public sl.ERROR_CODE RetrieveSpatialMap(ref FusedPointCloud fusedPointCloud)
         {
             int nbVertices = 0;
             UpdateFusedPointCloud(ref nbVertices);
-            // Resize the vertice array according to how many vertices are needed.
+            // Resize the vertices array according to how many vertices are needed.
             fusedPointCloud.vertices = new Vector4[nbVertices];
             if (nbVertices > 0)
                 return RetrieveFusedPointCloud(fusedPointCloud.vertices);
@@ -1997,9 +2206,9 @@ namespace sl
         }
 
         /// <summary>
-        /// Updates the fused point cloud (if spatial map type was FUSED_POINT_CLOUD)
+        /// Updates the fused point cloud (if spatial map type was \ref SPATIAL_MAP_TYPE "FUSED_POINT_CLOUD").
         /// </summary>
-        /// <returns>Error code indicating if the update was successful, and why it wasn't otherwise.</returns>
+        /// <returns>sl.ERROR_CODE indicating if the update was successful, and why it wasn't otherwise.</returns>
         public sl.ERROR_CODE UpdateFusedPointCloud(ref int nbVertices)
         {
             sl.ERROR_CODE err = sl.ERROR_CODE.FAILURE;
@@ -2008,20 +2217,25 @@ namespace sl
         }
 
         /// <summary>
-        /// Retrieves all points of the fused point cloud. Call UpdateFusedPointCloud() before calling this.
-        /// Vertex arrays must be at least of the sizes returned by UpdateFusedPointCloud
+        /// Retrieves all points of the fused point cloud.
+        /// \note Call UpdateFusedPointCloud() before calling this.
+        /// 
+        /// Vertex arrays must be at least of the sizes returned by UpdateFusedPointCloud().
         /// </summary>
         /// <param name="vertices">Points of the fused point cloud.</param>
-        /// <returns>Error code indicating if the retrieval was successful, and why it wasn't otherwise.</returns>
+        /// <returns>sl.ERROR_CODE indicating if the retrieval was successful, and why it wasn't otherwise.</returns>
         public sl.ERROR_CODE RetrieveFusedPointCloud(Vector4[] vertices)
         {
             return (sl.ERROR_CODE)dllz_retrieve_fused_point_cloud(CameraID, vertices);
         }
 
-        ///Extracts the current spatial map from the spatial mapping process.
-        ///If the object to be filled already contains a previous version of the mesh, only changes will be updated, optimizing performance.
-        ///return \ref SUCCESS if the mesh is filled and available, otherwise \ref ERROR_CODE::FAILURE.
-        ///warning This is a blocking function.You should either call it in a thread or at the end of the mapping process.
+        /// <summary>
+        /// Extracts the current spatial map from the spatial mapping process.
+        ///
+        /// If the object to be filled already contains a previous version of the mesh, only changes will be updated, optimizing performance.
+        /// </summary>
+        /// <returns>sl.ERROR_CODE.SUCCESS if the mesh is filled and available, otherwise sl.ERROR_CODE.FAILURE.</returns>
+        /// This is a blocking method. You should either call it in a thread or at the end of the mapping process.
         public ERROR_CODE ExtractWholeSpatialMap()
         {
             sl.ERROR_CODE err = sl.ERROR_CODE.FAILURE;
@@ -2029,7 +2243,8 @@ namespace sl
             return err;
         }
         /// <summary>
-        /// Starts the mesh generation process in a thread that doesn't block the spatial mapping process.
+        /// Starts the mesh generation process in a thread that does not block the spatial mapping process.
+        ///
         /// ZEDSpatialMappingHelper calls this each time it has finished applying the last mesh update.
         /// </summary>
         public void RequestSpatialMap()
@@ -2038,7 +2253,7 @@ namespace sl
         }
 
         /// <summary>
-        /// Sets the pause state of the data integration mechanism for the ZED's spatial mapping.
+        /// Pauses or resumes the spatial mapping processes.
         /// </summary>
         /// <param name="status">If true, the integration is paused. If false, the spatial mapping is resumed.</param>
         public void PauseSpatialMapping(bool status)
@@ -2047,8 +2262,11 @@ namespace sl
         }
 
         /// <summary>
-        /// Returns the mesh generation status. Useful for knowing when to update and retrieve the mesh.
+        /// Returns the mesh generation status.
+        ///
+        /// Useful for knowing when to update and retrieve the mesh.
         /// </summary>
+        /// <returns>sl.ERROR_CODE.SUCCESS if the mesh is ready and not yet retrieved, otherwise sl.ERROR_CODE.FAILURE.</returns>
         public sl.ERROR_CODE GetMeshRequestStatus()
         {
             return (sl.ERROR_CODE)dllz_get_mesh_request_status_async(CameraID);
@@ -2059,6 +2277,7 @@ namespace sl
         /// </summary>
         /// <param name="filename">Path and filename of the mesh.</param>
         /// <param name="format">File format (extension). Can be .obj, .ply or .bin.</param>
+        /// <returns>Has the mesh been saved successfully.</returns>
         public bool SaveMesh(string filename, MESH_FILE_FORMAT format)
         {
             return dllz_save_mesh(CameraID, filename, format);
@@ -2069,23 +2288,27 @@ namespace sl
         /// </summary>
         /// <param name="filename">Path and filename of the point cloud.</param>
         /// <param name="format">File format (extension). Can be .obj, .ply or .bin.</param>
+        /// <returns>Has the point cloud been saved successfully.</returns>
         public bool SavePointCloud(string filename, MESH_FILE_FORMAT format)
         {
             return dllz_save_point_cloud(CameraID, filename, format);
         }
 
         /// <summary>
-        /// Loads a saved mesh file. ZEDSpatialMapping then configures itself as if the loaded mesh was just scanned.
+        /// Loads a saved mesh file.
+        ///
+        /// ZEDSpatialMapping then configures itself as if the loaded mesh was just scanned.
         /// </summary>
         /// <param name="filename">Path and filename of the mesh. Should include the extension (.obj, .ply or .bin).</param>
-        /// <param name="nbVerticesInSubmeshes">Array of the number of vertices in each submesh.</param>
-        /// <param name="nbTrianglesInSubmeshes">Array of the number of triangles in each submesh.</param>
-        /// <param name="nbSubmeshes">Number of submeshes.</param>
-        /// <param name="updatedIndices">List of all submeshes updated since the last update.</param>
-        /// <param name="nbVertices">Total number of updated vertices in all submeshes.</param>
-        /// <param name="nbTriangles">Total number of updated triangles in all submeshes.</param>
-        /// <param name="nbSubmeshMax">Maximum number of submeshes that can be handled.</param>
+        /// <param name="nbVerticesInSubmeshes">Array of the number of vertices in each sub-mesh.</param>
+        /// <param name="nbTrianglesInSubmeshes">Array of the number of triangles in each sub-mesh.</param>
+        /// <param name="nbSubmeshes">Number of sub-meshes.</param>
+        /// <param name="updatedIndices">List of all sub-meshes updated since the last update.</param>
+        /// <param name="nbVertices">Total number of updated vertices in all sub-meshes.</param>
+        /// <param name="nbTriangles">Total number of updated triangles in all sub-meshes.</param>
+        /// <param name="nbSubmeshMax">Maximum number of sub-meshes that can be handled.</param>
         /// <param name="textureSize">Array containing the sizes of all the textures (width, height) if applicable.</param>
+        /// <returns>Has the mesh been loaded successfully.</returns>
         public bool LoadMesh(string filename, int[] nbVerticesInSubmeshes, int[] nbTrianglesInSubmeshes, ref int nbSubmeshes, int[] updatedIndices,
             ref int nbVertices, ref int nbTriangles, int nbSubmeshMax, int[] textureSize = null)
         {
@@ -2097,14 +2320,14 @@ namespace sl
         /// Filters a mesh to remove triangles while still preserving its overall shape (though less accurate).
         /// </summary>
         /// <param name="filterParameters">Filter level. Higher settings remove more triangles.</param>
-        /// <param name="nbVerticesInSubmeshes">Array of the number of vertices in each submesh.</param>
-        /// <param name="nbTrianglesInSubmeshes">Array of the number of triangles in each submesh.</param>
-        /// <param name="nbSubmeshes">Number of submeshes.</param>
-        /// <param name="updatedIndices">List of all submeshes updated since the last update.</param>
-        /// <param name="nbVertices">Total number of updated vertices in all submeshes.</param>
-        /// <param name="nbTriangles">Total number of updated triangles in all submeshes.</param>
-        /// <param name="nbSubmeshMax">Maximum number of submeshes that can be handled.</param>
-        /// <returns>True if the filtering was successful, false otherwise.</returns>
+        /// <param name="nbVerticesInSubmeshes">Array of the number of vertices in each sub-mesh.</param>
+        /// <param name="nbTrianglesInSubmeshes">Array of the number of triangles in each sub-mesh.</param>
+        /// <param name="nbSubmeshes">Number of sub-meshes.</param>
+        /// <param name="updatedIndices">List of all sub-meshes updated since the last update.</param>
+        /// <param name="nbVertices">Total number of updated vertices in all sub-meshes.</param>
+        /// <param name="nbTriangles">Total number of updated triangles in all sub-meshes.</param>
+        /// <param name="nbSubmeshMax">Maximum number of sub-meshes that can be handled.</param>
+        /// <returns>Has the mesh been filtered successfully.</returns>
         public bool FilterMesh(MESH_FILTER filterParameters, int[] nbVerticesInSubmeshes, int[] nbTrianglesInSubmeshes, ref int nbSubmeshes, int[] updatedIndices, ref int nbVertices, ref int nbTriangles, int nbSubmeshMax)
         {
             return dllz_filter_mesh(CameraID, filterParameters, nbVerticesInSubmeshes, nbTrianglesInSubmeshes, ref nbSubmeshes, updatedIndices, ref nbVertices, ref nbTriangles, nbSubmeshMax);
@@ -2114,7 +2337,7 @@ namespace sl
         /// </summary>
         /// <param name="filterParameters">Filter level. Higher settings remove more triangles.</param>
         /// <param name="mesh">The mesh to be filled with the generated spatial map.</param>
-        /// <returns>True if the filtering was successful, false otherwise.</returns>
+        /// <returns>Has the mesh been filtered successfully.</returns>
         public bool FilterMesh(MESH_FILTER filterParameters, ref Mesh mesh)
         {
             return dllz_filter_mesh(CameraID, filterParameters, mesh.nbVerticesInSubmesh, mesh.nbTrianglesInSubmesh, ref mesh.nbUpdatedSubmesh, mesh.updatedIndices, ref mesh.nbVertices, ref mesh.nbTriangles,
@@ -2124,38 +2347,46 @@ namespace sl
         /// <summary>
         /// Applies the scanned texture onto the internal scanned mesh.
         /// </summary>
-        /// <param name="nbVerticesInSubmeshes">Array of the number of vertices in each submesh.</param>
-        /// <param name="nbTrianglesInSubmeshes">Array of the number of triangles in each submesh.</param>
-        /// <param name="nbSubmeshes">Number of submeshes.</param>
-        /// <param name="updatedIndices">List of all submeshes updated since the last update.</param>
-        /// <param name="nbVertices">Total number of updated vertices in all submeshes.</param>
-        /// <param name="nbTriangles">Total number of updated triangles in all submeshes.</param>
+        /// <param name="nbVerticesInSubmeshes">Array of the number of vertices in each sub-mesh.</param>
+        /// <param name="nbTrianglesInSubmeshes">Array of the number of triangles in each sub-mesh.</param>
+        /// <param name="nbSubmeshes">Number of sub-meshes.</param>
+        /// <param name="updatedIndices">List of all sub-meshes updated since the last update.</param>
+        /// <param name="nbVertices">Total number of updated vertices in all sub-meshes.</param>
+        /// <param name="nbTriangles">Total number of updated triangles in all sub-meshes.</param>
         /// <param name="textureSize"> Vector containing the size of all the texture (width, height). </param>
-        /// <param name="nbSubmeshMax">Maximum number of submeshes that can be handled.</param>
-        /// <returns></returns>
+        /// <param name="nbSubmeshMax">Maximum number of sub-meshes that can be handled.</param>
+        /// <returns>Has the texture been applied successfully.</returns>
         public bool ApplyTexture(int[] nbVerticesInSubmeshes, int[] nbTrianglesInSubmeshes, ref int nbSubmeshes, int[] updatedIndices, ref int nbVertices, ref int nbTriangles, int[] textureSize, int nbSubmeshMax)
         {
             return dllz_apply_texture(CameraID, nbVerticesInSubmeshes, nbTrianglesInSubmeshes, ref nbSubmeshes, updatedIndices, ref nbVertices, ref nbTriangles, textureSize, nbSubmeshMax);
         }
 
+        /// <summary>
+        /// Applies the texture on a mesh.
+        /// </summary>
+        /// <param name="mesh">Mesh with a texture to apply.</param>
+        /// <returns>Has the texture been applied successfully.</returns>
         public bool ApplyTexture(ref Mesh mesh)
         {
             return dllz_apply_texture(CameraID, mesh.nbVerticesInSubmesh, mesh.nbTrianglesInSubmesh, ref mesh.nbUpdatedSubmesh, mesh.updatedIndices, ref mesh.nbVertices, ref mesh.nbTriangles, mesh.texturesSize, (int)Constant.MAX_SUBMESH);
         }
 
         /// <summary>
-        /// Gets the current state of spatial mapping.
+        ///  Returns the current spatial mapping state.
+        ///
+        /// As the spatial mapping runs asynchronously, this method allows you to get reported errors or status info.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The current \ref SPATIAL_MAPPING_STATE "state" of the spatial mapping process.</returns>
         public SPATIAL_MAPPING_STATE GetSpatialMappingState()
         {
             return (sl.SPATIAL_MAPPING_STATE)dllz_get_spatial_mapping_state(CameraID);
         }
 
         /// <summary>
-        /// Gets a vector pointing toward the direction of gravity. This is estimated from a 3D scan of the environment,
-        /// and as such, a scan must be started/finished for this value to be calculated.
-        /// If using the ZED Mini, this isn't required thanks to its IMU.
+        /// Gets a vector pointing toward the direction of gravity.
+        ///
+        /// This is estimated from a 3D scan of the environment, and as such, a scan must be started/finished for this value to be calculated.
+        /// If using a camera other than \ref MODEL "MODEL.ZED", this is not required thanks to its IMU.
         /// </summary>
         /// <returns>Vector3 pointing downward.</returns>
         public Vector3 GetGravityEstimate()
@@ -2166,16 +2397,18 @@ namespace sl
         }
 
         /// <summary>
-        /// Consolidates the chunks from a scan. This is used to turn lots of small meshes (which are efficient for
-        /// the scanning process) into several large meshes (which are more convenient to work with).
+        /// Consolidates the chunks from a scan.
+        ///
+        /// This is used to turn lots of small meshes (which are efficient for the scanning process)
+        /// into several large meshes (which are more convenient to work with).
         /// </summary>
         /// <param name="numberFaces"></param>
-        /// <param name="nbVerticesInSubmeshes">Array of the number of vertices in each submesh.</param>
-        /// <param name="nbTrianglesInSubmeshes">Array of the number of triangles in each submesh.</param>
-        /// <param name="nbSubmeshes">Number of submeshes.</param>
-        /// <param name="updatedIndices">List of all submeshes updated since the last update.</param>
-        /// <param name="nbVertices">Total number of updated vertices in all submeshes.</param>
-        /// <param name="nbTriangles">Total number of updated triangles in all submeshes.</param>
+        /// <param name="nbVerticesInSubmeshes">Array of the number of vertices in each sub-mesh.</param>
+        /// <param name="nbTrianglesInSubmeshes">Array of the number of triangles in each sub-mesh.</param>
+        /// <param name="nbSubmeshes">Number of sub-meshes.</param>
+        /// <param name="updatedIndices">List of all sub-meshes updated since the last update.</param>
+        /// <param name="nbVertices">Total number of updated vertices in all sub-meshes.</param>
+        /// <param name="nbTriangles">Total number of updated triangles in all sub-meshes.</param>
         public void MergeChunks(int numberFaces, int[] nbVerticesInSubmeshes, int[] nbTrianglesInSubmeshes, ref int nbSubmeshes, int[] updatedIndices, ref int nbVertices, ref int nbTriangles, int nbSubmesh)
         {
             dllz_spatial_mapping_merge_chunks(CameraID, numberFaces, nbVerticesInSubmeshes, nbTrianglesInSubmeshes, ref nbSubmeshes, updatedIndices, ref nbVertices, ref nbTriangles, nbSubmesh);
@@ -2183,20 +2416,23 @@ namespace sl
 
         ///@}
 
-        ////////////////////////
-        /// Plane Detection  ///
-        ////////////////////////
+        ///@{
+        /// @name Plane Detection
+
+
+        ///////////////////////////// PLANE DETECTION ////////////////////////////////
 
 
         /// <summary>
-        /// Looks for a plane in the visible area that is likely to represent the floor.
+        /// Detect the floor plane of the scene.
+        /// 
         /// Use ZEDPlaneDetectionManager.DetectFloorPlane for a higher-level version that turns planes into GameObjects.
         /// </summary>
         /// <param name="plane">Data on the detected plane.</param>
         /// <param name="playerHeight">Height of the camera from the newly-detected floor.</param>
         /// <param name="priorQuat">Prior rotation.</param>
         /// <param name="priorTrans">Prior position.</param>
-        /// <returns></returns>
+        /// <returns>sl.ERROR_CODE.SUCCESS if everything went fine, sl.ERROR_CODE.FAILURE otherwise.</returns>
         [Obsolete("This Method is Deprecated, use FindFloorPlane instead", false)]
         public sl.ERROR_CODE findFloorPlane(ref PlaneData plane, out float playerHeight, Quaternion priorQuat, Vector3 priorTrans)
         {
@@ -2218,14 +2454,15 @@ namespace sl
         }
 
         /// <summary>
-        /// Looks for a plane in the visible area that is likely to represent the floor.
+        /// Detect the floor plane of the scene.
+        /// 
         /// Use ZEDPlaneDetectionManager.DetectFloorPlane for a higher-level version that turns planes into GameObjects.
         /// </summary>
         /// <param name="plane">Data on the detected plane.</param>
         /// <param name="playerHeight">Height of the camera from the newly-detected floor.</param>
         /// <param name="priorQuat">Prior rotation.</param>
         /// <param name="priorTrans">Prior position.</param>
-        /// <returns></returns>
+        /// <returns>sl.ERROR_CODE.SUCCESS if everything went fine, sl.ERROR_CODE.FAILURE otherwise.</returns>
         public sl.ERROR_CODE FindFloorPlane(ref PlaneData plane, out float playerHeight, Quaternion priorQuat, Vector3 priorTrans)
         {
             IntPtr p = IntPtr.Zero;
@@ -2247,13 +2484,15 @@ namespace sl
 
         /// <summary>
         /// Using data from a detected floor plane, updates supplied vertex and triangle arrays with
-        /// data needed to make a mesh that represents it. These arrays are updated directly from the wrapper.
+        /// data needed to make a mesh that represents it.
+        ///
+        /// These arrays are updated directly from the wrapper.
         /// </summary>
         /// <param name="vertices">Array to be filled with mesh vertices.</param>
         /// <param name="triangles">Array to be filled with mesh triangles, stored as indexes of each triangle's points.</param>
         /// <param name="numVertices">Total vertices in the mesh.</param>
         /// <param name="numTriangles">Total triangle indexes (3x number of triangles).</param>
-        /// <returns></returns>
+        /// <returns>0 is the method was successful, 1 otherwise.</returns>
         [Obsolete("This Method is Deprecated, use ConvertFloorPlaneToMesh instead", false)]
         public int convertFloorPlaneToMesh(Vector3[] vertices, int[] triangles, out int numVertices, out int numTriangles)
         {
@@ -2262,24 +2501,27 @@ namespace sl
 
         /// <summary>
         /// Using data from a detected floor plane, updates supplied vertex and triangle arrays with
-        /// data needed to make a mesh that represents it. These arrays are updated directly from the wrapper.
+        /// data needed to make a mesh that represents it.
+        ///
+        /// These arrays are updated directly from the wrapper.
         /// </summary>
         /// <param name="vertices">Array to be filled with mesh vertices.</param>
         /// <param name="triangles">Array to be filled with mesh triangles, stored as indexes of each triangle's points.</param>
         /// <param name="numVertices">Total vertices in the mesh.</param>
         /// <param name="numTriangles">Total triangle indexes (3x number of triangles).</param>
-        /// <returns></returns>
+        /// <returns>0 is the method was successful, 1 otherwise.</returns>
         public int ConvertFloorPlaneToMesh(Vector3[] vertices, int[] triangles, out int numVertices, out int numTriangles)
         {
             return dllz_convert_floorplane_to_mesh(CameraID, vertices, triangles, out numVertices, out numTriangles);
         }
 
         /// <summary>
-        /// Checks for a plane in the real world at given screen-space coordinates.
+        /// Checks the plane at the given left image coordinates.
         /// </summary>
-        /// <param name="plane">Data on the detected plane.</param>
-        /// <param name="screenPos">Point on the ZED image to check for a plane.</param>
-        /// <returns></returns>
+        /// <param name="plane">The detected plane if the method succeeded.</param>
+        /// <param name="coord">The image coordinate. The coordinate must be taken from the full-size image.</param>
+        /// <param name="parameters">A structure containing all the specific parameters for the plane detection. Default: a preset of PlaneDetectionParameters.</param>
+        /// <returns>sl.ERROR_CODE.SUCCESS if everything went fine, sl.ERROR_CODE.FAILURE otherwise.</returns>
         [Obsolete("This Method is Deprecated, use FindPlaneAtHit instead", false)]
         public sl.ERROR_CODE findPlaneAtHit(ref PlaneData plane, Vector2 coord, ref PlaneDetectionParameters planeDetectionParameters)
         {
@@ -2304,11 +2546,12 @@ namespace sl
         }
 
         /// <summary>
-        /// Checks for a plane in the real world at given screen-space coordinates.
+        /// Checks the plane at the given left image coordinates.
         /// </summary>
-        /// <param name="plane">Data on the detected plane.</param>
-        /// <param name="screenPos">Point on the ZED image to check for a plane.</param>
-        /// <returns></returns>
+        /// <param name="plane">The detected plane if the method succeeded.</param>
+        /// <param name="coord">The image coordinate. The coordinate must be taken from the full-size image.</param>
+        /// <param name="parameters">A structure containing all the specific parameters for the plane detection. Default: a preset of PlaneDetectionParameters.</param>
+        /// <returns>sl.ERROR_CODE.SUCCESS if everything went fine, sl.ERROR_CODE.FAILURE otherwise.</returns>
         public sl.ERROR_CODE FindPlaneAtHit(ref PlaneData plane, Vector2 coord, ref PlaneDetectionParameters planeDetectionParameters)
         {
             IntPtr p = IntPtr.Zero;
@@ -2333,13 +2576,15 @@ namespace sl
 
         /// <summary>
         /// Using data from a detected hit plane, updates supplied vertex and triangle arrays with
-        /// data needed to make a mesh that represents it. These arrays are updated directly from the wrapper.
+        /// data needed to make a mesh that represents it.
+        ///
+        /// These arrays are updated directly from the wrapper.
         /// </summary>
         /// <param name="vertices">Array to be filled with mesh vertices.</param>
         /// <param name="triangles">Array to be filled with mesh triangles, stored as indexes of each triangle's points.</param>
         /// <param name="numVertices">Total vertices in the mesh.</param>
         /// <param name="numTriangles">Total triangle indexes (3x number of triangles).</param>
-        /// <returns></returns>
+        /// <returns>0 is the method was successful, 1 otherwise.</returns>
         [Obsolete("This Method is Deprecated, use ConvertHitPlaneToMesh instead", false)]
         public int convertHitPlaneToMesh(Vector3[] vertices, int[] triangles, out int numVertices, out int numTriangles)
         {
@@ -2348,13 +2593,15 @@ namespace sl
 
         /// <summary>
         /// Using data from a detected hit plane, updates supplied vertex and triangle arrays with
-        /// data needed to make a mesh that represents it. These arrays are updated directly from the wrapper.
+        /// data needed to make a mesh that represents it.
+        ///
+        /// These arrays are updated directly from the wrapper.
         /// </summary>
         /// <param name="vertices">Array to be filled with mesh vertices.</param>
         /// <param name="triangles">Array to be filled with mesh triangles, stored as indexes of each triangle's points.</param>
         /// <param name="numVertices">Total vertices in the mesh.</param>
         /// <param name="numTriangles">Total triangle indexes (3x number of triangles).</param>
-        /// <returns></returns>
+        /// <returns>0 is the method was successful, 1 otherwise.</returns>
         public int ConvertHitPlaneToMesh(Vector3[] vertices, int[] triangles, out int numVertices, out int numTriangles)
         {
             return dllz_convert_hitplane_to_mesh(CameraID, vertices, triangles, out numVertices, out numTriangles);
@@ -2405,20 +2652,26 @@ namespace sl
         /// @name Recording
 
         /// <summary>
-        /// Creates a file for recording the ZED's output into a .SVO or .AVI video.
-        /// </summary><remarks>An SVO is Stereolabs' own format designed for the ZED. It holds the video feed with timestamps
-        /// as well as info about the camera used to record it.</remarks>
-        /// <param name="videoFileName">Filename. Whether it ends with .svo or .avi defines its file type.</param>
-        /// <param name="compressionMode">How much compression to use</param>
-        /// <param name="bitrate">Override default bitrate with a custom bitrate (Kbits/s)</param>
-        /// <param name="target_fps">Use another fps than camera fps. Must respect camera_fps%target_fps == 0</param>
-        /// <param name="transcode">If input is in streaming mode, dump directly into SVO file (transcode=false) or decode/encode (transcode=true)</param>
-        /// <returns>An ERROR_CODE that defines if the file was successfully created and can be filled with images.</returns>
+        /// Creates an SVO file to be filled by EnableRecording() and DisableRecording().
+        /// \note An SVO is Stereolabs' own format designed for the ZED.
+        /// It holds the video feed with timestamps as well as info about the camera used to record it.
+        /// </summary>
+        /// <param name="videoFileName">Filename of the recording. Whether it ends with .svo or .avi defines its file type.</param>
+        /// <param name="compressionMode">The compression to use for recording.</param>
+        /// <param name="bitrate">Override default bitrate with a custom bitrate (Kbits/s).</param>
+        /// <param name="targetFPS">Use another fps than camera FPS. Must respect camera_fps%target_fps == 0.</param>
+        /// <param name="transcode">If input is in streaming mode, dump directly into SVO file (transcode=false) or decode/encode (transcode=true).</param>
+        /// <returns>An sl.ERROR_CODE that defines if the file was successfully created and can be filled with images.</returns>
         public ERROR_CODE EnableRecording(string videoFileName, SVO_COMPRESSION_MODE compressionMode = SVO_COMPRESSION_MODE.H264_BASED, uint bitrate = 0, int targetFPS = 0, bool transcode = false)
         {
             return (ERROR_CODE)dllz_enable_recording(CameraID, StringUtf8ToByte(videoFileName), (int)compressionMode, bitrate, targetFPS, transcode);
         }
 
+        /// <summary>
+        /// Creates an SVO file to be filled by EnableRecording() and DisableRecording().
+        /// </summary>
+        /// <param name="videoFileName">A structure containing all the specific parameters for the positional tracking. Default: a reset of RecordingParameters.</param>
+        /// <returns>An sl.ERROR_CODE that defines if the file was successfully created and can be filled with images.</returns>
         public ERROR_CODE EnableRecording(RecordingParameters recordingParameters)
         {
             return (ERROR_CODE)dllz_enable_recording(CameraID, StringUtf8ToByte(recordingParameters.videoFilename), (int)recordingParameters.compressionMode, recordingParameters.bitrate,
@@ -2426,9 +2679,9 @@ namespace sl
         }
 
         /// <summary>
-        ///  Get the recording information
+        /// Get the recording information.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The recording state structure. For more details, see \ref RecordingStatus.</returns>
         public sl.RecordingStatus GetRecordingStatus()
         {
             IntPtr p = dllz_get_recording_status(CameraID);
@@ -2443,9 +2696,11 @@ namespace sl
         }
 
         /// <summary>
-        ///  Get the recording parameters
+        /// Returns the RecordingParameters used.
+        /// 
+        /// It corresponds to the structure given as argument to the EnableRecording() method.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>sl.RecordingParameters containing the parameters used for recording initialization.</returns>
         public sl.RecordingParameters GetRecordingParameters()
         {
             IntPtr p = dllz_get_recording_parameters(CameraID);
@@ -2462,15 +2717,14 @@ namespace sl
         /// <summary>
         /// Pauses or resumes the recording.
         /// </summary>
-        /// <param name="status"> if true, the recording is paused. If false, the recording is resumed. </param>
-        /// <returns></returns>
+        /// <param name="status">If true, the recording is paused. If false, the recording is resumed.</param>
         public void PauseRecording(bool status)
         {
             dllz_pause_recording(CameraID, status);
         }
 
         /// <summary>
-        /// Stops recording to an SVO/AVI, if applicable, and closes the file.
+        /// Disables the recording initiated by EnableRecording() and closes the generated file.
         /// </summary>
         public void DisableRecording()
         {
@@ -2482,14 +2736,19 @@ namespace sl
         ///@{
         /// @name Streaming
 
-        ////////////////////////
-        /// Streaming Module ///
-        ////////////////////////
+        ///////////////////////////// Streaming Module ////////////////////////////////
 
         /// <summary>
         /// Creates an streaming pipeline.
         /// </summary>
-        /// <returns>An ERROR_CODE that defines if the streaming pipe was successfully created</returns>
+        /// <param name="codec">Defines the codec used for streaming.</param>
+        /// <param name="bitrate">Defines the streaming bitrate in Kbits/s.</param>
+        /// <param name="port">Defines the port used for streaming.</param>
+        /// <param name="gopSize">Defines the gop size in number of frames.</param>
+        /// <param name="adaptativeBitrate">Enable/Disable adaptive bitrate.</param>
+        /// <param name="chunkSize">Defines a single chunk size.</param>
+        /// <param name="targetFPS">Defines the target framerate for the streaming output.</param>
+        /// <returns>An sl.ERROR_CODE that defines if the streaming pipe was successfully created.</returns>
         public ERROR_CODE EnableStreaming(STREAMING_CODEC codec = STREAMING_CODEC.H264_BASED, uint bitrate = 8000, ushort port = 30000, int gopSize = -1, bool adaptativeBitrate = false, int chunkSize = 32768, int targetFPS = 0)
         {
             int doAdaptBitrate = adaptativeBitrate ? 1 : 0;
@@ -2499,10 +2758,10 @@ namespace sl
         /// <summary>
         /// Creates an streaming pipeline.
         /// </summary>
-        /// <params>
-        /// Streaming parameters: See sl.StreamingParameters for more informations.
-        /// </params>
-        /// <returns>An ERROR_CODE that defines if the streaming pipe was successfully created</returns>
+        /// <param name="streamingParameters">
+        /// A structure containing all the specific parameters for the streaming. Default: a preset of StreamingParameters.
+        /// </param>
+        /// <returns>An sl.ERROR_CODE that defines if the streaming pipe was successfully created.</returns>
         public ERROR_CODE EnableStreaming(ref StreamingParameters streamingParameters)
         {
             int doAdaptBitrate = streamingParameters.adaptativeBitrate ? 1 : 0;
@@ -2510,9 +2769,9 @@ namespace sl
         }
 
         /// <summary>
-        /// Tells if streaming is running or not.
+        /// Tells if the streaming is running.
         /// </summary>
-        /// <returns> false if streaming is not enabled, true if streaming is on</returns>
+        /// <returns>Has the streaming been enabled successfully.</returns>
         public bool IsStreamingEnabled()
         {
             int res = dllz_is_streaming_enabled(CameraID);
@@ -2523,7 +2782,7 @@ namespace sl
         }
 
         /// <summary>
-        /// Stops the streaming pipeline.
+        /// Disables the streaming initiated by EnableStreaming().
         /// </summary>
         public void DisableStreaming()
         {
@@ -2531,9 +2790,11 @@ namespace sl
         }
 
         /// <summary>
-        ///  Get the streaming parameters
+        /// Returns the StreamingParameters used.
+        /// 
+        /// It corresponds to the structure given as argument to the EnableStreaming() method.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>sl.StreamingParameters containing the parameters used for streaming initialization.</returns>
         public sl.StreamingParameters GetStreamingParameters()
         {
             IntPtr p = dllz_get_streaming_parameters(CameraID);
@@ -2549,15 +2810,16 @@ namespace sl
 
         ///@}
 
-        ////////////////////////
-        /// Save utils fct   ///
-        ////////////////////////
+        ///////////////////////////// Save utils fct ////////////////////////////////
 
         /// <summary>
-        /// Save current image (specified by view) in a file defined by filename
-        /// Supported formats are jpeg and png. Filename must end with either .jpg or .png
+        /// Save current image (specified by view) in a file defined by filename.
+        ///
+        /// Supported formats are JPEG and PNG. \n Filename must end with either .jpg or .png.
         /// </summary>
-        /// <returns> returns an ERROR_CODE that indicates the type of error </returns>
+        /// <param name="side">sl.SIDE on which to save the image.</param>
+        /// <param name="filename"> Filename must end with .jpg or .png.</param>
+        /// <returns> An sl.ERROR_CODE that indicates the type of error.</returns>
         public sl.ERROR_CODE SaveCurrentImageInFile(sl.VIEW view, String filename)
         {
             sl.ERROR_CODE err = (sl.ERROR_CODE)dllz_save_current_image(CameraID, view, filename);
@@ -2566,11 +2828,12 @@ namespace sl
 
         /// <summary>
         /// Save the current depth in a file defined by filename.
-        /// Supported formats are PNG,PFM and PGM
+        ///
+        /// Supported formats are PNG, PFM and PGM.
         /// </summary>
-        /// <param name="side"> defines left (0) or right (1) depth</param>
-        /// <param name="filename"> filename must end with .png, .pfm or .pgm</param>
-        /// <returns> returns an ERROR_CODE that indicates the type of error </returns>
+        /// <param name="side">sl.SIDE on which to save the depth.</param>
+        /// <param name="filename"> Filename must end with .png, .pfm or .pgm.</param>
+        /// <returns> An sl.ERROR_CODE that indicates the type of error.</returns>
         public sl.ERROR_CODE SaveCurrentDepthInFile(SIDE side, String filename)
         {
             sl.ERROR_CODE err = (sl.ERROR_CODE)dllz_save_current_depth(CameraID, (int)side, filename);
@@ -2579,11 +2842,12 @@ namespace sl
 
         /// <summary>
         /// Save the current point cloud in a file defined by filename.
-        /// Supported formats are PLY,VTK,XYZ and PCD
+        ///
+        /// Supported formats are PLY, VTK, XYZ and PCD.
         /// </summary>
-        /// <param name="side">defines left (0) or right (1) point cloud</param>
-        /// <param name="filename"> filename must end with .ply, .xyz , .vtk or .pcd </param>
-        /// <returns> returns an ERROR_CODE that indicates the type of error </returns>
+        /// <param name="side">sl.SIDE on which to save the point cloud.</param>
+        /// <param name="filename">Filename must end with .ply, .xyz , .vtk or .pcd.</param>
+        /// <returns> An sl.ERROR_CODE that indicates the type of error.</returns>
         public sl.ERROR_CODE SaveCurrentPointCloudInFile(SIDE side, String filename)
         {
             sl.ERROR_CODE err = (sl.ERROR_CODE)dllz_save_current_point_cloud(CameraID, (int)side, filename);
@@ -2594,16 +2858,14 @@ namespace sl
         /// @name Object Detection
 
 
-        ////////////////////////
-        /// Object detection ///
-        ////////////////////////
+        ///////////////////////////// Object detection ////////////////////////////////
 
         /// <summary>
-        /// Check if a corresponding optimized engine is found for the requested Model based on your rig configuration.
+        /// Check if a corresponding optimized engine is found for the requested model based on your rig configuration.
         /// </summary>
         /// <param name="model"> AI model to check.</param>
         /// <param name="gpu_id">ID of the gpu.</param>
-        /// <returns></returns>
+        /// <returns>The \ref AI_Model_status "status" of the AI model.</returns>
         public static AI_Model_status CheckAIModelStatus(AI_MODELS model, int gpu_id = 0)
         {
             IntPtr p = dllz_check_AI_model_status(model, gpu_id);
@@ -2621,16 +2883,17 @@ namespace sl
         /// </summary>
         /// <param name="model">AI model to optimize.</param>
         /// <param name="gpu_id">ID of the gpu to optimize on.</param>
-        /// <returns></returns>
+        /// <returns>An sl.ERROR_CODE that indicates the type of error.</returns>
         public static sl.ERROR_CODE OptimizeAIModel(AI_MODELS model, int gpu_id = 0)
         {
             return (sl.ERROR_CODE)dllz_optimize_AI_model(model, gpu_id);
         }
 
         /// <summary>
-        /// Enable object detection module
+        /// Initializes and starts object detection module.
         /// </summary>
-        /// <returns> returns an ERROR_CODE that indicates the type of error </returns>
+        /// <param name="od_params">A structure containing all the specific parameters for the object detection. Default: a preset of ObjectDetectionParameters.</param>
+        /// <returns>An sl.ERROR_CODE that indicates the type of error.</returns>
         public sl.ERROR_CODE EnableObjectDetection(ref ObjectDetectionParameters od_params)
         {
             sl.ERROR_CODE objDetectStatus = ERROR_CODE.FAILURE;
@@ -2640,10 +2903,10 @@ namespace sl
         }
 
         /// <summary>
-        /// Enable body tracking module
+        /// Initializes and starts body tracking module.
         /// </summary>
-        /// <param name="bt_params">Body Tracking parameters</param>
-        /// <returns> returns an ERROR_CODE that indicates the type of error </returns>
+        /// <param name="bt_params">A structure containing all the specific parameters for the body tracking. Default: a preset of BodyTrackingParameters.</param>
+        /// <returns>An sl.ERROR_CODE that indicates the type of error.</returns>
         public sl.ERROR_CODE EnableBodyTracking(ref BodyTrackingParameters bt_params)
         {
             sl.ERROR_CODE btStatus = ERROR_CODE.FAILURE;
@@ -2654,9 +2917,9 @@ namespace sl
 
         /// <summary>
         /// Disable object detection module and release the resources.
-        /// instanceID : Id of the object detection instance. Used when multiple instances of the OD module are enabled at the same time.
-        /// disableAllInstance : should disable all instances of the object detection module or just instanceID.
         /// </summary>
+        /// <param name="instanceID">Id of the object detection instance. Used when multiple instances of the object detection module are enabled at the same time.</param>
+        /// <param name="disableAllInstance">Should disable all instances of the object detection module or just <b>instanceID</b>.</param>
         public void DisableObjectDetection(uint instanceID = 0, bool disableAllInstance = false)
         {
             dllz_disable_object_detection(CameraID, instanceID, disableAllInstance);
@@ -2664,18 +2927,20 @@ namespace sl
 
         /// <summary>
         /// Disable body tracking module and release the resources.
-        /// instanceID : Id of the body tracking instance. Used when multiple instances of the BT module are enabled at the same time.
-        /// disableAllInstance : should disable all instances of the body tracking module or just instanceID.
         /// </summary>
+        /// <param name="instanceID">Id of the body tracking module instance. Used when multiple instances of the body tracking module module are enabled at the same time.</param>
+        /// <param name="disableAllInstance">Should disable all instances of the body tracking module or just <b>instanceID</b>.</param>
         public void DisableBodyTracking(uint instanceID = 0, bool disableAllInstance = false)
         {
             dllz_disable_body_tracking(CameraID, instanceID, disableAllInstance);
         }
 
         /// <summary>
-        ///  Get the object detections parameters
+        /// Returns the ObjectDetectionParameters used.
+        ///
+        /// It corresponds to the structure given as argument to the EnableObjectDetection() method.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>sl.ObjectDetectionParameters containing the parameters used for object detection initialization.</returns>
         public sl.ObjectDetectionParameters GetObjectDetectionParameters()
         {
             IntPtr p = dllz_get_object_detection_parameters(CameraID);
@@ -2690,9 +2955,11 @@ namespace sl
         }
 
         /// <summary>
-        ///  Get the body tracking parameters
+        /// Returns the BodyTrackingParameters used.
+        ///
+        /// It corresponds to the structure given as argument to the EnableBodyTracking() method.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>sl.BodyTrackingParameters containing the parameters used for body tracking initialization.</returns>
         public sl.BodyTrackingParameters GetBodyTrackingParameters()
         {
             IntPtr p = dllz_get_body_tracking_parameters(CameraID);
@@ -2707,39 +2974,47 @@ namespace sl
         }
 
         /// <summary>
-        /// Pause or Unpause the object detection.
-        /// The retrieveObjects function will keep on returning the last objects detected while in pause.
+        /// Pause or resume the object detection.
+        ///
+        /// The RetrieveObjects() method will keep on returning the last objects detected while in pause.
         /// </summary>
-        /// <param name="status">True : Pause the OD. False : Unpause the OD.</param>
-        /// <param name="instanceID">Id of the Object detection instance. Used when multiple instances of the OD module are enabled at the same time.</param>
+        /// <param name="status">If true, object detection is paused. If false, object detection is resumed.</param>
+        /// <param name="instanceID">Id of the instance to pause/resume. Used when multiple instances of the object detection module are enabled at the same time.</param>
         public void PauseObjectDetection(bool status, uint instanceID = 0)
         {
             dllz_pause_object_detection(CameraID, status, instanceID);
         }
 
         /// <summary>
-        /// Pause or Unpause the body tracking.
-        /// The RetrieveBodies function will keep on returning the last bodies detected while in pause.
+        /// Pause or resume the body tracking.
+        ///
+        /// The RetrieveBodies() method will keep on returning the last bodies detected while in pause.
         /// </summary>
-        /// <param name="status">True : Pause the BT. False : Unpause the BT.</param>
-        /// <param name="instanceID">Id of the Body Tracking instance. Used when multiple instances of the BT module are enabled at the same time.</param>
+        /// <param name="status">If true, body tracking is paused. If false, body tracking is resumed.</param>
+        /// <param name="instanceID">Id of the instance to pause/resume. Used when multiple instances of the body tracking module are enabled at the same time.</param>
         public void PauseBodyTracking(bool status, uint instanceID = 0)
         {
             dllz_pause_body_tracking(CameraID, status, instanceID);
         }
-
+        
+        /// <summary>
+        /// Feed the 3D Object tracking method with your own 2D bounding boxes from your own detection algorithm.
+        /// </summary>
+        /// <param name="objects_in">List of CustomBoxObjectData to feed the object detection.</param>
+        /// <param name="instanceID">Id of the object detection instance. Used when multiple instances of the object detection module are enabled at the same time.</param>
+        /// <returns>sl.ERROR_CODE.SUCCESS if everything went fine.</returns>
         public sl.ERROR_CODE IngestCustomBoxObjects(List<CustomBoxObjectData> objects_in)
         {
             return (sl.ERROR_CODE)dllz_ingest_custom_box_objects(CameraID, objects_in.Count, objects_in.ToArray());
         }
 
         /// <summary>
-        /// Retrieve objects detected by the object detection module. To retrieve Body Tracking data use RetrieveBodies.
+        /// Retrieve objects detected by the object detection module.
         /// </summary>
         /// <param name="objs"> Retrieved objects. </param>
         /// <param name="od_params"> Object detection runtime parameters </param>
-        /// <param name="instanceID">Id of the Object detection instance. Used when multiple instances of the OD module are enabled at the same time.</param>
-        /// <returns> returns an ERROR_CODE that indicates the type of error </returns>
+        /// <param name="instanceID">Id of the object detection instance. Used when multiple instances of the object detection module are enabled at the same time.</param>
+        /// <returns>sl.ERROR_CODE.SUCCESS if everything went fine, sl.ERROR_CODE.FAILURE otherwise.</returns>
         public sl.ERROR_CODE RetrieveObjects(ref Objects objs, ref ObjectDetectionRuntimeParameters od_params, uint instanceID = 0)
         {
             IntPtr p = Marshal.AllocHGlobal(System.Runtime.InteropServices.Marshal.SizeOf<sl.Objects>());
@@ -2760,12 +3035,12 @@ namespace sl
         }
 
         /// <summary>
-        /// Retrieve bodies detected by the Body Tracking module. To retrieve Body Tracking data use RetrieveBodies.
+        /// Retrieve bodies detected by the body tracking module.
         /// </summary>
         /// <param name="objs"> Retrieved bodies. </param>
-        /// <param name="bt_params"> Body Tracking runtime parameters </param>
-        /// <param name="instanceID">Id of the Body Tracking instance. Used when multiple instances of the BT module are enabled at the same time.</param>
-        /// <returns> returns an ERROR_CODE that indicates the type of error </returns>
+        /// <param name="bt_params"> Body tracking runtime parameters </param>
+        /// <param name="instanceID">Id of the body tracking instance. Used when multiple instances of the body tracking module are enabled at the same time.</param>
+        /// <returns>sl.ERROR_CODE.SUCCESS if everything went fine, sl.ERROR_CODE.FAILURE otherwise.</returns>
         public sl.ERROR_CODE RetrieveBodies(ref Bodies objs, ref BodyTrackingRuntimeParameters bt_params, uint instanceID = 0)
         {
             IntPtr p = Marshal.AllocHGlobal(System.Runtime.InteropServices.Marshal.SizeOf<sl.Bodies>());
@@ -2788,21 +3063,21 @@ namespace sl
         /// <summary>
         /// Update the batch trajectories and retrieve the number of batches.
         /// </summary>
-        /// <param name="nbBatches"> numbers of batches </param>
-        /// <returns> returns an ERROR_CODE that indicates the type of error </returns>
+        /// <param name="nbBatches"> Numbers of batches. </param>
+        /// <returns>An sl.ERROR_CODE that indicates the type of error.</returns>
         public sl.ERROR_CODE UpdateObjectsBatch(out int nbBatches)
         {
             return (sl.ERROR_CODE)dllz_update_objects_batch(CameraID, out nbBatches);
         }
         /// <summary>
         /// Retrieve a batch of objects.
-        /// This function need to be called after RetrieveObjects, otherwise trajectories will be empty.
-        /// If also needs to be called after UpdateOBjectsBatch in order to retrieve the number of batch trajectories.
+        /// \note This method need to be called after RetrieveObjects(), otherwise trajectories will be empty.
+        /// \note It also needs to be called after UpdateObjectsBatch() in order to retrieve the number of batch trajectories.
+        /// \note To retrieve all the objects' batches, you need to iterate from 0 to nbBatches (retrieved from UpdateObjectsBatch()).
         /// </summary>
-        /// <remarks> To retrieve all the objectsbatches, you need to iterate from 0 to nbBatches (retrieved from UpdateObjectBatches) </remarks>
-        /// <param name="batch_index"> index of the batch retrieved. </param>
-        /// <param name="objectsBatch"> trajectory that will be filled by the batching queue process </param>
-        /// <returns> returns an ERROR_CODE that indicates the type of error </returns>
+        /// <param name="batch_index"> Index of the batch retrieved.</param>
+        /// <param name="objectsBatch"> Trajectory that will be filled by the batching queue process.</param>
+        /// <returns>An sl.ERROR_CODE that indicates the type of error.</returns>
         public sl.ERROR_CODE GetObjectsBatch(int batch_index, ref ObjectsBatch objectsBatch)
         {
             return (sl.ERROR_CODE)dllz_get_objects_batch_data(CameraID, batch_index, ref objectsBatch.numData, ref objectsBatch.id , ref objectsBatch.label, ref objectsBatch.sublabel,
