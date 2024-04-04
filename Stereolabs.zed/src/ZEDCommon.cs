@@ -4906,7 +4906,7 @@ namespace sl
         /// <summary>
         /// The serial number of the used ZED camera.
         /// </summary>
-        int serialnumber;
+        public int serialnumber;
         /// <summary>
         /// The communication parameters to connect this camera to the Fusion.
         /// </summary>
