@@ -304,6 +304,10 @@ namespace sl
         /// The module needs a newer version of CUDA.
         /// </summary>
         MODULE_NOT_COMPATIBLE_WITH_CUDA_VERSION,
+        /// <summary>
+        /// The input data does not contains the high frequency sensors data, this is usually because it requires newer SVO/Streaming. In order to work this modules needs inertial data present in it input.
+        /// </summary>
+        SENSORS_DATA_REQUIRED,
         /// @cond SHOWHIDDEN 
         ERROR_CODE_LAST
         /// @endcond
@@ -312,7 +316,7 @@ namespace sl
     ///\ingroup  Core_group
     /// <summary>
     /// Lists available coordinates systems for positional tracking and 3D measures.
-    /// \image html CoordinateSystem.png
+    /// \image html CoordinateSystem.webp
     /// </summary>
     public enum COORDINATE_SYSTEM
     {
@@ -348,7 +352,40 @@ namespace sl
         RIGHT_HANDED_Z_UP_X_FWD
     }
 
-    /// \ingroup Core_groupCameraInformation
+    /// <summary>
+    /// Lists available modules.
+    /// </summary>
+    public enum MODULE
+    {
+        /// <summary>
+        /// All modules
+        /// </summary>
+        ALL = 0,
+        /// <summary>
+        /// Depth module
+        /// </summary>
+        DEPTH = 1,
+        /// <summary>
+        /// Positional tracking module
+        /// </summary>
+        POSITIONAL_TRACKING = 2,
+        /// <summary>
+        /// Object Detection module
+        /// </summary>
+        OBJECT_DETECTION = 3,
+        /// <summary>
+        /// Body Tracking module
+        /// </summary>
+        BODY_TRACKING = 4,
+        /// <summary>
+        /// Spatial mapping module
+        /// </summary>
+        SPATIAL_MAPPING = 5,
+
+        LAST = 6
+    }
+
+    /// \ingroup Core_group
     /// <summary>
     /// Structure containing information about the camera sensor. 
     /// </summary>
@@ -406,47 +443,6 @@ namespace sl
         /// Sensors configuration parameters stored in a sl.SensorsConfiguration.
         /// </summary>
         public SensorsConfiguration sensorsConfiguration;
-    };
-
-    /// \ingroup Video_group
-    /// <summary>
-    /// Structure defining the input type used in the ZED SDK.
-    /// </summary>
-    /// It can be used to select a specific camera with an id or serial number, or from a SVO file.
-    [StructLayout(LayoutKind.Sequential)]
-    public struct InputType
-    {
-        /// <summary>
-        /// Current input type.
-        /// </summary>
-        public INPUT_TYPE inputType;
-
-        /// <summary>
-        /// Serial number of the camera.
-        /// </summary>
-	    uint serialNumber;
-
-        /// <summary>
-        /// Id of the camera.
-        /// </summary>
-        uint id;
-
-        /// <summary>
-        /// Path to the SVO file.
-        /// </summary>
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
-        char[] svoInputFilename;
-
-        /// <summary>
-        /// IP address of the streaming camera.
-        /// </summary>
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
-        char[] streamInputIp;
-
-        /// <summary>
-        /// Port of the streaming camera.
-        /// </summary>
-        ushort streamInputPort;
     };
 
     #endregion
@@ -529,7 +525,7 @@ namespace sl
         /// Positional tracking mode used.
         /// </summary>
         /// Can be used to improve accuracy in some types of scene at the cost of longer runtime.
-        public sl.POSITIONAL_TRACKING_MODE mode = sl.POSITIONAL_TRACKING_MODE.STANDARD;
+        public sl.POSITIONAL_TRACKING_MODE mode = sl.POSITIONAL_TRACKING_MODE.GEN_1;
     }
     /// \ingroup PositionalTracking_group
     /// <summary>
@@ -603,28 +599,25 @@ namespace sl
         /// <summary>
         /// Once computed the ROI computed will be automatically applied.
         /// </summary>
-        public bool autoApply;
-    }
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = (int)MODULE.LAST)]
+        public bool[] autoApplyModule;
 
-    ///\ingroup PositionalTracking_group
-    /// <summary>
-    /// Lists the different states of region of interest auto detection.
-    /// </summary>
-    public enum REGION_OF_INTEREST_AUTO_DETECTION_STATE
-    {
-        /// <summary>
-        /// The region of interest auto detection is initializing.
-        /// </summary>
-        RUNNING,
-        /// <summary>
-        /// The region of interest mask is ready, if auto_apply was enabled, the region of interest mask is being used.
-        /// </summary>
-        READY,
-        /// <summary>
-        ///  The region of interest auto detection is not enabled.
-        /// </summary>
-        NOT_ENABLED
-    };
+        public RegionOfInterestParameters()
+        {
+            depthFarThresholdMeters = 2.5f;
+            imageHeightRatioCutoff = 0.5f;
+            autoApplyModule = new bool[(int)MODULE.LAST];
+            autoApplyModule[(int)MODULE.ALL] = true;
+
+        }
+
+        public RegionOfInterestParameters(bool[] autoApplyModule_, float depthFarThresholdMeters_ = 2.5f, float imageHeightRatioCutoff_ = 0.5f)
+        {
+            depthFarThresholdMeters = depthFarThresholdMeters_;
+            imageHeightRatioCutoff = imageHeightRatioCutoff_;
+            autoApplyModule = autoApplyModule_;
+        }
+    }
 
     ///\ingroup PositionalTracking_group
     /// <summary>
@@ -633,7 +626,7 @@ namespace sl
     public enum POSITIONAL_TRACKING_STATE
     {
         /// <summary>
-        /// The camera is searching for a previously known position to locate itself.
+        /// \warn DEPRECATED: This state is no longer in use.
         /// </summary>
         SEARCHING,
         /// <summary>
@@ -653,7 +646,88 @@ namespace sl
         /// <summary>
         /// The camera is searching for the floor plane to locate itself with respect to it.\n The sl.REFERENCE_FRAME.WORLD will be set afterward.
         /// </summary>
-        SEARCHING_FLOOR_PLANE
+        SEARCHING_FLOOR_PLANE,
+        /// <summary>
+        /// The tracking module was unable to perform tracking from the previous frame to the current frame.
+        /// </summary>
+        UNAVAILABLE,
+    }
+
+    ///\ingroup PositionalTracking_group
+    /// <summary>
+    /// Report the status of current odom tracking.
+    /// </summary>
+    public enum ODOMETRY_STATUS
+    {
+        /// <summary>
+        /// The positional tracking module successfully tracked from the previous frame to the current frame.
+        /// </summary>
+        OK,
+        /// <summary>
+        /// The positional tracking module failed to track from the previous frame to the current frame.
+        /// </summary>
+        UNAVAILABLE
+    }
+
+    ///\ingroup PositionalTracking_group
+    /// <summary>
+    /// Report the status of current map tracking.
+    /// </summary>
+    public enum SPATIAL_MEMORY_STATUS
+    {
+        /// <summary>
+        /// The positional tracking module is operating normally.
+        /// </summary>
+        OK,
+        /// <summary>
+        /// The positional tracking module detected a loop and corrected its position.
+        /// </summary>
+        LOOP_CLOSED,
+        /// <summary>
+        /// The positional tracking module is searching for recognizable areas in the global map to relocate.
+        /// </summary>
+        SEARCHING,
+        /// <summary>
+        /// Spatial memory is disabled.
+        /// </summary>
+        OFF
+    }
+
+    ///\ingroup PositionalTracking_group
+    /// <summary>
+    /// Report the status of the positional tracking fusion.
+    /// </summary>
+    public enum POSITIONAL_TRACKING_FUSION_STATUS
+    {
+        VISUAL_INERTIAL = 0,
+        VISUAL = 1,
+        INERTIAL = 2,
+        GNSS = 3,
+        VISUAL_INERTIAL_GNSS = 4,
+        VISUAL_GNSS = 5,
+        INERTIAL_GNSS = 6,
+        UNAVAILABLE = 7
+    }
+
+    ///\ingroup PositionalTracking_group
+    /// <summary>
+    /// Lists the different status of positional tracking.
+    /// </summary>
+    public struct PositionalTrackingStatus
+    {
+        /// <summary>
+        /// Represents the current state of Visual-Inertial Odometry (VIO) tracking between the previous frame and the current frame.
+        /// </summary>
+        public ODOMETRY_STATUS odometryStatus;
+        /// <summary>
+        /// Represents the current state of camera tracking in the global map.
+        /// </summary>
+        public SPATIAL_MEMORY_STATUS spatialMemoryStatus;
+        /// <summary>
+        /// Represents the current state of positional tracking fusion.
+        /// </summary>
+        public POSITIONAL_TRACKING_FUSION_STATUS trackingFusionStatus;
+
     }
 
     ///\ingroup PositionalTracking_group
@@ -665,44 +739,11 @@ namespace sl
         /// <summary>
         /// Default mode. Best compromise in performance and accuracy.
         /// </summary>
-        STANDARD,
+        GEN_1,
         /// <summary>
-        /// Improve accuracy in more challenging scenes such as outdoor repetitive patterns like extensive fields.
-        /// \n Currently works best with sl.DEPTH_MODE.ULTRA and requires more compute power.
+        /// Next generation of positional tracking, allow better accuracy.
         /// </summary>
-        QUALITY
-    }
-
-    ///\ingroup SpatialMapping_group
-    /// <summary>
-    /// Lists the different states of spatial memory area export.
-    /// </summary>
-    public enum AREA_EXPORTING_STATE
-    {
-        /// <summary>
-        /// The spatial memory file has been successfully created.
-        /// </summary>
-        SUCCESS,
-        /// <summary>
-        /// The spatial memory is currently being written.
-        /// </summary>
-        RUNNING,
-        /// <summary>
-        /// The spatial memory file exportation has not been called.
-        /// </summary>
-        NOT_STARTED,
-        /// <summary>
-        /// The spatial memory contains no data, the file is empty.
-        /// </summary>
-        FILE_EMPTY,
-        /// <summary>
-        /// The spatial memory file has not been written because of a wrong file name.
-        /// </summary>
-        FILE_ERROR,
-        /// <summary>
-        /// The spatial memory learning is disabled. No file can be created.
-        /// </summary>
-        SPATIAL_MEMORY_DISABLED,
+        GEN_2
     }
 
     /// \ingroup PositionalTracking_group
@@ -1205,7 +1246,7 @@ namespace sl
         /// </summary>
         /// Each depth pixel has a corresponding confidence sl.MEASURE.CONFIDENCE in the range [1, 100].
         /// \n Decreasing this value will remove depth data from both objects edges and low textured areas, to keep only confident depth estimation data.
-        /// \n Default: 100 (no depth pixel will be rejected)
+        /// \n Default: 95
         /// \note Pixels with a value close to 100 are not to be trusted. Accurate depth pixels tends to be closer to lower values.
         /// \note It can be seen as a probability of error, scaled to 100.
         public int confidenceThreshold;
@@ -1230,7 +1271,7 @@ namespace sl
         /// Default constructor.
         /// </summary>
         /// All the parameters are set to their default values.
-        public RuntimeParameters(REFERENCE_FRAME reframe = REFERENCE_FRAME.CAMERA, bool depth = true, int cnf_threshold = 100, int txt_cnf_threshold = 100, bool removeSaturatedAreas_ = true, bool pEnableFillMode = false)
+        public RuntimeParameters(REFERENCE_FRAME reframe = REFERENCE_FRAME.CAMERA, bool depth = true, int cnf_threshold = 95, int txt_cnf_threshold = 100, bool removeSaturatedAreas_ = true, bool pEnableFillMode = false)
         {
             this.measure3DReferenceFrame = reframe;
             this.enableDepth = depth;
@@ -1329,6 +1370,45 @@ namespace sl
         public Vector3 Trans;
     };
 
+    ///\ingroup Depth_group
+    /// <summary>
+    /// Structure containing data that can be stored in and retrieved from SVOs.
+    ///  That information will be ingested with sl.Camera.ingestDataIntoSVO and retrieved with sl.Camera.retrieveSVOData.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct SVOData
+    {
+        /// <summary>
+        /// Key used to retrieve the data stored into SVOData's content.
+        /// The key size must not exceed 128 characters.
+        /// </summary>
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+        public string key;
+        /// <summary>
+        /// Timestamp of the data (in nanoseconds).
+        /// </summary>
+        public ulong timestamp;
+        /// <summary>
+        /// Content stored as SVOData
+        /// Allow any type of content, including raw data like compressed images of json.
+        /// </summary>
+        IntPtr content;
+        /// <summary>
+        /// Size of the content data.
+        /// </summary>
+        public int contentSize;
+
+        public string GetContent()
+        {
+            return Marshal.PtrToStringAnsi(content);
+        }
+
+        public void SetContent(string c)
+        {
+            content = Marshal.StringToHGlobalAnsi(c);
+        }
+    }
+
 
     ///\ingroup Depth_group
     /// <summary>
@@ -1358,7 +1438,11 @@ namespace sl
         /// <summary>
         /// End to End Neural disparity estimation.\n Requires AI module.
         /// </summary>
-        NEURAL
+        NEURAL,
+        /// <summary>
+        /// More accurate Neural disparity estimation.\n Requires AI module.
+        /// </summary>
+        NEURAL_PLUS
     };
 
     ///\ingroup Depth_group
@@ -1474,6 +1558,26 @@ namespace sl
         /// \n Type: sl.MAT_TYPE.MAT_16U_C1.
         /// </summary>
         DEPTH_U16_MM_RIGHT
+    };
+
+    ///\ingroup Depth_group
+    /// <summary>
+    /// Lists the different states of region of interest auto detection.
+    /// </summary>
+    public enum REGION_OF_INTEREST_AUTO_DETECTION_STATE
+    {
+        /// <summary>
+        /// The region of interest auto detection is initializing.
+        /// </summary>
+        RUNNING,
+        /// <summary>
+        /// The region of interest mask is ready, if auto_apply was enabled, the region of interest mask is being used.
+        /// </summary>
+        READY,
+        /// <summary>
+        ///  The region of interest auto detection is not enabled.
+        /// </summary>
+        NOT_ENABLED
     };
 
     #endregion
@@ -1618,7 +1722,7 @@ namespace sl
         /// </summary>
         public bool enableRightSideMeasure;
         /// <summary>
-        /// Defines if a flip of the images is needed.
+        /// Disables the self-calibration process at camera opening.
         ///
         /// At initialization, sl.Camera runs a self-calibration process that corrects small offsets from the device's factory calibration.
         /// \n A drawback is that calibration parameters will slightly change from one (live) run to another, which can be an issue for repeatability.
@@ -2071,6 +2175,7 @@ namespace sl
         /// <summary>
         /// System path of the camera.
         /// </summary>
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 512)]
         public string path;
 
         /// <summary>
@@ -2182,6 +2287,11 @@ namespace sl
     public enum RESOLUTION
     {
         /// <summary>
+        /// 3856x2180 for imx678 mono
+        /// \n Available FPS: 15
+        /// </summary>
+        HD4K,
+        /// <summary>
         /// 2208*1242 (x2)
         /// \n Available FPS: 15
         /// </summary>
@@ -2269,7 +2379,19 @@ namespace sl
         /// <summary>
         /// ZED X Mini (ZED XM) camera model
         /// </summary>
-        ZED_XM
+        ZED_XM,
+        /// <summary>
+        /// Virtual ZED-X generated from 2 ZED-XOne
+        /// </summary>
+        VIRTUAL_ZED_X = 10,
+        /// <summary>
+        /// ZED XOne with global shutter AR0234 sensor 
+        /// </summary>
+        ZED_XONE_GS = 30,
+        /// <summary>
+        /// ZED XOne with 4K rolling shutter IMX678 sensor
+        /// </summary>
+        ZED_XONE_UHD = 31,
     };
 
     ///\ingroup  Video_group
@@ -2598,6 +2720,48 @@ namespace sl
         /// </summary>
         BOTH = 2
     }
+
+    /// \ingroup Video_group
+    /// <summary>
+    /// Structure defining the input type used in the ZED SDK.
+    /// </summary>
+    /// It can be used to select a specific camera with an id or serial number, or from a SVO file.
+    [StructLayout(LayoutKind.Sequential)]
+    public struct InputType
+    {
+        /// <summary>
+        /// Current input type.
+        /// </summary>
+        public INPUT_TYPE inputType;
+
+        /// <summary>
+        /// Serial number of the camera.
+        /// </summary>
+	    uint serialNumber;
+
+        /// <summary>
+        /// Id of the camera.
+        /// </summary>
+        uint id;
+
+        /// <summary>
+        /// Path to the SVO file.
+        /// </summary>
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+        char[] svoInputFilename;
+
+        /// <summary>
+        /// IP address of the streaming camera.
+        /// </summary>
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+        char[] streamInputIp;
+
+        /// <summary>
+        /// Port of the streaming camera.
+        /// </summary>
+        ushort streamInputPort;
+    };
+
     #endregion
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2776,6 +2940,38 @@ namespace sl
                 rangeMeter = 10.0f;
             }
         }
+    }
+
+    ///\ingroup SpatialMapping_group
+    /// <summary>
+    /// Lists the different states of spatial memory area export.
+    /// </summary>
+    public enum AREA_EXPORTING_STATE
+    {
+        /// <summary>
+        /// The spatial memory file has been successfully created.
+        /// </summary>
+        SUCCESS,
+        /// <summary>
+        /// The spatial memory is currently being written.
+        /// </summary>
+        RUNNING,
+        /// <summary>
+        /// The spatial memory file exportation has not been called.
+        /// </summary>
+        NOT_STARTED,
+        /// <summary>
+        /// The spatial memory contains no data, the file is empty.
+        /// </summary>
+        FILE_EMPTY,
+        /// <summary>
+        /// The spatial memory file has not been written because of a wrong file name.
+        /// </summary>
+        FILE_ERROR,
+        /// <summary>
+        /// The spatial memory learning is disabled. No file can be created.
+        /// </summary>
+        SPATIAL_MEMORY_DISABLED,
     }
 
     ///\ingroup SpatialMapping_group
@@ -3229,14 +3425,6 @@ namespace sl
         /// This is used to identify which object detection module instance is used.
         uint instanceModuleId;
         /// <summary>
-        /// Whether the object detection is synchronized to the image or runs in a separate thread.
-        /// </summary>
-        /// If set to true, the detection is run on every sl.Camera.Grab().
-        /// \n Otherwise, the thread runs at its own speed, which can lead to new detection once in a while.
-        /// \n Default: true
-        [MarshalAs(UnmanagedType.U1)]
-        public bool imageSync;
-        /// <summary>
         /// Whether the object detection system includes object tracking capabilities across a sequence of images.
         /// </summary>
         /// Default: true
@@ -3361,14 +3549,6 @@ namespace sl
         /// This is used to identify which body tracking module instance is used.
         uint instanceModuleId;
         /// <summary>
-        /// Whether the body tracking is synchronized to the image or runs in a separate thread.
-        /// </summary>
-        /// If set to true, the detection is run on every sl.Camera.Grab().
-        /// \n Otherwise, the thread runs at its own speed, which can lead to new detection once in a while.
-        /// \n Default: true
-        [MarshalAs(UnmanagedType.U1)]
-        public bool imageSync;
-        /// <summary>
         /// Whether the body tracking system includes body/person tracking capabilities across a sequence of images.
         /// </summary>
         /// Default: true
@@ -3396,6 +3576,13 @@ namespace sl
         /// Body format to be outputted by the ZED SDK with sl.Camera.RetrieveBodies().
         /// </summary>
         public sl.BODY_FORMAT bodyFormat;
+
+        /// <summary>
+        /// Selection of keypoints to be outputted by the ZED SDK with \ref sl_retrieve_bodies().
+        /// </summary>
+        /// Default: SL_BODY_KEYPOINTS_SELECTION_FULL
+        public sl.BODY_KEYPOINTS_SELECTION bodySelection;
+
         /// <summary>
         /// Upper depth range for detections.
         /// </summary>
@@ -3519,7 +3706,8 @@ namespace sl
         /// From 0 to 100, a low value means the object might not be localized perfectly or the label (sl.OBJECT_CLASS) is uncertain.
 		public float confidence;
         /// <summary>
-        /// Mask defining which pixels which belong to the object (in \ref boundingBox and set to 255) and those of the background (set to 0).
+        /// Pointer of the sl.Mat representing the mask defining which pixels which belong to the object (in \ref boundingBox and set to 255) and those of the background (set to 0).
+        /// To access the pixels values, create a new sl.Mat from that IntPtr. Ex: sl.Mat mat = new sl.Mat(mask);
         /// </summary>
         /// \warning The mask information is only available for tracked objects (sl.OBJECT_TRACKING_STATE.OK) that have a valid depth.
         /// \warning Otherwise, the mask will not be initialized.
@@ -3765,7 +3953,7 @@ namespace sl
         /// \endcode
         /// where pi is ```positionCovariance[i]```
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
-        public CovarMatrix positionCovariance;// covariance matrix of the 3d position, represented by its upper triangular matrix value
+        public float[] positionCovariance;// covariance matrix of the 3d position, represented by its upper triangular matrix value
         /// <summary>
         /// Detection confidence value of the body/person.
         /// </summary>
@@ -4277,6 +4465,10 @@ namespace sl
         /// Related to sl.DEPTH_MODE.NEURAL
         /// </summary>
         NEURAL_DEPTH,
+        /// <summary>
+        /// Related to sl.DEPTH_MODE.NEURAL_PLUS
+        /// </summary>
+        NEURAL_PLUS_DEPTH,
         ///@cond SHOWHIDDEN
         LAST
         ///@endcond
@@ -4728,18 +4920,22 @@ namespace sl
     public enum FUSION_ERROR_CODE
     {
         /// <summary>
+        /// Ingested covariance data must vary between ingest.
+        /// </summary>
+        GNSS_DATA_COVARIANCE_MUST_VARY = -8,
+        /// <summary>
         /// The senders are using different body formats.
         /// \n Consider changing them.
         /// </summary>
-        WRONG_BODY_FORMAT = -7,
+        BODY_FORMAT_MISMATCH = -7,
         /// <summary>
         /// The following module was not enabled.
         /// </summary>
-        NOT_ENABLE = -6,
+        MODULE_NOT_ENABLED = -6,
         /// <summary>
         /// Some sources are provided by SVO and others by LIVE stream.
         /// </summary>
-        INPUT_FEED_MISMATCH = -5,
+        SOURCE_MISMATCH = -5,
         /// <summary>
         /// Connection timed out. Unable to reach the sender.
         /// \n Verify the sender's IP/port.
@@ -4754,7 +4950,7 @@ namespace sl
         /// The provided IP address format is incorrect.
         /// \n Please provide the IP in the format 'a.b.c.d', where (a, b, c, d) are numbers between 0 and 255.
         /// </summary>
-        BAD_IP_ADDRESS = -2,
+        INVALID_IP_ADDRESS = -2,
         /// <summary>
         /// Standard code for unsuccessful behavior.
         /// </summary>
@@ -4766,7 +4962,7 @@ namespace sl
         /// <summary>
         /// Significant differences observed between sender's FPS.
         /// </summary>
-        ERRATIC_FPS = 1,
+        FUSION_INCONSISTENT_FPS = 1,
         /// <summary>
         /// At least one sender has an FPS lower than 10 FPS.
         /// </summary>
@@ -4809,7 +5005,7 @@ namespace sl
         /// <summary>
         /// The sender does not run with a constant frame rate.
         /// </summary>
-        ERRATIC_FPS = 2,
+        INCONSISTENT_FPS = 2,
         /// <summary>
         /// The frame rate of the sender is lower than 10 FPS.
         /// </summary>
@@ -4906,7 +5102,7 @@ namespace sl
         /// <summary>
         /// The serial number of the used ZED camera.
         /// </summary>
-        public int serialnumber;
+        int serialnumber;
         /// <summary>
         /// The communication parameters to connect this camera to the Fusion.
         /// </summary>
@@ -5010,27 +5206,32 @@ namespace sl
 
         /// <summary>
         /// Latency (in seconds) of the received data.
+        /// Timestamp difference between the time when the data are sent and the time they are received (mostly introduced when using the local network workflow).
         /// </summary>
         public float receivedLatency;
 
         /// <summary>
         /// Latency (in seconds) after Fusion synchronization.
+        /// Difference between the timestamp of the data received and the timestamp at the end of the Fusion synchronization.
         /// </summary>
         public float syncedLatency;
 
         /// <summary>
-        /// If no data present is set to false.
+        /// Is set to false if no data in this batch of metrics.
         /// </summary>
         [MarshalAs(UnmanagedType.U1)]
         public bool isPresent;
 
         /// <summary>
-        /// Percent of detection par image during the last second in %, a low value means few detections occurs lately.
+        /// Skeleton detection percent during the last second.
+        /// Number of frames with at least one detection / number of frames, over the last second.
+        /// A low value means few detections occured lately for this sender.
         /// </summary>
         public float ratioDetection;
 
         /// <summary>
-        /// Average time difference for the current fused data.
+        /// Average data acquisition timestamp difference.
+        /// Average standard deviation of sender's period since the start.
         /// </summary>
         public float deltaTs;
 
@@ -5070,25 +5271,111 @@ namespace sl
 
     /// \ingroup Fusion_group
     /// <summary>
-    /// Lists the different states of the GNSS calibration.
+    /// Lists the different states of the GNSS fusion.
     /// </summary>
-    public enum GNSS_CALIBRATION_STATE
+    public enum GNSS_FUSION_STATUS
     {
         /// <summary>
-        /// The GNSS/VIO calibration has not been completed yet.
-        /// \n Please continue moving the robot while ingesting GNSS data to perform the calibration.
+        /// The GNSS fusion module is calibrated and working successfully.
         /// </summary>
-        GNSS_CALIBRATION_STATE_NOT_CALIBRATED = 0,
+        OK = 0,
         /// <summary>
-        /// The GNSS/VIO calibration is completed.
+        /// The GNSS fusion module is not enabled.
         /// </summary>
-        GNSS_CALIBRATION_STATE_CALIBRATED = 1,
+        OFF = 1,
         /// <summary>
-        /// A GNSS/VIO re-calibration is in progress in the background.
-        /// \n Current geo-tracking services may not be accurate.
+        /// Calibration of the GNSS/VIO fusion module is in progress.
         /// </summary>
-        GNSS_CALIBRATION_STATE_RE_CALIBRATION_IN_PROGRESS = 2
+        CALIBRATION_IN_PROGRESS = 2,
+        /// <summary>
+        /// Re-alignment of GNSS/VIO data is in progress, leading to potentially inaccurate global position
+        /// </summary>
+        RECALIBRATION_IN_PROGRESS = 3
     };
+
+    /// <summary>
+    /// Class containing the overall position fusion status
+    /// </summary>
+    public struct FusedPositionalTrackingStatus
+    {
+        /// <summary>
+        /// Represents the current state of Visual-Inertial Odometry (VIO) tracking between the previous frame and the current frame.
+        /// </summary>
+        public ODOMETRY_STATUS odometryStatus;
+        /// <summary>
+        /// Represents the current state of camera tracking in the global map.
+        /// </summary>
+        public SPATIAL_MEMORY_STATUS spatialMemoryStatus;
+        /// <summary>
+        /// Represents the current state of GNSS.
+        /// </summary>
+        public GNSS_STATUS gnssStatus;
+        /// <summary>
+        /// Represents the current mode of GNSS.
+        /// </summary>
+        public GNSS_MODE gnssMode;
+        /// <summary>
+        /// Represents the current state of GNSS fusion for global localization.
+        /// </summary>
+        public GNSS_FUSION_STATUS gnssFusionStatus;
+        /// <summary>
+        /// Represents the current state of positional tracking fusion.
+        /// </summary>
+        public POSITIONAL_TRACKING_FUSION_STATUS trackingFusionStatus;
+    }
+
+    /**
+     \class GNSS_STATUS
+     \ingroup Sensors_group
+     \brief Class representing the fix quality of GNSS signal.
+     */
+    public enum GNSS_STATUS
+    {
+        /// <summary>
+        /// No GNSS fix data is available.
+        /// </summary>
+        UNKNOWN = 0,
+        /// <summary>
+        /// Single Point Positioning.
+        /// </summary>
+        SINGLE = 1,
+        /// <summary>
+        /// Differential GNSS.
+        /// </summary>
+        DGNSS = 2,
+        /// <summary>
+        /// Real-Time Kinematic (RTK) GNSS fix in fixed mode.
+        /// </summary>
+        RTK_FIX = 3,
+        /// <summary>
+        /// Real-Time Kinematic (RTK) GNSS fix in float mode. 
+        /// </summary>
+        RTK_FLOAT = 4,
+        /// <summary>
+        /// Precise Positioning Service.
+        /// </summary>
+        PPS = 5
+    };
+
+    public enum GNSS_MODE
+    {
+        /// <summary>
+        ///  No GNSS fix data is available. 
+        /// </summary>
+        UNKNOWN = 0,
+        /// <summary>
+        /// No GNSS fix is available.
+        /// </summary>
+        NO_FIX = 1,
+        /// <summary>
+        /// 2D GNSS fix, providing latitude and longitude coordinates but without altitude information.
+        /// </summary>
+        FIX_2D = 2,
+        /// <summary>
+        /// 3D GNSS fix, providing latitude, longitude, and altitude coordinates. 
+        /// </summary>
+        FIX_3D = 3
+    }
 
     /// \ingroup Sensor_group
     /// <summary>
@@ -5290,9 +5577,14 @@ namespace sl
         ///  Default: true
         /// </summary>     
         public bool enableRollingCalibration = true;
+        /// <summary>
+        /// Define a transform between the GNSS antenna and the camera system for the VIO / GNSS calibration.
+        /// Default value is [0,0,0], this position can be refined by the calibration if enabled
+        /// </summary>
+        public Vector3 gnssAntennaPosition = Vector3.Zero;
 
         public GNSSCalibrationParameters(float targetYawUncertainty_ = 0.1f, bool enableTranslationUncertaintyTarget_ = false, float targetTranslationUncertainty_ = 0.01f,
-            bool enableReinitialization_ = true, float gnssVioReinitThreshold_ = 5, bool enableRollingCalibration_ = true)
+            bool enableReinitialization_ = true, float gnssVioReinitThreshold_ = 5, bool enableRollingCalibration_ = true, Vector3 gnssAntennaPosition_ = default(Vector3))
         {
             targetYawUncertainty = targetYawUncertainty_;
             enableTranslationUncertaintyTarget = enableTranslationUncertaintyTarget_;
@@ -5300,6 +5592,7 @@ namespace sl
             enableReinitialization = enableReinitialization_;
             gnssVioReinitThreshold = gnssVioReinitThreshold_;
             enableRollingCalibration = enableRollingCalibration_;
+            gnssAntennaPosition = gnssAntennaPosition_;
         }
     };
 

@@ -75,6 +75,9 @@ namespace sl
         [DllImport(nameDll, EntryPoint = "sl_fusion_get_position")]
         private static extern POSITIONAL_TRACKING_STATE dllz_fusion_get_position(ref Pose pose, REFERENCE_FRAME referenceFrame, UNIT unit, ref CameraIdentifier uuid, POSITION_TYPE retrieveType);
 
+        [DllImport(nameDll, EntryPoint = "sl_fusion_get_fused_positional_tracking_status")]
+        private static extern IntPtr dllz_fusion_get_fused_positional_tracking_status();
+
         [DllImport(nameDll, EntryPoint = "sl_fusion_disable_positional_tracking")]
         private static extern void dllz_fusion_disable_positional_tracking();
 
@@ -92,19 +95,19 @@ namespace sl
         private static extern POSITIONAL_TRACKING_STATE dllz_fusion_get_current_gnss_data(ref GNSSData data);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_get_geo_pose")]
-        private static extern GNSS_CALIBRATION_STATE dllz_fusion_get_geo_pose(ref GeoPose pose);
+        private static extern GNSS_FUSION_STATUS dllz_fusion_get_geo_pose(ref GeoPose pose);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_geo_to_camera")]
-        private static extern GNSS_CALIBRATION_STATE dllz_fusion_geo_to_camera(ref LatLng inLatLng, out Pose outPose);
+        private static extern GNSS_FUSION_STATUS dllz_fusion_geo_to_camera(ref LatLng inLatLng, out Pose outPose);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_camera_to_geo")]
-        private static extern GNSS_CALIBRATION_STATE dllz_fusion_camera_to_geo(ref Pose inPose, out GeoPose outGeoPose);
+        private static extern GNSS_FUSION_STATUS dllz_fusion_camera_to_geo(ref Pose inPose, out GeoPose outGeoPose);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_get_current_timestamp")]
         private static extern ulong dllz_fusion_get_current_timestamp();
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_get_current_gnss_calibration_std")]
-        private static extern GNSS_CALIBRATION_STATE dllz_fusion_get_current_gnss_calibration_std(ref float yawStd, ref Vector3 positionStd);
+        private static extern GNSS_FUSION_STATUS dllz_fusion_get_current_gnss_calibration_std(ref float yawStd, ref Vector3 positionStd);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_get_geo_tracking_calibration")]
         private static extern void dllz_fusion_get_geo_tracking_calibration(ref Vector3 position, ref System.Numerics.Quaternion rotation);
@@ -150,6 +153,11 @@ namespace sl
             /// </summary>     
             [MarshalAs(UnmanagedType.U1)]
             public bool enableRollingCalibration;
+            /// <summary>
+            /// Define a transform between the GNSS antenna and the camera system for the VIO / GNSS calibration.
+            /// Default value is [0,0,0], this position can be refined by the calibration if enabled
+            /// </summary>
+            public Vector3 gnssAntennaPosition;
 
             public sl_GNSSCalibrationParameters(GNSSCalibrationParameters gnssCalibrationParameters)
             {
@@ -159,6 +167,7 @@ namespace sl
                 enableReinitialization = gnssCalibrationParameters.enableReinitialization;
                 gnssVioReinitThreshold = gnssCalibrationParameters.gnssVioReinitThreshold;
                 enableRollingCalibration = gnssCalibrationParameters.enableRollingCalibration;
+                gnssAntennaPosition = gnssCalibrationParameters.gnssAntennaPosition;
             }
         };
 
@@ -184,7 +193,6 @@ namespace sl
                 gnssCalibrationParameters = new sl_GNSSCalibrationParameters(positionalTrackingFusionParameters.gnssCalibrationParameters);
             }
         }
-
 
         ~Fusion()
         {
@@ -376,6 +384,23 @@ namespace sl
         }
 
         /// <summary>
+        /// Gets the current status of fused position.
+        /// </summary>
+        /// <returns> The current status of the tracking process.</returns>
+        public FusedPositionalTrackingStatus GetFusedPositionalTrackingStatus()
+        {
+            IntPtr p = dllz_fusion_get_fused_positional_tracking_status();
+            if (p == IntPtr.Zero)
+            {
+                return new FusedPositionalTrackingStatus();
+            }
+
+            FusedPositionalTrackingStatus fusedP = (FusedPositionalTrackingStatus)Marshal.PtrToStructure(p, typeof(FusedPositionalTrackingStatus));
+            return fusedP;
+        }
+
+
+        /// <summary>
         /// Disables the positional tracking 
         /// </summary>
         public void DisablePositionalTracking()
@@ -411,7 +436,7 @@ namespace sl
         /// </summary>
         /// <param name="pose">the current GeoPose</param>
         /// <returns></returns>
-        public GNSS_CALIBRATION_STATE GetGeoPose(ref GeoPose pose)
+        public GNSS_FUSION_STATUS GetGeoPose(ref GeoPose pose)
         {
             return dllz_fusion_get_geo_pose(ref pose);
         }
@@ -422,7 +447,7 @@ namespace sl
         /// <param name="inLatLng"></param>
         /// <param name="outPose"></param>
         /// <returns></returns>
-        public GNSS_CALIBRATION_STATE GeoToCamera(ref LatLng inLatLng, out Pose outPose)
+        public GNSS_FUSION_STATUS GeoToCamera(ref LatLng inLatLng, out Pose outPose)
         {
             return dllz_fusion_geo_to_camera(ref inLatLng, out outPose);
         }
@@ -433,7 +458,7 @@ namespace sl
         /// <param name="inPose"></param>
         /// <param name="outGeoPose"></param>
         /// <returns></returns>
-        public GNSS_CALIBRATION_STATE CameraToGeo(ref Pose inPose, out GeoPose outGeoPose)
+        public GNSS_FUSION_STATUS CameraToGeo(ref Pose inPose, out GeoPose outGeoPose)
         {
             return dllz_fusion_camera_to_geo(ref inPose, out outGeoPose);
         }
@@ -453,7 +478,7 @@ namespace sl
         /// <param name="yawStd">yaw uncertainty</param>
         /// <param name="positionStd">position uncertainty</param>
         /// <returns></returns>
-        public GNSS_CALIBRATION_STATE GetCurrentGNSSCalibrationStd(ref float yawStd, ref Vector3 positionStd)
+        public GNSS_FUSION_STATUS GetCurrentGNSSCalibrationStd(ref float yawStd, ref Vector3 positionStd)
         {
             return dllz_fusion_get_current_gnss_calibration_std(ref yawStd, ref positionStd);
         }
@@ -463,7 +488,7 @@ namespace sl
         /// </summary>
         /// <param name="position">calibration found between VIO and GNSS (Translation)</param>
         /// <param name="rotation">calibration found between VIO and GNSS (Rotation)</param>
-        public void GetGeoTrackingCalibration(ref Vector3 position, ref Quaternion rotation)
+        public void GetGeoTrackingCalibration(ref Vector3 position, ref System.Numerics.Quaternion rotation)
         {
             dllz_fusion_get_geo_tracking_calibration(ref position, ref rotation);
         }
