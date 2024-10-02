@@ -1,7 +1,9 @@
 //======= Copyright (c) Stereolabs Corporation, All rights reserved. ===============
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Windows.Media.Media3D;
 
 namespace sl
 {
@@ -23,7 +25,10 @@ namespace sl
          ************************************************************************/
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_read_configuration_file")]
-        private static extern FUSION_ERROR_CODE dllz_fusion_read_configuration_file(System.Text.StringBuilder jsonConfigFileName, COORDINATE_SYSTEM coordinateSystem, UNIT unit, [In, Out] FusionConfiguration[] configs, ref int nbCameras);
+        private static extern void dllz_fusion_read_configuration_file(System.Text.StringBuilder jsonConfigFileName, COORDINATE_SYSTEM coordinateSystem, UNIT unit, [In, Out] FusionConfiguration[] configs, ref int nbCameras);
+
+        [DllImport(nameDll, EntryPoint = "sl_fusion_read_configuration")]
+        private static extern void dllz_fusion_read_configuration(System.Text.StringBuilder fusionConfiguration, COORDINATE_SYSTEM coordinateSystem, UNIT unit, [In, Out] FusionConfiguration[] configs, ref int nbCameras);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_get_sender_state")]
         private static extern SENDER_ERROR_CODE dllz_fusion_get_sender_state(ref CameraIdentifier uuid);
@@ -35,7 +40,7 @@ namespace sl
         private static extern FUSION_ERROR_CODE dllz_fusion_process();
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_subscribe")]
-        private static extern FUSION_ERROR_CODE dllz_fusion_subscribe(ref CameraIdentifier uuid, System.Text.StringBuilder jsonConfigFileName, ref Vector3 poseTranslation, ref System.Numerics.Quaternion poseRotation);
+        private static extern FUSION_ERROR_CODE dllz_fusion_subscribe(ref CameraIdentifier uuid, CommunicationParameters communicationParameters, ref Vector3 poseTranslation, ref System.Numerics.Quaternion poseRotation);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_unsubscribe")]
         private static extern FUSION_ERROR_CODE dllz_fusion_unsubscribe(ref CameraIdentifier uuid);
@@ -60,7 +65,7 @@ namespace sl
         private static extern void dllz_fusion_disable_body_tracking();
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_retrieve_bodies")]
-        private static extern FUSION_ERROR_CODE dllz_fusion_retrieve_bodies(ref Bodies bodies, ref BodyTrackingFusionRuntimeParameters rtparams, CameraIdentifier uuid);
+        private static extern FUSION_ERROR_CODE dllz_fusion_retrieve_bodies(IntPtr bodies, ref BodyTrackingFusionRuntimeParameters rtparams, CameraIdentifier uuid);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_get_process_metrics")]
         private static extern FUSION_ERROR_CODE dllz_fusion_get_process_metrics(ref FusionMetrics metrics);
@@ -73,7 +78,7 @@ namespace sl
         private static extern FUSION_ERROR_CODE dllz_fusion_enable_positional_tracking(ref sl_PositionalTrackingFusionParameters ptfParams);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_get_position")]
-        private static extern POSITIONAL_TRACKING_STATE dllz_fusion_get_position(ref Pose pose, REFERENCE_FRAME referenceFrame, UNIT unit, ref CameraIdentifier uuid, POSITION_TYPE retrieveType);
+        private static extern POSITIONAL_TRACKING_STATE dllz_fusion_get_position(ref Pose pose, REFERENCE_FRAME referenceFrame, ref CameraIdentifier uuid, POSITION_TYPE retrieveType);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_get_fused_positional_tracking_status")]
         private static extern IntPtr dllz_fusion_get_fused_positional_tracking_status();
@@ -210,12 +215,34 @@ namespace sl
         /// <param name="jsonConfigFileName">The name of the JSON file containing the configuration.</param>
         /// <param name="coordinateSystem">The COORDINATE_SYSTEM in which you want the World Pose to be in.</param>
         /// <param name="unit">The UNIT in which you want the World Pose to be in.</param>
-        /// <param name="configs"> An array of \ref FusionConfiguration for all the camera present in the file.</param>
+        /// <returns>A List of \ref FusionConfiguration for all the camera present in the file. </returns>
+        public static List<FusionConfiguration> ReadConfigurationFile(System.Text.StringBuilder jsonConfigFileName, COORDINATE_SYSTEM coordinateSystem, UNIT unit)
+        {
+            FusionConfiguration[] configs = new FusionConfiguration[(int)Constant.MAX_FUSED_CAMERAS];
+            int nbCameras = 0;
+            dllz_fusion_read_configuration_file(jsonConfigFileName, coordinateSystem, unit, configs, ref nbCameras);
+
+            var List = new List<FusionConfiguration>();
+            for (int i = 0; i < nbCameras; i++)
+            {
+                List.Add(configs[i]);
+            }
+
+            return List;
+        }
+
+        /// <summary>
+        /// Read a Configuration JSON string to configure a fusion process.
+        /// </summary>
+        /// <param name="fusionConfiguration">The name of the JSON file containing the configuration.</param>
+        /// <param name="coordinateSystem">The COORDINATE_SYSTEM in which you want the World Pose to be in.</param>
+        /// <param name="unit">The UNIT in which you want the World Pose to be in.</param>
+        /// <param name="configs"> An array of \ref FusionConfiguration for all the camera present in the file of size Constant.MAX_FUSED_CAMERAS.</param>
         /// <param name="nbCameras">Number of cameras</param>
-        public void ReadConfigurationFile(System.Text.StringBuilder jsonConfigFileName, COORDINATE_SYSTEM coordinateSystem, UNIT unit, ref FusionConfiguration[] configs, ref int nbCameras)
+        public void ReadFusionConfiguration(System.Text.StringBuilder fusionConfiguration, COORDINATE_SYSTEM coordinateSystem, UNIT unit, ref FusionConfiguration[] configs, ref int nbCameras)
         {
             configs = new FusionConfiguration[(int)Constant.MAX_FUSED_CAMERAS];
-            dllz_fusion_read_configuration_file(jsonConfigFileName, coordinateSystem, unit, configs, ref nbCameras);
+            dllz_fusion_read_configuration(fusionConfiguration, coordinateSystem, unit, configs, ref nbCameras);
         }
 
         /// <summary>
@@ -250,14 +277,14 @@ namespace sl
         /// <summary>
         ///  adds a camera to the multi camera handler
         /// </summary>
-        /// <param name="uuid"></param>
-        /// <param name="jsonConfigFileName"></param>
-        /// <param name="poseTranslation"></param>
-        /// <param name="poseRotation"></param>
+        /// <param name="uuid">	The requested camera identifier.</param>
+        /// <param name="communicationParameters">The communication parameters to connect to the camera..</param>
+        /// <param name="poseTranslation">The World position of the camera, regarding the other camera of the setup.</param>
+        /// <param name="poseRotation">The World rotation of the camera, regarding the other camera of the setup.</param>
         /// <returns></returns>
-        public FUSION_ERROR_CODE Subscribe(ref CameraIdentifier uuid, string jsonConfigFileName, ref Vector3 poseTranslation, ref System.Numerics.Quaternion poseRotation)
+        public FUSION_ERROR_CODE Subscribe(ref CameraIdentifier uuid, CommunicationParameters communicationParameters, ref Vector3 poseTranslation, ref System.Numerics.Quaternion poseRotation)
         {
-            return dllz_fusion_subscribe(ref uuid, new System.Text.StringBuilder(jsonConfigFileName, jsonConfigFileName.Length), ref poseTranslation, ref poseRotation);
+            return dllz_fusion_subscribe(ref uuid, communicationParameters, ref poseTranslation, ref poseRotation);
         }
 
         /// <summary>
@@ -273,9 +300,9 @@ namespace sl
         /// <summary>
         /// updates the camera World pose
         /// </summary>
-        /// <param name="uuid"></param>
-        /// <param name="poseTranslation"></param>
-        /// <param name="poseRotation"></param>
+        /// <param name="uuid">The requested camera identifier.</param>
+        /// <param name="poseTranslation"> The World position of the camera, regarding the other camera of the setup.</param>
+        /// <param name="poseRotation">	The World rotation of the camera, regarding the other camera of the setup.</param>
         /// <returns></returns>
         public FUSION_ERROR_CODE UpdatePose(ref CameraIdentifier uuid, ref Vector3 poseTranslation, ref System.Numerics.Quaternion poseRotation)
         {
@@ -339,7 +366,20 @@ namespace sl
         /// <returns></returns>
         public FUSION_ERROR_CODE RetrieveBodies(ref Bodies bodies, ref BodyTrackingFusionRuntimeParameters rtparams, CameraIdentifier uuid)
         {
-            return dllz_fusion_retrieve_bodies(ref bodies, ref rtparams, uuid);
+            IntPtr p = Marshal.AllocHGlobal(System.Runtime.InteropServices.Marshal.SizeOf<sl.Bodies>());
+            sl.FUSION_ERROR_CODE err = (sl.FUSION_ERROR_CODE)dllz_fusion_retrieve_bodies(p, ref rtparams, uuid);
+
+            if (p != IntPtr.Zero)
+            {
+                bodies = (sl.Bodies)Marshal.PtrToStructure(p, typeof(sl.Bodies));
+                Marshal.FreeHGlobal(p);
+                return err;
+            }
+            else
+            {
+                Marshal.FreeHGlobal(p);
+                return sl.FUSION_ERROR_CODE.FAILURE;
+            }
         }
 
         /// <summary>
@@ -378,9 +418,9 @@ namespace sl
         /// <param name="uuid"></param>
         /// <param name="retrieveType"></param>
         /// <returns></returns>
-        public POSITIONAL_TRACKING_STATE GetPosition(ref Pose pose, REFERENCE_FRAME referenceFrame, UNIT unit, ref CameraIdentifier uuid, POSITION_TYPE retrieveType)
+        public POSITIONAL_TRACKING_STATE GetPosition(ref Pose pose, REFERENCE_FRAME referenceFrame, ref CameraIdentifier uuid, POSITION_TYPE retrieveType)
         {
-            return dllz_fusion_get_position(ref pose, referenceFrame, unit, ref uuid, retrieveType);
+            return dllz_fusion_get_position(ref pose, referenceFrame, ref uuid, retrieveType);
         }
 
         /// <summary>

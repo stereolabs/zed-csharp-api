@@ -159,6 +159,14 @@ namespace sl
     public enum ERROR_CODE
     {
         /// <summary>
+        /// The operation could not proceed with the target configuration but did success with a fallback.
+        /// </summary>
+        CONFIGURATION_FALLBACK= -4
+        /// <summary>
+        /// The input data does not contains the high frequency sensors data, this is usually because it requires newer SVO/Streaming. In order to work this modules needs inertial data present in it input.
+        /// </summary>
+        SENSORS_DATA_REQUIRED = -3
+        /// <summary>
         ///  The image could be corrupted, Enabled with the parameter InitParameters.enable_image_validity_check
         /// </summary>
         CORRUPTED_FRAME = -2,
@@ -304,10 +312,6 @@ namespace sl
         /// The module needs a newer version of CUDA.
         /// </summary>
         MODULE_NOT_COMPATIBLE_WITH_CUDA_VERSION,
-        /// <summary>
-        /// The input data does not contains the high frequency sensors data, this is usually because it requires newer SVO/Streaming. In order to work this modules needs inertial data present in it input.
-        /// </summary>
-        SENSORS_DATA_REQUIRED,
         /// @cond SHOWHIDDEN 
         ERROR_CODE_LAST
         /// @endcond
@@ -1784,7 +1788,7 @@ namespace sl
         /// </summary>
         public int depthStabilization;
         /// <summary>
-        /// Optional path where the ZED SDK has to search for the settings file (<i>SN<XXXX>.conf</i> file).
+        /// Optional path where the ZED SDK has to search for the settings file (SNXXXX.conf file).
         ///
         /// This file contains the calibration information of the camera.
         /// \n Default: ""
@@ -2095,8 +2099,7 @@ namespace sl
         /// 
         /// Default: -1 (the GOP size will last at maximum 2 seconds, depending on camera FPS)
         /// \note The GOP size determines the maximum distance between IDR/I-frames. Very high GOP size will result in slightly more efficient compression, especially on static scenes. But latency will increase.
-        /// \note Maximum value: 256
-    
+        /// \note Maximum value: 256  
         /// </summary>
         public int gopSize;
         /// <summary>
@@ -2292,6 +2295,10 @@ namespace sl
         /// </summary>
         HD4K,
         /// <summary>
+        /// 3800x1800
+        /// </summary>
+        QHDPLUS,
+        /// <summary>
         /// 2208*1242 (x2)
         /// \n Available FPS: 15
         /// </summary>
@@ -2400,7 +2407,6 @@ namespace sl
     /// </summary>
     /// \note For more info, read about the ZED SDK C++ enum it mirrors:
     /// <a href="https://www.stereolabs.com/docs/api/group__Video__group.html#ga77fc7bfc159040a1e2ffb074a8ad248c">VIEW</a>
-    /// </remarks>
     public enum VIEW
     {
         /// <summary>
@@ -2590,7 +2596,7 @@ namespace sl
         /// Range of exposure auto control in microseconds.
         /// \n Used with \ref Camera.SetCameraSettings(VIDEO_SETTINGS,int,int) "SetCameraSettings()".
         /// \n Min/max range between max range defined in DTS.
-        /// \n By default : [28000 - <fps_time> or 19000] us.
+        /// \n By default : [28000 - fps_time or 19000] us.
         /// \note Only available for ZED X/X Mini cameras.
         /// </summary>
         AUTO_EXPOSURE_TIME_RANGE,
@@ -2732,34 +2738,43 @@ namespace sl
         /// <summary>
         /// Current input type.
         /// </summary>
-        public INPUT_TYPE inputType;
+        private INPUT_TYPE inputType;
 
         /// <summary>
         /// Serial number of the camera.
         /// </summary>
-	    uint serialNumber;
+	    public uint serialNumber;
 
         /// <summary>
         /// Id of the camera.
         /// </summary>
-        uint id;
+        public uint id;
 
         /// <summary>
         /// Path to the SVO file.
         /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
-        char[] svoInputFilename;
+        public char[] svoInputFilename;
 
         /// <summary>
         /// IP address of the streaming camera.
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
-        char[] streamInputIp;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
+        public char[] streamInputIp;
 
         /// <summary>
         /// Port of the streaming camera.
         /// </summary>
-        ushort streamInputPort;
+        public ushort streamInputPort;
+
+        /// <summary>
+        /// Returns the current input type.
+        /// </summary>
+        /// <returns></returns>
+        public readonly INPUT_TYPE GetType()
+        {
+            return inputType;
+        }
     };
 
     #endregion
@@ -3423,12 +3438,11 @@ namespace sl
         /// Id of the module instance.
         /// </summary>
         /// This is used to identify which object detection module instance is used.
-        uint instanceModuleId;
+        public uint instanceModuleId;
         /// <summary>
         /// Whether the object detection system includes object tracking capabilities across a sequence of images.
         /// </summary>
         /// Default: true
-        /// </summary>
         [MarshalAs(UnmanagedType.U1)]
         public bool enableObjectTracking;
         /// <summary>
@@ -3547,12 +3561,11 @@ namespace sl
         /// Id of the module instance.
         /// </summary>
         /// This is used to identify which body tracking module instance is used.
-        uint instanceModuleId;
+        public uint instanceModuleId;
         /// <summary>
         /// Whether the body tracking system includes body/person tracking capabilities across a sequence of images.
         /// </summary>
         /// Default: true
-        /// </summary>
         [MarshalAs(UnmanagedType.U1)]
         public bool enableObjectTracking;
         /// <summary>
@@ -3834,7 +3847,6 @@ namespace sl
     ///\ingroup Object_group
     /// <summary>
     /// Structure containing the results of the object detection module.
-    /// </summary>
     /// It contains the number of object in the scene (\ref numObject) and the \ref objectData structure for each object.
     /// \note Since the data is transmitted from C++ to C#, the size of the structure must be constant.
     /// \note Therefore, there is a limitation of 75 (sl.Constant.MAX_OBJECTS) objects in the image.
@@ -4092,6 +4104,16 @@ namespace sl
         /// </summary>
         public int isTracked;
         /// <summary>
+        /// Status of the actual inference precision mode used to detect the bodies/persons.
+        /// It depends on the GPU hardware support, the sl::BodyTrackingParameters.allowReducedPrecisionInference input parameter and the model support.
+        /// </summary>
+        public INFERENCE_PRECISION inferencePrecisionMode;
+
+        /// <summary>
+        /// Body format used in sl::BodyTrackingParameters.body_format parameter.
+        /// </summary>
+	    public BODY_FORMAT bodyFormat;
+        /// <summary>
         /// Array of detected bodies/persons.
         /// </summary>
         /// \note Since the data is transmitted from C++ to C#, the size of the structure must be constant.
@@ -4120,7 +4142,6 @@ namespace sl
         /// <summary>
         /// 38-keypoint model
         /// \n Including simplified face, hands and feet.
-        /// \note Early Access
         /// </summary>
         BODY_38,
 #if false
@@ -4493,32 +4514,43 @@ namespace sl
         NMS3D_PER_CLASS
     };
 
+    /// <summary>
+    /// Lists supported bounding box preprocessing.
+    /// </summary>
+    public enum INFERENCE_PRECISION
+    {
+        FP32 = 0,
+        FP16 = 1,
+        INT8 = 2
+    };
+
+
     ///\ingroup Body_group
     /// <summary>
     /// Semantic of human body parts and order of \ref sl.BodyData.keypoints for \ref sl.BODY_FORMAT.BODY_18.
     /// </summary>
     public enum BODY_18_PARTS
     {
-        NOSE = 0, /**< 0*/
-        NECK = 1, /**< 1*/
-        RIGHT_SHOULDER = 2, /**< 2*/
-        RIGHT_ELBOW = 3, /**< 3*/
-        RIGHT_WRIST = 4, /**< 4*/
-        LEFT_SHOULDER = 5, /**< 5*/
-        LEFT_ELBOW = 6, /**< 6*/
-        LEFT_WRIST = 7, /**< 7*/
-        RIGHT_HIP = 8, /**< 8*/
-        RIGHT_KNEE = 9, /**< 9*/
-        RIGHT_ANKLE = 10, /**< 10*/
-        LEFT_HIP = 11, /**< 11*/
-        LEFT_KNEE = 12, /**< 12*/
-        LEFT_ANKLE = 13, /**< 13*/
-        RIGHT_EYE = 14, /**< 14*/
-        LEFT_EYE = 15, /**< 15*/
-        RIGHT_EAR = 16, /**< 16*/
-        LEFT_EAR = 17, /**< 17*/
+        NOSE            = 0,
+        NECK            = 1,
+        RIGHT_SHOULDER  = 2,
+        RIGHT_ELBOW     = 3,
+        RIGHT_WRIST     = 4,
+        LEFT_SHOULDER   = 5,
+        LEFT_ELBOW      = 6,
+        LEFT_WRIST      = 7,
+        RIGHT_HIP       = 8,
+        RIGHT_KNEE      = 9,
+        RIGHT_ANKLE     = 10,
+        LEFT_HIP        = 11,
+        LEFT_KNEE       = 12,
+        LEFT_ANKLE      = 13,
+        RIGHT_EYE       = 14,
+        LEFT_EYE        = 15,
+        RIGHT_EAR       = 16,
+        LEFT_EAR        = 17,
         ///@cond SHOWHIDDEN
-        LAST = 18
+        LAST            = 18
         ///@endcond
     };
 
@@ -4528,42 +4560,42 @@ namespace sl
     /// </summary>
     public enum BODY_34_PARTS
     {
-        PELVIS = 0, /**< 0*/
-        NAVAL_SPINE = 1, /**< 1*/
-        CHEST_SPINE = 2, /**< 2*/
-        NECK = 3, /**< 3*/
-        LEFT_CLAVICLE = 4, /**< 4*/
-        LEFT_SHOULDER = 5, /**< 5*/
-        LEFT_ELBOW = 6, /**< 6*/
-        LEFT_WRIST = 7, /**< 7*/
-        LEFT_HAND = 8, /**< 8*/
-        LEFT_HANDTIP = 9, /**< 9*/
-        LEFT_THUMB = 10, /**< 10*/
-        RIGHT_CLAVICLE = 11, /**< 11*/
-        RIGHT_SHOULDER = 12, /**< 12*/
-        RIGHT_ELBOW = 13, /**< 13*/
-        RIGHT_WRIST = 14, /**< 14*/
-        RIGHT_HAND = 15, /**< 15*/
-        RIGHT_HANDTIP = 16, /**< 16*/
-        RIGHT_THUMB = 17, /**< 17*/
-        LEFT_HIP = 18, /**< 18*/
-        LEFT_KNEE = 19, /**< 19*/
-        LEFT_ANKLE = 20, /**< 20*/
-        LEFT_FOOT = 21, /**< 21*/
-        RIGHT_HIP = 22, /**< 22*/
-        RIGHT_KNEE = 23, /**< 23*/
-        RIGHT_ANKLE = 24, /**< 24*/
-        RIGHT_FOOT = 25, /**< 25*/
-        HEAD = 26, /**< 26*/
-        NOSE = 27, /**< 27*/
-        LEFT_EYE = 28, /**< 28*/
-        LEFT_EAR = 29, /**< 29*/
-        RIGHT_EYE = 30, /**< 30*/
-        RIGHT_EAR = 31, /**< 31*/
-        LEFT_HEEL = 32, /**< 32*/
-        RIGHT_HEEL = 33, /**< 33*/
+        PELVIS              = 0,
+        NAVAL_SPINE         = 1,
+        CHEST_SPINE         = 2,
+        NECK                = 3,
+        LEFT_CLAVICLE       = 4,
+        LEFT_SHOULDER       = 5,
+        LEFT_ELBOW          = 6,
+        LEFT_WRIST          = 7,
+        LEFT_HAND           = 8, 
+        LEFT_HANDTIP        = 9,
+        LEFT_THUMB          = 10,
+        RIGHT_CLAVICLE      = 11,
+        RIGHT_SHOULDER      = 12,
+        RIGHT_ELBOW         = 13,
+        RIGHT_WRIST         = 14,
+        RIGHT_HAND          = 15,
+        RIGHT_HANDTIP       = 16,
+        RIGHT_THUMB         = 17,
+        LEFT_HIP            = 18,
+        LEFT_KNEE           = 19,
+        LEFT_ANKLE          = 20,
+        LEFT_FOOT           = 21,
+        RIGHT_HIP           = 22,
+        RIGHT_KNEE          = 23,
+        RIGHT_ANKLE         = 24,
+        RIGHT_FOOT          = 25,
+        HEAD                = 26,
+        NOSE                = 27,
+        LEFT_EYE            = 28,
+        LEFT_EAR            = 29,
+        RIGHT_EYE           = 30,
+        RIGHT_EAR           = 31,
+        LEFT_HEEL           = 32,
+        RIGHT_HEEL          = 33,
         ///@cond SHOWHIDDEN
-        LAST = 34
+        LAST                = 34
         ///@endcond
     };
 
@@ -4573,47 +4605,47 @@ namespace sl
 	/// </summary>
 	public enum BODY_38_PARTS 
     {
-        PELVIS, /**< 0*/
-        SPINE_1, /**< 1*/
-        SPINE_2, /**< 2*/
-        SPINE_3, /**< 3*/
-        NECK, /**< 4*/
-        NOSE, /**< 5*/
-        LEFT_EYE, /**< 6*/
-        RIGHT_EYE, /**< 7*/
-        LEFT_EAR, /**< 8*/
-        RIGHT_EAR, /**< 9*/
-        LEFT_CLAVICLE, /**< 10*/
-        RIGHT_CLAVICLE, /**< 11*/
-        LEFT_SHOULDER, /**< 12*/
-        RIGHT_SHOULDER, /**< 13*/
-        LEFT_ELBOW, /**< 14*/
-        RIGHT_ELBOW, /**< 15*/
-        LEFT_WRIST, /**< 16*/
-        RIGHT_WRIST, /**< 17*/
-        LEFT_HIP, /**< 18*/
-        RIGHT_HIP, /**< 19*/
-        LEFT_KNEE, /**< 20*/
-        RIGHT_KNEE, /**< 21*/
-        LEFT_ANKLE, /**< 22*/
-        RIGHT_ANKLE, /**< 23*/
-        LEFT_BIG_TOE, /**< 24*/
-        RIGHT_BIG_TOE, /**< 25*/
-        LEFT_SMALL_TOE, /**< 26*/
-        RIGHT_SMALL_TOE, /**< 27*/
-        LEFT_HEEL, /**< 28*/
-        RIGHT_HEEL, /**< 29*/
+        PELVIS              = 0,
+        SPINE_1             = 1,
+        SPINE_2             = 2,
+        SPINE_3             = 3,
+        NECK                = 4,
+        NOSE                = 5,
+        LEFT_EYE            = 6,
+        RIGHT_EYE           = 7,
+        LEFT_EAR            = 8,
+        RIGHT_EAR           = 9,
+        LEFT_CLAVICLE       = 10,
+        RIGHT_CLAVICLE      = 11,
+        LEFT_SHOULDER       = 12,
+        RIGHT_SHOULDER      = 13,
+        LEFT_ELBOW          = 14,
+        RIGHT_ELBOW         = 15,
+        LEFT_WRIST          = 16,
+        RIGHT_WRIST         = 17,
+        LEFT_HIP            = 18,
+        RIGHT_HIP           = 19,
+        LEFT_KNEE           = 20,
+        RIGHT_KNEE          = 21,
+        LEFT_ANKLE          = 22,
+        RIGHT_ANKLE         = 23,
+        LEFT_BIG_TOE        = 24,
+        RIGHT_BIG_TOE       = 25,
+        LEFT_SMALL_TOE      = 26,
+        RIGHT_SMALL_TOE     = 27,
+        LEFT_HEEL           = 28,
+        RIGHT_HEEL          = 29,
         // Hands
-        LEFT_HAND_THUMB_4, /**< 30*/
-        RIGHT_HAND_THUMB_4, /**< 31*/
-        LEFT_HAND_INDEX_1, /**< 32*/
-        RIGHT_HAND_INDEX_1, /**< 33*/
-        LEFT_HAND_MIDDLE_4, /**< 34*/
-        RIGHT_HAND_MIDDLE_4, /**< 35*/
-        LEFT_HAND_PINKY_1, /**< 36*/
-        RIGHT_HAND_PINKY_1, /**< 37*/
+        LEFT_HAND_THUMB_4   = 30,
+        RIGHT_HAND_THUMB_4  = 31,
+        LEFT_HAND_INDEX_1   = 32,
+        RIGHT_HAND_INDEX_1  = 33,
+        LEFT_HAND_MIDDLE_4  = 34,
+        RIGHT_HAND_MIDDLE_4 = 35,
+        LEFT_HAND_PINKY_1   = 36,
+        RIGHT_HAND_PINKY_1  = 37,
         ///@cond SHOWHIDDEN
-        LAST = 38
+        LAST                = 38
         ///@endcond
     };
 
@@ -5084,12 +5116,12 @@ namespace sl
         /// <summary>
         /// The comm port used for streaming the data
         /// </summary>
-	    uint ipPort;
+	    public uint ipPort;
         /// <summary>
         /// The IP address of the sender
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
-        char[] ipAdd;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
+        public char[] ipAdd;
     };
 
     /// \ingroup Fusion_group
@@ -5102,7 +5134,7 @@ namespace sl
         /// <summary>
         /// The serial number of the used ZED camera.
         /// </summary>
-        int serialnumber;
+        public uint serialNumber;
         /// <summary>
         /// The communication parameters to connect this camera to the Fusion.
         /// </summary>
@@ -5118,7 +5150,7 @@ namespace sl
         /// <summary>
         /// The input type for the current camera.
         /// </summary>
-        public INPUT_TYPE inputType;
+        public InputType inputType;
     };
 
 
@@ -5188,6 +5220,23 @@ namespace sl
         /// Serial Number of the camera.
         /// </summary>
         public ulong sn;
+
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public CameraIdentifier()
+        {
+            sn = 0;
+        }
+
+        /// <summary>
+        /// Constructor with serial number.
+        /// </summary>
+        /// <param name="_sn"></param>
+        public CameraIdentifier(ulong _sn)
+        {
+            sn = _sn;
+        }
     }
 
     /// \ingroup Fusion_group
