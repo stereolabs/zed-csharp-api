@@ -1045,7 +1045,7 @@ namespace sl
         /// The grabbing method is typically called in the main loop in a separate thread.
         /// \note For more info, read about the SDK method it calls:
         /// <a href="https://www.stereolabs.com/docs/api/classsl_1_1Camera.html#afa3678a18dd574e162977e97d7cbf67b">grab</a>.
-        /// </remarks>
+        /// </summary>
         /// <param name="runtimeParameters">A structure containing all the runtime parameters. Default: a preset of RuntimeParameters.</param>
         /// <returns>false if no problem was encountered, true otherwise.</returns>
         public sl.ERROR_CODE Grab(ref sl.RuntimeParameters runtimeParameters)
@@ -3097,14 +3097,14 @@ namespace sl
         /// <param name="bt_params"> Body tracking runtime parameters </param>
         /// <param name="instanceID">Id of the body tracking instance. Used when multiple instances of the body tracking module are enabled at the same time.</param>
         /// <returns>sl.ERROR_CODE.SUCCESS if everything went fine, sl.ERROR_CODE.FAILURE otherwise.</returns>
-        public sl.ERROR_CODE RetrieveBodies(ref Bodies objs, ref BodyTrackingRuntimeParameters bt_params, uint instanceID = 0)
+        public sl.ERROR_CODE RetrieveBodies(ref Bodies bodies, ref BodyTrackingRuntimeParameters bt_params, uint instanceID = 0)
         {
             IntPtr p = Marshal.AllocHGlobal(System.Runtime.InteropServices.Marshal.SizeOf<sl.Bodies>());
             sl.ERROR_CODE err = (sl.ERROR_CODE)dllz_retrieve_bodies_data(CameraID, ref bt_params, p, instanceID);
 
             if (p != IntPtr.Zero)
             {
-                objs = (sl.Bodies)Marshal.PtrToStructure(p, typeof(sl.Bodies));
+                bodies = (sl.Bodies)Marshal.PtrToStructure(p, typeof(sl.Bodies));
                 Marshal.FreeHGlobal(p);
                 return err;
             }
