@@ -286,7 +286,11 @@ namespace sl
         /// <summary>
         /// Data will be stored on the GPU (graphic card side).
         /// </summary>
-        GPU = 1
+        GPU = 1,
+        /// <summary>
+        /// Data will be stored on both the CPU and GPU
+        /// </summary>
+        BOTH = 2
 
     };
 
@@ -428,6 +432,22 @@ namespace sl
 
         [DllImport(nameDll, EntryPoint = "sl_mat_clone")]
         private static extern void dllz_mat_clone(System.IntPtr ptr, System.IntPtr ptrSource);
+
+        [DllImport(nameDll, EntryPoint = "sl_mat_convert_color")]
+        private static extern int dllz_mat_convert_color(System.IntPtr ptr, int mem, bool swapRBChannels, int cudaStream = 0);
+
+        [DllImport(nameDll, EntryPoint = "sl_convert_color")]
+        private static extern int dllz_convert_color(System.IntPtr ptr1, System.IntPtr ptr2, bool swapRBChannels, bool removeAlphaChannel, int mem, int cudaStream = 0);
+
+        [DllImport(nameDll, EntryPoint = "sl_blob_from_image")]
+        private static extern int dllz_blob_from_image(System.IntPtr image_in, System.IntPtr tensor_out, sl.Resolution resolution,
+                                    float scaleFactor, float3 mean, float3 stdDev, bool keepAspectRatio, bool swapRBChannels,
+                                    int cudaStream = 0);
+
+        [DllImport(nameDll, EntryPoint = "sl_blob_from_images")]
+        private static extern int dllz_blob_from_images(System.IntPtr[] images_in, int nbImages, System.IntPtr tensor_out, sl.Resolution resolution,
+                            float scaleFactor, float3 mean, float3 stdDev, bool keepAspectRatio, bool swapRBChannels,
+                            int cudaStream = 0);
 
         #endregion
 
@@ -1015,8 +1035,77 @@ namespace sl
         {
             return (sl.ERROR_CODE)(dllz_mat_set_to_uchar4(_matInternalPtr, ref value, (int)(mem)));
         }
-        /***************************************************************************************/
 
+        /// <summary>
+        /// Convert the color channels of the Mat (RGB to BGR or RGBA to BGRA).
+        /// This methods works only on 8U_C4 or 8U_C3.
+        /// </summary>
+        /// <param name="mem"> Which buffer to fill, CPU and/or GPU.</param>
+        /// <param name="swapRBChannels">Swap blue and red channels.</param>
+        /// <returns>sl.ERROR_CODE indicating if the get was successful, or why it wasn't.</returns>
+        public sl.ERROR_CODE ConvertColor(sl.MEM mem = sl.MEM.CPU, bool swapRBChannels = false)
+        {
+            return (sl.ERROR_CODE)dllz_mat_convert_color(_matInternalPtr, (int)mem, swapRBChannels);
+        }
+
+        /// <summary>
+        /// Convert the color channels of the Mat into another Mat
+        /// This methods works only on 8U_C4 if removeAlphaChannel is enabled, or 8U_C4 and 8U_C3 if swapRBChannels is enabled
+        /// </summary>
+        /// <param name="src">Source image.</param>
+        /// <param name="dst">Destination image.</param>
+        /// <param name="swapRBChannels">Swap blue and red channels.</param>
+        /// <param name="removeAlphaChannel"> Remove alpha channel.</param>
+        /// <param name="mem"> Which buffer to fill, CPU and/or GPU.</param>
+        /// <returns>sl.ERROR_CODE indicating if the get was successful, or why it wasn't.</returns>
+        public static sl.ERROR_CODE ConvertColor(sl.Mat src, sl.Mat dst, bool swapRBChannels = false, bool removeAlphaChannel = false, sl.MEM mem = sl.MEM.CPU)
+        {
+            return (sl.ERROR_CODE)dllz_convert_color(src._matInternalPtr, dst._matInternalPtr, swapRBChannels, removeAlphaChannel, (int)mem);
+        }
+
+        /// <summary>
+        /// Convert an image into a GPU Tensor in planar channel configuration (NCHW), ready to use for deep learning model
+        /// </summary>
+        /// <param name="image_in">input image to convert</param>
+        /// <param name="tensor_out">output GPU tensor</param>
+        /// <param name="resolution">resolution of the output image, generally square, although not mandatory</param>
+        /// <param name="scaleFactor">Scale factor applied to each pixel value, typically to convert the char value into [0-1] float</param>
+        /// <param name="mean"> mean, statistic to normalized the pixel values, applied AFTER the scale. For instance for imagenet statistics the mean would be sl::float3(0.485, 0.456, 0.406)</param>
+        /// <param name="stdDev">standard deviation, statistic to normalized the pixel values, applied AFTER the scale. For instance for imagenet statistics the standard deviation would be sl::float3(0.229, 0.224, 0.225)</param>
+        /// <param name="keepAspectRatio">indicates if the original width and height ratio should be kept using padding (sometimes refer to as letterboxing) or if the image should be stretched</param>
+        /// <param name="swapRBChannels">indicates if the Red and Blue channels should be swapped (RGB-BGR or RGBA-BGRA)</param>
+        /// <returns>sl.ERROR_CODE indicating if the get was successful, or why it wasn't.</returns>
+        public static sl.ERROR_CODE BlobFromImage(sl.Mat image_in, sl.Mat tensor_out, sl.Resolution resolution,
+                                               float scaleFactor, float3 mean, float3 stdDev, bool keepAspectRatio, 
+                                               bool swapRBChannels)
+        {
+            return (sl.ERROR_CODE)dllz_blob_from_image(image_in._matInternalPtr, tensor_out._matInternalPtr, resolution, scaleFactor, mean, stdDev, keepAspectRatio, swapRBChannels, 0);
+        }
+
+        /// <summary>
+        /// Convert an image array into a GPU Tensor in planar channel configuration (NCHW), ready to use for deep learning model
+        /// </summary>
+        /// <param name="image_in">input images to convert</param>
+        /// <param name="tensor_out">output GPU tensor</param>
+        /// <param name="resolution">resolution of the output image, generally square, although not mandatory</param>
+        /// <param name="scaleFactor">Scale factor applied to each pixel value, typically to convert the char value into [0-1] float</param>
+        /// <param name="mean"> mean, statistic to normalized the pixel values, applied AFTER the scale. For instance for imagenet statistics the mean would be sl::float3(0.485, 0.456, 0.406)</param>
+        /// <param name="stdDev">standard deviation, statistic to normalized the pixel values, applied AFTER the scale. For instance for imagenet statistics the standard deviation would be sl::float3(0.229, 0.224, 0.225)</param>
+        /// <param name="keepAspectRatio">indicates if the original width and height ratio should be kept using padding (sometimes refer to as letterboxing) or if the image should be stretched</param>
+        /// <param name="swapRBChannels">indicates if the Red and Blue channels should be swapped (RGB-BGR or RGBA-BGRA)</param>
+        /// <returns>sl.ERROR_CODE indicating if the get was successful, or why it wasn't.</returns>
+        public static sl.ERROR_CODE BlobFromImages(sl.Mat[] images_in, sl.Mat tensor_out, sl.Resolution resolution,
+                                       float scaleFactor, float3 mean, float3 stdDev, bool keepAspectRatio, bool swapRBChannels)
+        {
+            IntPtr[] ptrArray = new IntPtr[images_in.Length];
+
+            for (int i = 0; i < images_in.Length; i++)
+            {
+                ptrArray[i] = images_in[i]._matInternalPtr;
+            }
+
+            return (sl.ERROR_CODE) dllz_blob_from_images(ptrArray, images_in.Length, tensor_out._matInternalPtr, resolution, scaleFactor, mean, stdDev, keepAspectRatio, swapRBChannels, 0);
+        }
     }
 
 }
