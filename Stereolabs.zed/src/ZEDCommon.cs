@@ -2251,7 +2251,7 @@ namespace sl
         /// <summary>
         /// [Cam model, eeprom version, white balance param]
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 3)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
         public byte[] identifiers;
         /// <summary>
         ///  badge name (zedx_ar0234)
