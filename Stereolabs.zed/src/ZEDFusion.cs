@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using System.Windows.Media.Media3D;
 
 namespace sl
 {
@@ -94,7 +93,7 @@ namespace sl
          ************************************************************************/
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_ingest_gnss_data")]
-        private static extern void dllz_fusion_ingest_gnss_data(ref GNSSData data);
+        private static extern FUSION_ERROR_CODE dllz_fusion_ingest_gnss_data(ref GNSSData data, bool Radian);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_get_current_gnss_data")]
         private static extern POSITIONAL_TRACKING_STATE dllz_fusion_get_current_gnss_data(ref GNSSData data);
@@ -179,6 +178,7 @@ namespace sl
         /// <summary>
         /// DLL-friendly version of PositionalTrackingFusionParameters (found in ZEDCommon.cs).
         /// </summary>
+        [StructLayout(LayoutKind.Sequential)]
         public struct sl_PositionalTrackingFusionParameters
         {
             /// <summary>
@@ -190,12 +190,38 @@ namespace sl
             /// </summary>
             public sl_GNSSCalibrationParameters gnssCalibrationParameters;
             /// <summary>
+            /// Position of the base footprint with respect to the user world.
+            /// </summary>
+            public Vector3 baseFootprintToWorldTranslation;
+            /// <summary>
+            /// Orientation of the base footprint with respect to the user world.
+            /// </summary>
+            public Quaternion baseFootprintToWorldRotation;
+            /// <summary>
+            /// Position of the base footprint with respect to the baselink.
+            /// </summary>
+            public Vector3 baseFootprintToBaselinkTranslation;
+            /// <summary>
+            /// Orientation of the base footprint with respect to the baselink.
+            /// </summary>
+            public Quaternion baseFootprintToBaselinkRotation;
+            /// <summary>
+            /// Whether to override 2 of the 3 rotations from \ref base_footprint_to_world_transform using the IMU gravity.
+            /// </summary>
+            [MarshalAs(UnmanagedType.U1)]
+            public bool SetGravityAsOrigin;
+            /// <summary>
             /// Constructor
             /// </summary>
             public sl_PositionalTrackingFusionParameters(PositionalTrackingFusionParameters positionalTrackingFusionParameters)
             {
                 enableGNSSFusion = positionalTrackingFusionParameters.enableGNSSFusion;
                 gnssCalibrationParameters = new sl_GNSSCalibrationParameters(positionalTrackingFusionParameters.gnssCalibrationParameters);
+                baseFootprintToWorldTranslation = positionalTrackingFusionParameters.baseFootprintToWorldTranslation;
+                baseFootprintToWorldRotation = positionalTrackingFusionParameters.baseFootprintToWorldRotation;
+                baseFootprintToBaselinkTranslation = positionalTrackingFusionParameters.baseFootprintToBaselinkTranslation;
+                baseFootprintToBaselinkRotation = positionalTrackingFusionParameters.baseFootprintToBaselinkRotation;
+                SetGravityAsOrigin = positionalTrackingFusionParameters.SetGravityAsOrigin;
             }
         }
 
@@ -456,9 +482,9 @@ namespace sl
         /// ingests GNSS data from an external sensor into the fusion module
         /// </summary>
         /// <param name="data">the current GNSS data to combine with the current positional tracking data</param>
-        public void IngestGNSSData(ref GNSSData data)
+        public FUSION_ERROR_CODE IngestGNSSData(ref GNSSData data)
         {
-            dllz_fusion_ingest_gnss_data(ref data);
+            return dllz_fusion_ingest_gnss_data(ref data, true);
         }
 
         /// <summary>
@@ -507,7 +533,7 @@ namespace sl
         /// Gets the current timestamp.
         /// </summary>
         /// <returns></returns>
-        public ulong GetCurrentTimestamp()
+        public ulong GetCurrentTimeStamp()
         {
             return dllz_fusion_get_current_timestamp();
         }

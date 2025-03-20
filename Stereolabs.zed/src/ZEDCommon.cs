@@ -4,6 +4,8 @@ using System.Runtime.InteropServices;
 using System.Numerics;
 using System;
 using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Controls;
 
 /// \defgroup Video_group Video Module
 /// \defgroup Depth_group Depth Sensing Module
@@ -56,6 +58,7 @@ namespace sl
     /// <summary>
     /// Structure representing a generic 3*3 matrix.
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct Matrix3x3
     {
         /// <summary>
@@ -94,16 +97,14 @@ namespace sl
         /// <summary>
         /// The output position will be the fused position projected into the requested camera repository.
         /// </summary>
-        FUSION,
-        ///@cond SHOWHIDDEN 
-        SL_POSITION_TYPE_LAST
-        ///@endcond
+        FUSION
     };
 
     /// <summary>
     /// \ingroup Core_group
     /// Structure containing the width and height of an image.
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct Resolution
     {
         /// <summary>
@@ -111,19 +112,19 @@ namespace sl
         /// </summary>
         /// <param name="width">Width of the image in pixels.</param>
         /// <param name="height">Height of the image in pixels.</param>
-        public Resolution(uint width = 0, uint height = 0)
+        public Resolution(int width = 0, int height = 0)
         {
-            this.width = (System.UIntPtr)width;
-            this.height = (System.UIntPtr)height;
+            this.width = width;
+            this.height = height;
         }
         /// <summary>
         /// Width of the image in pixels.
         /// </summary>
-        public System.UIntPtr width;
+        public int width;
         /// <summary>
         /// Height of the image in pixels.
         /// </summary>
-        public System.UIntPtr height;
+        public int height;
     };
 
     /// <summary>
@@ -161,11 +162,11 @@ namespace sl
         /// <summary>
         /// The operation could not proceed with the target configuration but did success with a fallback.
         /// </summary>
-        CONFIGURATION_FALLBACK= -4
+        CONFIGURATION_FALLBACK= -4,
         /// <summary>
         /// The input data does not contains the high frequency sensors data, this is usually because it requires newer SVO/Streaming. In order to work this modules needs inertial data present in it input.
         /// </summary>
-        SENSORS_DATA_REQUIRED = -3
+        SENSORS_DATA_REQUIRED = -3,
         /// <summary>
         ///  The image could be corrupted, Enabled with the parameter InitParameters.enable_image_validity_check
         /// </summary>
@@ -313,7 +314,7 @@ namespace sl
         /// </summary>
         MODULE_NOT_COMPATIBLE_WITH_CUDA_VERSION,
         /// @cond SHOWHIDDEN 
-        ERROR_CODE_LAST
+        LAST
         /// @endcond
     };
 
@@ -606,7 +607,7 @@ namespace sl
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = (int)MODULE.LAST)]
         public bool[] autoApplyModule;
 
-        public RegionOfInterestParameters()
+        public RegionOfInterestParameters(float depthFarThresholdMeters_ = 2.5f, float imageHeightRatioCutoff_ = 0.5f)
         {
             depthFarThresholdMeters = 2.5f;
             imageHeightRatioCutoff = 0.5f;
@@ -717,6 +718,7 @@ namespace sl
     /// <summary>
     /// Lists the different status of positional tracking.
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct PositionalTrackingStatus
     {
         /// <summary>
@@ -805,6 +807,7 @@ namespace sl
         /// <summary>
         /// Whether the IMU sensor is available in your camera.
         /// </summary>
+        [MarshalAs(UnmanagedType.U1)]
         public bool available;
         /// <summary>
         /// Data acquisition timestamp in nanoseconds.
@@ -866,6 +869,7 @@ namespace sl
         /// <summary>
         /// Whether the barometer sensor is available in your camera.
         /// </summary>
+        [MarshalAs(UnmanagedType.U1)]
         public bool available;
         /// <summary>
         /// Data acquisition timestamp in nanoseconds.
@@ -922,6 +926,7 @@ namespace sl
         /// <summary>
         /// Whether the magnetometer sensor is available in your camera.
         /// </summary>
+        [MarshalAs(UnmanagedType.U1)]
         public bool available;
         /// <summary>
         /// Data acquisition timestamp in nanoseconds.
@@ -1129,6 +1134,7 @@ namespace sl
         /// <summary>
         /// Whether the sensor is available in your camera.
         /// </summary>
+        [MarshalAs(UnmanagedType.U1)]
         public bool isAvailable;
     };
 
@@ -1386,12 +1392,11 @@ namespace sl
         /// Key used to retrieve the data stored into SVOData's content.
         /// The key size must not exceed 128 characters.
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
-        public string key;
+        IntPtr key;
         /// <summary>
-        /// Timestamp of the data (in nanoseconds).
+        /// Size of the key string
         /// </summary>
-        public ulong timestamp;
+        int keySize;
         /// <summary>
         /// Content stored as SVOData
         /// Allow any type of content, including raw data like compressed images of json.
@@ -1400,16 +1405,46 @@ namespace sl
         /// <summary>
         /// Size of the content data.
         /// </summary>
-        public int contentSize;
+        int contentSize;
+        /// <summary>
+        /// Timestamp of the data (in nanoseconds).
+        /// </summary>
+        public ulong timestamp;
 
-        public string GetContent()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public readonly string GetContent()
         {
             return Marshal.PtrToStringAnsi(content);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="c"></param>
         public void SetContent(string c)
         {
             content = Marshal.StringToHGlobalAnsi(c);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public readonly string GetKey()
+        {
+            return Marshal.PtrToStringAnsi(key);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="k"></param>
+        public void SetKey(string k)
+        {
+            key = Marshal.StringToHGlobalAnsi(k);
         }
     }
 
@@ -1439,6 +1474,10 @@ namespace sl
         /// Computation mode that favors edges and sharpness.\n Requires more GPU memory and computation power.
         /// </summary>
 		ULTRA,
+        /// <summary>
+        /// End to End Neural disparity estimation.\n Requires AI module.
+        /// </summary>
+        NEURAL_LIGHT,
         /// <summary>
         /// End to End Neural disparity estimation.\n Requires AI module.
         /// </summary>
@@ -1711,7 +1750,7 @@ namespace sl
         ///
         /// If you are using the camera upside down, setting this parameter to sl.FLIP_MODE.ON will cancel its rotation.
         /// \n The images will be horizontally flipped.
-        /// \n Default: sl.FLIP_MODE.AUTO
+        /// \n Default: sl.FLIP_MODE.OFF
         /// \note From ZED SDK 3.2 a new sl.FLIP_MODE enum was introduced to add the automatic flip mode detection based on the IMU gravity detection.
         /// \note This does not work on sl.MODEL.ZED cameras since they do not have the necessary sensors.
         /// </summary>
@@ -1887,6 +1926,17 @@ namespace sl
         ///  \n default: disabled
         /// </summary>
         public bool enableImageValidityCheck;
+        /// <summary>
+        ///  Set a maximum size for all SDK output, like retrieveImage and retrieveMeasure functions.
+        ///  This will override the default (0,0) and instead of outputting native image size sl::Mat, the ZED SDK will take this size as default.
+	    ///A custom lower size can also be used at runtime, but not bigger.This is used for internal optimization of compute and memory allocations
+	    /// The default is similar to previous version with(0,0), meaning native image size
+	    /// 
+	    /// \note: if maximum_working_resolution field are lower than 64, it will be interpreted as dividing scale factor;
+	    /// - maximum_working_resolution = sl::Resolution(1280, 2) -> 1280 x(image_height/2) = 1280 x(half height)
+	    /// - maximum_working_resolution = sl::Resolution(4, 4) -> (image_width/4) x(image_height/4) = quarter size
+        /// </summary>
+        public Resolution maximumWorkingResolution;
 
 
         /// <summary>
@@ -1897,17 +1947,17 @@ namespace sl
         public InitParameters()
         {
             this.inputType = sl.INPUT_TYPE.USB;
-            this.resolution = RESOLUTION.HD720;
-            this.cameraFPS = 60;
+            this.resolution = RESOLUTION.AUTO;
+            this.cameraFPS = 0;
             this.cameraDeviceID = 0;
             this.pathSVO = "";
             this.svoRealTimeMode = false;
             this.coordinateUnits = UNIT.METER;
             this.coordinateSystem = COORDINATE_SYSTEM.IMAGE;
-            this.depthMode = DEPTH_MODE.PERFORMANCE;
+            this.depthMode = DEPTH_MODE.NEURAL;
             this.depthMinimumDistance = -1;
             this.depthMaximumDistance = -1;
-            this.cameraImageFlip = FLIP_MODE.AUTO;
+            this.cameraImageFlip = FLIP_MODE.OFF;
             this.cameraDisableSelfCalib = false;
             this.sdkVerbose = 0;
             this.sdkGPUId = -1;
@@ -1924,6 +1974,7 @@ namespace sl
             this.asyncGrabCameraRecovery = false;
             this.grabComputeCappingFPS = 0;
             this.enableImageValidityCheck = false;
+            this.maximumWorkingResolution = new Resolution(0, 0);
         }
 
     }
@@ -2044,6 +2095,7 @@ namespace sl
         /// \note This saves a encoding session and can be especially useful on NVIDIA Geforce cards where the number of encoding session is limited.
         /// \note \ref compressionMode, \ref targetFPS and \ref bitrate will be ignored in this mode.
         /// </summary>
+        [MarshalAs(UnmanagedType.U1)]
         public bool transcode;
         /// <summary>
         /// Default constructor.
@@ -2066,6 +2118,7 @@ namespace sl
     /// \note For more info, read about the ZED SDK C++ class it mirrors:
     /// <a href="https://www.stereolabs.com/docs/api/structsl_1_1StreamingParameters.html">StreamingParameters</a>
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct StreamingParameters
     {
         /// <summary>
@@ -2110,7 +2163,7 @@ namespace sl
         /// \note If activated, the bitrate can vary between [bitrate/4, bitrate].
         /// \warning Currently, the adaptive bitrate only works when "sending" device is a NVIDIA Jetson (X1, X2, Xavier, Nano).
         /// </summary>
-    
+        [MarshalAs(UnmanagedType.U1)]
         public bool adaptativeBitrate;
         /// <summary>
         /// Size of a single chunk.
@@ -2180,12 +2233,14 @@ namespace sl
         /// </summary>
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 512)]
         public string path;
-
+        /// <summary>
+        /// i2c port of the camera.
+        /// </summary>
+        public int i2cPort;
         /// <summary>
         /// Model of the camera.
         /// </summary>
         public sl.MODEL cameraModel;
-
         /// <summary>
         /// Serial number of the camera.
         ///
@@ -2193,12 +2248,35 @@ namespace sl
         /// \warning Not provided for Windows.
         /// </summary>
         public uint sn;
-
+        /// <summary>
+        /// [Cam model, eeprom version, white balance param]
+        /// </summary>
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        public byte[] identifiers;
+        /// <summary>
+        ///  badge name (zedx_ar0234)
+        /// </summary>
+        public IntPtr camera_badge;
+        /// <summary>
+        /// Name of sensor (zedx)
+        /// </summary>
+        public IntPtr camera_sensor_model;
+        /// <summary>
+        /// Name of Camera in DT (ZED_CAM1)
+        /// </summary>
+        public IntPtr camera_name;
         /// <summary>
         /// Input type of the camera.
         /// </summary>
         public sl.INPUT_TYPE inputType;
-
+        /// <summary>
+        /// sensor_address when available (ZED-X HDR/XOne HDR only)
+        /// </summary>
+        public byte sensorAddressLeft;
+        /// <summary>
+        /// sensor_address when available (ZED-X HDR/XOne HDR only)
+        /// </summary>
+        public byte sensorAddressRight;
     };
 
     ///\ingroup  Video_group
@@ -2304,6 +2382,10 @@ namespace sl
         /// </summary>
         HD2K,
         /// <summary>
+        /// 1920*1536 (x2) \n Available FPS: 15, 30*/
+        /// </summary>
+        HD1536,
+        /// <summary>
         /// 1920*1080 (x2)
         /// \n Available FPS: 15, 30
         /// </summary>
@@ -2388,9 +2470,9 @@ namespace sl
         /// </summary>
         ZED_XM,
         /// <summary>
-        /// Virtual ZED-X generated from 2 ZED-XOne
+        /// Virtual ZED X generated from 2 ZED X One
         /// </summary>
-        VIRTUAL_ZED_X = 10,
+        VIRTUAL_ZED_X = 11,
         /// <summary>
         /// ZED XOne with global shutter AR0234 sensor 
         /// </summary>
@@ -2399,6 +2481,10 @@ namespace sl
         /// ZED XOne with 4K rolling shutter IMX678 sensor
         /// </summary>
         ZED_XONE_UHD = 31,
+        /// <summary>
+        /// ZED XOne HDR.
+        /// </summary>
+        ZED_XONE_HDR = 32
     };
 
     ///\ingroup  Video_group
@@ -2631,6 +2717,12 @@ namespace sl
         /// \note Only available for ZED X/X Mini cameras.
         /// </summary>
         DENOISING,
+        /// <summary>
+        ///  Level of denoising applied on both left and right images.
+        ///  Affected value should be between 0 and 100.
+        ///  Default value is 50. \note Only available for ZED X/X Mini cameras.
+        /// </summary>
+        SCENE_ILLUMINANCE,
         ///@cond SHOWHIDDEN 
         LAST
         ///@endcond
@@ -2771,7 +2863,7 @@ namespace sl
         /// Returns the current input type.
         /// </summary>
         /// <returns></returns>
-        public readonly INPUT_TYPE GetType()
+        public INPUT_TYPE GetType()
         {
             return inputType;
         }
@@ -3294,6 +3386,7 @@ namespace sl
     /// <summary>
     /// Class representing a sub-mesh containing local vertices and triangles.
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct Chunk
     {
         /// <summary>
@@ -3499,6 +3592,7 @@ namespace sl
         /// \note This setting allow int8 precision which can speed up by another x2 factor (compared to fp16, or x4 compared to fp32) and half the fp16 memory usage, however some accuracy could be lost.
         /// \note The accuracy loss should not exceed 1-2% on the compatible models.
         /// \note The current compatible models are all [sl.AI_MODELS.HUMAN_BODY_XXXX](\ref AI_MODELS).
+        [MarshalAs(UnmanagedType.U1)]
         public bool allowReducedPrecisionInference;
     };
 
@@ -3546,6 +3640,151 @@ namespace sl
         /// \note sl::ObjectDetectionRuntimeParameters.detectionConfidenceThreshold will be taken as fallback/default value.
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = (int)sl.OBJECT_CLASS.LAST)]
         public int[] objectConfidenceThreshold;
+    };
+
+    /// <summary>
+    /// Structure containing a set of runtime properties of a certain class ID for the object detection module using a custom model.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct CustomObjectDetectionProperties
+    {
+        /// <summary>
+        /// Index of the class represented by this set of properties.
+        /// </summary>
+        public int ClassID;
+        /// <summary>
+        /// Whether the object object is kept or not.
+        /// </summary>
+        [MarshalAs(UnmanagedType.U1)]
+        public bool enabled;
+        /// <summary>
+        /// Confidence threshold.
+        /// From 1 to 100, with 1 meaning a low threshold, more uncertain objects and 99 very few but very precise objects.
+        /// If the scene contains a lot of objects, increasing the confidence can slightly speed up the process, since every object instance is tracked.
+        /// </summary>
+        public float detectionConfidenceThreshold;
+        /// <summary>
+        /// Provide hypothesis about the object movements (degrees of freedom or DoF) to improve the object tracking.
+        /// - true: 2 DoF projected alongside the floor plane. Case for object standing on the ground such as person, vehicle, etc. 
+        ///  The projection implies that the objects cannot be superposed on multiple horizontal levels. 
+        /// - false: 6 DoF (full 3D movements are allowed).
+        /// </summary>
+        [MarshalAs(UnmanagedType.U1)]
+        public bool isGrounded;
+        /// <summary>
+        /// Provide hypothesis about the object staticity to improve the object tracking.
+		/// - true: the object will be assumed to never move nor being moved.
+		/// - false: the object will be assumed to be able to move or being moved.
+        /// </summary>
+        [MarshalAs(UnmanagedType.U1)]
+        public bool isStatic;
+        /// <summary>
+        /// Maximum tracking time threshold (in seconds) before dropping the tracked object when unseen for this amount of time.
+        /// By default, let the tracker decide internally based on the internal sub class of the tracked object.
+        /// </summary>
+        public float trackingTimeout;
+        /// <summary>
+        /// Maximum tracking distance threshold(in meters) before dropping the tracked object when unseen for this amount of meters.
+        /// By default, do not discard tracked object based on distance.
+        /// Only valid for static object.
+        /// </summary>
+        public float trackingMaxDist;
+        /// <summary>
+        /// Maximum allowed width normalized to the image size.
+        /// Any prediction bigger than that will be filtered out.
+        /// Default: -1 (no filtering)
+        /// </summary>
+        public float maxBoxWidthNormalized;
+        /// <summary>
+        /// Minimum allowed width normalized to the image size.
+        /// Any prediction smaller than that will be filtered out.
+        /// Default: -1 (no filtering)
+        /// </summary>
+        public float minBoxWidthNormalized;
+        /// <summary>
+        /// Maximum allowed height normalized to the image size.
+        /// Any prediction bigger than that will be filtered out.
+        /// Default: -1 (no filtering)
+        /// </summary>
+        public float maxBoxHeightNormalized;
+        /// <summary>
+        /// Minimum allowed height normalized to the image size.
+        /// Any prediction smaller than that will be filtered out.
+        /// Default: -1 (no filtering)
+        /// </summary>
+        public float minBoxHeightNormalized;
+        /// <summary>
+        /// Maximum allowed 3D width.
+        /// Any prediction bigger than that will be either discarded (if object is tracked and in SEARCHING state) or clamped.
+        /// Default: -1 (no filtering)
+        /// </summary>
+        public float maxBoxWidthMeters;
+        /// <summary>
+        /// Minimum allowed 3D width.
+        /// Any prediction smaller than that will be either discarded (if object is tracked and in SEARCHING state) or clamped.
+        /// Default: -1 (no filtering)
+        /// </summary>
+        public float minBoxWidthMeters;
+        /// <summary>
+        /// Maximum allowed 3D height.
+        /// Any prediction bigger than that will be either discarded (if object is tracked and in SEARCHING state) or clamped.
+        /// Default: -1 (no filtering)
+        /// </summary>
+        public float maxBoxHeightMeters;
+        /// <summary>
+        /// Minimum allowed 3D height.
+        /// Any prediction smaller than that will be either discarded (if object is tracked and in SEARCHING state) or clamped.
+        /// Default: -1 (no filtering)
+        /// </summary>
+        public float minBoxHeightMeters;
+        /// <summary>
+        /// For increased accuracy, the native \ref sl::OBJECT_SUBCLASS mapping, if any.
+        ///  Native objects have refined internal parameters for better 3D projection and tracking accuracy.
+        /// If one of the custom objects can be mapped to one the native \ref sl::OBJECT_SUBCLASS, this can help to boost the tracking accuracy.
+        /// Default: no mapping
+        /// </summary>
+        public OBJECT_SUBCLASS nativeMappedClass;
+        /// <summary>
+        /// Preset defining the expected maximum acceleration of the tracked object.
+        /// Determines how the ZED SDK interprets object acceleration, affecting tracking behavior and predictions.
+        /// Default: OBJECT_ACCELERATION_PRESET.DEFAULT
+        /// </summary>
+        public OBJECT_ACCELERATION_PRESET objectAccelerationPreset;
+        /// <summary>
+        /// Manually override the acceleration preset.
+        /// If set, this value takes precedence over the selected preset, allowing for a custom maximum acceleration.
+        /// Unit is m/s^2.
+        /// Default: nan (no override)
+        /// </summary>
+        public float maxAllowedAcceleration;
+    };
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct CustomObjectDetectionRuntimeParameters
+    {
+        public CustomObjectDetectionProperties customObjectDetectionProperties;
+
+        IntPtr objectClassDetectionProperties;
+
+        uint numberCustomDetectionProperties;
+
+        public readonly CustomObjectDetectionProperties[] GetObjectClassDetectionProperties()
+        {
+
+            CustomObjectDetectionProperties[] array = new CustomObjectDetectionProperties[numberCustomDetectionProperties];
+            int structSize = Marshal.SizeOf(typeof(CustomObjectDetectionProperties));
+
+            for (int i = 0; i < numberCustomDetectionProperties; i++)
+            {
+                IntPtr structPtr = IntPtr.Add(objectClassDetectionProperties, i * structSize);
+                array[i] = Marshal.PtrToStructure<CustomObjectDetectionProperties>(structPtr);
+            }
+
+            return array;
+        }
     };
 
     ///\ingroup Body_group
@@ -3602,15 +3841,6 @@ namespace sl
         /// Default: -1 (value set in sl.InitParameters.depthMaximumDistance)
         /// \note The value cannot be greater than sl.InitParameters.depthMaximumDistance and its unit is defined in sl.InitParameters.coordinateUnits.
         public float maxRange;
-
-#if false
-        /// <summary>
-        /// Batching system parameters.
-        /// Batching system(introduced in 3.5) performs short-term re-identification with deep learning and trajectories filtering.
-        /// BatchParameters.enable must to be true to use this feature (by default disabled)
-        /// </summary>
-        public BatchParameters batchParameters;
-#endif
         /// <summary>
         /// Prediction duration of the ZED SDK when an object is not detected anymore before switching its state to sl.OBJECT_TRACKING_STATE.SEARCHING.
         /// </summary>
@@ -3631,6 +3861,7 @@ namespace sl
         /// \note This setting allow int8 precision which can speed up by another x2 factor (compared to fp16, or x4 compared to fp32) and half the fp16 memory usage, however some accuracy could be lost.
         /// \note The accuracy loss should not exceed 1-2% on the compatible models.
         /// \note The current compatible models are all [sl.AI_MODELS.HUMAN_BODY_XXXX](\ref AI_MODELS).
+        [MarshalAs(UnmanagedType.U1)]
         public bool allowReducedPrecisionInference;
     };
 
@@ -3842,7 +4073,152 @@ namespace sl
         /// \note It is advised to set it by labels to avoid issues.
         [MarshalAs(UnmanagedType.U1)]
         public bool isGrounded;
+        /// <summary>
+        /// Provide hypothesis about the object staticity to improve the object tracking.
+        /// - true: the object will be assumed to never move nor being moved.
+        /// - false: the object will be assumed to be able to move or being moved.
+        /// </summary>
+        [MarshalAs(UnmanagedType.U1)]
+        public bool isStatic;
+        /// <summary>
+        /// Maximum tracking time threshold (in seconds) before dropping the tracked object when unseen for this amount of time.
+        /// By default, let the tracker decide internally based on the internal sub class of the tracked object.
+        /// </summary>
+        public float trackingTimeout;
+        /// <summary>
+        /// Maximum tracking distance threshold(in meters) before dropping the tracked object when unseen for this amount of meters.
+        /// By default, do not discard tracked object based on distance.
+        /// Only valid for static object.
+        /// </summary>
+        public float trackingMaxDist;
+        /// <summary>
+        /// Maximum allowed 3D width.
+        /// Any prediction bigger than that will be either discarded (if object is tracked and in SEARCHING state) or clamped.
+        /// Default: -1 (no filtering)
+        /// </summary>
+        public float maxBoxWidthMeters;
+        /// <summary>
+        /// Minimum allowed 3D width.
+        /// Any prediction smaller than that will be either discarded (if object is tracked and in SEARCHING state) or clamped.
+        /// Default: -1 (no filtering)
+        /// </summary>
+        public float minBoxWidthMeters;
+        /// <summary>
+        /// Maximum allowed 3D height.
+        /// Any prediction bigger than that will be either discarded (if object is tracked and in SEARCHING state) or clamped.
+        /// Default: -1 (no filtering)
+        /// </summary>
+        public float maxBoxHeightMeters;
+        /// <summary>
+        /// Minimum allowed 3D height.
+        /// Any prediction smaller than that will be either discarded (if object is tracked and in SEARCHING state) or clamped.
+        /// Default: -1 (no filtering)
+        /// </summary>
+        public float minBoxHeightMeters;
+        /// <summary>
+        /// Manually override the acceleration preset.
+        /// If set, this value takes precedence over the selected preset, allowing for a custom maximum acceleration.
+        /// Unit is m/s^2.
+        /// </summary>
+        public float maxAllowedAcceleration;
     }
+
+    /// <summary>
+    /// Structure that store external 2D mask.
+    /// 
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct CustomMaskObjectData
+    {
+        /// <summary>
+        /// Unique id to help identify and track AI detections.
+        /// </summary>
+        /// It can be either generated externally, or by using sl.Camera.GenerateUniqueID() or left empty.
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 37)]
+        public string uniqueObjectID;
+        /// <summary>
+        /// 2D bounding box of the object represented as four 2D points starting at the top left corner and rotation clockwise.
+        /// </summary>
+        /// \note Expressed in pixels on the original image resolution, ```[0, 0]``` is the top left corner.
+        /// \code
+        /// A ------ B
+        /// | Object |
+        /// D ------ C
+        /// \endcode
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+        public Vector2[] boundingBox2D;
+        /// <summary>
+        /// Object label.
+        /// </summary>
+        /// This information is passed-through and can be used to improve object tracking.
+        /// \note It should define an object class. This means that any similar object (in classification) should share the same label number.
+        public int label;
+        /// <summary>
+        /// Detection confidence value of the object.
+        /// </summary>
+        /// \note The value should be in ```[0-1]```.
+        /// \note It can be used to improve the object tracking.
+        public float probability;
+        /// <summary>
+        /// Provide hypothesis about the object movements (degrees of freedom or DoF) to improve the object tracking.
+        /// </summary>
+        /// - true: 2 DoF projected alongside the floor plane. Case for object standing on the ground such as person, vehicle, etc. 
+        /// \n The projection implies that the objects cannot be superposed on multiple horizontal levels. 
+        /// - false: 6 DoF (full 3D movements are allowed).
+        ///
+        /// \note This parameter cannot be changed for a given object tracking id.
+        /// \note It is advised to set it by labels to avoid issues.
+        [MarshalAs(UnmanagedType.U1)]
+        public bool isGrounded;
+        /// <summary>
+        /// Provide hypothesis about the object staticity to improve the object tracking.
+        /// - true: the object will be assumed to never move nor being moved.
+        /// - false: the object will be assumed to be able to move or being moved.
+        /// </summary>
+        [MarshalAs(UnmanagedType.U1)]
+        public bool isStatic;
+        /// <summary>
+        /// Maximum tracking time threshold (in seconds) before dropping the tracked object when unseen for this amount of time.
+        /// By default, let the tracker decide internally based on the internal sub class of the tracked object.
+        /// </summary>
+        public float trackingTimeout;
+        /// <summary>
+        /// Maximum tracking distance threshold(in meters) before dropping the tracked object when unseen for this amount of meters.
+        /// By default, do not discard tracked object based on distance.
+        /// Only valid for static object.
+        /// </summary>
+        public float trackingMaxDist;
+        /// <summary>
+        /// Maximum allowed 3D width.
+        /// Any prediction bigger than that will be either discarded (if object is tracked and in SEARCHING state) or clamped.
+        /// Default: -1 (no filtering)
+        /// </summary>
+        public float maxBoxWidthMeters;
+        /// <summary>
+        /// Minimum allowed 3D width.
+        /// Any prediction smaller than that will be either discarded (if object is tracked and in SEARCHING state) or clamped.
+        /// Default: -1 (no filtering)
+        /// </summary>
+        public float minBoxWidthMeters;
+        /// <summary>
+        /// Maximum allowed 3D height.
+        /// Any prediction bigger than that will be either discarded (if object is tracked and in SEARCHING state) or clamped.
+        /// Default: -1 (no filtering)
+        /// </summary>
+        public float maxBoxHeightMeters;
+        /// <summary>
+        /// Minimum allowed 3D height.
+        /// Any prediction smaller than that will be either discarded (if object is tracked and in SEARCHING state) or clamped.
+        /// Default: -1 (no filtering)
+        /// </summary>
+        public float minBoxHeightMeters;
+        /// <summary>
+        /// Manually override the acceleration preset.
+        /// If set, this value takes precedence over the selected preset, allowing for a custom maximum acceleration.
+        /// Unit is m/s^2.
+        /// </summary>
+        public float maxAllowedAcceleration;
+    };
 
     ///\ingroup Object_group
     /// <summary>
@@ -3910,6 +4286,7 @@ namespace sl
     /// [p1, p3, p4]
     /// [p2, p4, p5]
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct CovarMatrix
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
@@ -4167,6 +4544,30 @@ namespace sl
         /// \n Will output only upper body (from hip).
         /// </summary>
         UPPER_BODY
+    };
+
+    ///\ingroup Object_group
+    /// <summary>
+    /// Lists of supported presets for maximum acceleration allowed for a given tracked object.
+    /// </summary>
+    public enum OBJECT_ACCELERATION_PRESET
+    {
+        /// <summary>
+        /// The ZED SDK will automatically determine the appropriate maximum acceleration.
+        /// </summary>
+        DEFAULT,
+        /// <summary>
+        /// Suitable for objects with relatively low maximum acceleration (e.g., a person walking).
+        /// </summary>
+        LOW,
+        /// <summary>
+        /// Suitable for objects with moderate maximum acceleration (e.g., a person running).
+        /// </summary>
+        MEDIUM,
+        /// <summary>
+        /// Suitable for objects with high maximum acceleration (e.g., a car accelerating, a kicked sports ball).
+        /// </summary>
+        HIGH
     };
 
     ///\ingroup Object_group
@@ -4456,20 +4857,6 @@ namespace sl
         /// Related to sl.BODY_TRACKING_MODEL.HUMAN_BODY_ACCURATE
         /// </summary>
         HUMAN_BODY_38_ACCURATE_DETECTION,
-#if false
-        /// <summary>
-        /// Related to sl.BODY_TRACKING_MODEL.HUMAN_BODY_FAST
-        /// </summary>
-        HUMAN_BODY_70_FAST_DETECTION,
-        /// <summary>
-        /// Related to sl.BODY_TRACKING_MODEL.HUMAN_BODY_MEDIUM
-        /// </summary>
-        HUMAN_BODY_70_MEDIUM_DETECTION,
-        /// <summary>
-        /// Related to sl.BODY_TRACKING_MODEL.HUMAN_BODY_ACCURATE
-        /// </summary>
-        HUMAN_BODY_70_ACCURATE_DETECTION,
-#endif
         /// <summary>
         /// Related to sl.OBJECT_DETECTION_MODEL.PERSON_HEAD_BOX_FAST
         /// </summary>
@@ -4482,6 +4869,10 @@ namespace sl
         /// Related to sl.BatchParameters.enable
         /// </summary>
         REID_ASSOCIATION,
+        /// <summary>
+        /// Related to sl.DEPTH_MODE.NEURAL_LIGHT
+        /// </summary>
+        NEURAL_LIGHT_DEPTH,
         /// <summary>
         /// Related to sl.DEPTH_MODE.NEURAL
         /// </summary>
@@ -4935,8 +5326,6 @@ namespace sl
 
 #endif
 
-
-
     #endregion
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4952,68 +5341,77 @@ namespace sl
     public enum FUSION_ERROR_CODE
     {
         /// <summary>
-        /// Ingested covariance data must vary between ingest.
+        /// Significant differences observed between sender's FPS. Fusion quality will be affected. 
         /// </summary>
-        GNSS_DATA_COVARIANCE_MUST_VARY = -8,
+        FUSION_INCONSISTENT_FPS = -5,
         /// <summary>
-        /// The senders are using different body formats.
-        /// \n Consider changing them.
+        /// Fusion FPS is too low because at least one sender has an FPS lower than 10 FPS. Fusion quality will be affected.
         /// </summary>
-        BODY_FORMAT_MISMATCH = -7,
+        FUSION_FPS_TOO_LOW = -4,
         /// <summary>
-        /// The following module was not enabled.
+        /// You have attempted to ingest GNSSData into the Fusion system with an invalid timestamp. It is essential to ensure that the 
+        /// timestamp of your GNSSData is set correctly. This issue may arise from a unit error in the ingested timestamp, such as providing
+        /// the timestamp in microseconds instead of nanoseconds.
         /// </summary>
-        MODULE_NOT_ENABLED = -6,
+        INVALID_TIMESTAMP = -3,
         /// <summary>
-        /// Some sources are provided by SVO and others by LIVE stream.
+        /// This is a warning message notifying you about an issue encountered while ingesting GNSSData into the Fusion system. The 
+        /// problem lies in the very low covariance value provided. To ensure stability and prevent potential issues, the system will
+        /// automatically clamp this covariance value.
         /// </summary>
-        SOURCE_MISMATCH = -5,
+        INVALID_COVARIANCE = -2,
         /// <summary>
-        /// Connection timed out. Unable to reach the sender.
-        /// \n Verify the sender's IP/port.
+        /// All data from all sources has been consumed. No new data is available for processing.
         /// </summary>
-        CONNECTION_TIMED_OUT = -4,
-        /// <summary>
-        /// Intra-process shared memory allocation issue.
-        /// \n Multiple connections to the same data.
-        /// </summary>
-        MEMORY_ALREADY_USED = -3,
-        /// <summary>
-        /// The provided IP address format is incorrect.
-        /// \n Please provide the IP in the format 'a.b.c.d', where (a, b, c, d) are numbers between 0 and 255.
-        /// </summary>
-        INVALID_IP_ADDRESS = -2,
-        /// <summary>
-        /// Standard code for unsuccessful behavior.
-        /// </summary>
-        FAILURE = -1,
+        NO_NEW_DATA_AVAILABLE = -1,
         /// <summary>
         /// Standard code for successful behavior.
         /// </summary>
         SUCCESS = 0,
         /// <summary>
-        /// Significant differences observed between sender's FPS.
+        /// This is a warning message indicating an issue with the ingestGNSSData function call. The problem lies in the gnss_status field of  
+        /// the GNSSData parameter, which is currently set to UNKNOWN. To enhance the accuracy of the VPS (Visual Positioning System), it is essential
+        /// to provide an appropriate value for this field. To rectify this issue, please consider setting the gnss_status field to a valid value that
+        /// reflects the status of your GNSS sensor. If your GNSS sensor is unable to output a status, it is recommended to set the gnss_status field
+        /// to sl::GNSS_STATUS::SINGLE.
         /// </summary>
-        FUSION_INCONSISTENT_FPS = 1,
+        GNSS_DATA_NEED_FIX = 1,
         /// <summary>
-        /// At least one sender has an FPS lower than 10 FPS.
+        /// to prevent users from repeatedly ingesting a fixed or manually crafted covariance.        
         /// </summary>
-        FPS_TOO_LOW = 2,
+        GNSS_DATA_COVARIANCE_MUST_VARY = 2,
         /// <summary>
-        /// Problem detected with the ingested timestamp.
-        /// \n Sample data will be ignored.
+        /// Senders are using different body formats. Please use the same body format.
         /// </summary>
-        INVALID_TIMESTAMP = 3,
+        BODY_FORMAT_MISMATCH = 3,
         /// <summary>
-        /// Problem detected with the ingested covariance.
-        /// \n Sample data will be ignored.
+        /// The following module was not enabled. Please enable it to proceed.
         /// </summary>
-        INVALID_COVARIANCE = 4,
+        MODULE_NOT_ENABLED = 4,
         /// <summary>
-        /// All data from all sources has been consumed.
-        /// \n No new data is available for processing.
+        /// Some sources are provided by SVO and others by LIVE stream.
         /// </summary>
-        NO_NEW_DATA_AVAILABLE = 5
+        SOURCE_MISMATCH = 5,
+        /// <summary>
+        /// Connection timed out. Unable to reach the sender.
+        /// \n Verify the sender's IP/port.
+        /// </summary>
+        CONNECTION_TIMED_OUT = 6,
+        /// <summary>
+        /// Intra-process shared memory allocation issue.
+        /// \n Multiple connections to the same data. Check memory usage.
+        /// </summary>
+        MEMORY_ALREADY_USED = 7,
+        /// <summary>
+        /// The provided IP address format is incorrect.
+        /// \n Please provide the IP in the format 'a.b.c.d', where (a, b, c, d) are numbers between 0 and 255.
+        /// </summary>
+        INVALID_IP_ADDRESS = 8,
+        /// <summary>
+        /// Standard code for unsuccessful behavior.
+        /// </summary>
+        FAILURE = 9,
+
     }
 
     /// \ingroup Fusion_group
@@ -5023,26 +5421,76 @@ namespace sl
     public enum SENDER_ERROR_CODE
     {
         /// <summary>
-        /// The sender has been disconnected.
+        /// The sender encountered a grab error.
         /// </summary>
-        DISCONNECTED = -1,
+        GRAB_ERROR = -3,
+        /// <summary>
+        /// The sender does not run with a constant frame rate.
+        /// </summary>
+        INCONSISTENT_FPS = -2,
+        /// <summary>
+        /// The frame rate of the sender is lower than 10 FPS.
+        /// </summary>
+        FPS_TOO_LOW = -1,
         /// <summary>
         ///  Standard code for successful behavior.
         /// </summary>
         SUCCESS = 0,
         /// <summary>
-        /// The sender encountered a grab error.
+        /// The sender has been disconnected.
         /// </summary>
-        GRAB_ERROR = 1,
-        /// <summary>
-        /// The sender does not run with a constant frame rate.
-        /// </summary>
-        INCONSISTENT_FPS = 2,
-        /// <summary>
-        /// The frame rate of the sender is lower than 10 FPS.
-        /// </summary>
-        FPS_TOO_LOW = 3
+        DISCONNECTED = 1,
     }
+
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Configuration parameters for data synchronization.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct SynchronizationParameter
+    {
+        /// <summary>
+	    /// Size of synchronization windows in milliseconds.
+        /// The synchronization window is used by the synchronizer to return all data present inside the current
+	    /// synchronization window.For efficient fusion, the synchronization window size is expected to be equal
+	    /// to the mean `grab()` duration of the camera at the lowest FPS. If not provided, the fusion SDK will compute it from the
+	    /// data's sources.
+	    /// Default value: 0
+        /// </summary>
+        public double windowSize;
+        /// <summary>
+        /// Duration in milliseconds before considering a camera as inactive if no more data is present (for example camera disconnection).
+        /// The data_source_timeout parameter specifies the duration to wait before considering a camera as inactive
+        /// if no new data is received within the specified time frame.
+        /// </summary>
+        public double dataSourceTimeout;
+        /// <summary>
+        /// Determines whether to include the last data returned by a source in the final synchronized data.
+        /// If the keep_last_data parameter is set to true and no data is present in the current synchronization window,
+        /// the last data returned by the source will be included in the final synchronized data. This ensures continuity
+        /// even in the absence of fresh data.
+        /// </summary>
+        [MarshalAs(UnmanagedType.U1)]
+        public bool keepLastData;
+        /// <summary>
+        /// Maximum duration in milliseconds allowed for data to be considered as the last data.
+        /// The maximum_lateness parameter sets the maximum duration within which data can be considered as the last
+        /// available data. If the duration between the last received data and the current synchronization window exceeds
+        /// this value, the data will not be included as the last data in the final synchronized output.
+        /// </summary>
+        public double maximumLateness;
+
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public SynchronizationParameter()
+        {
+            windowSize = 0;
+            dataSourceTimeout = 50;
+            keepLastData = false;
+            maximumLateness = 50;
+        }
+    };
 
     /// \ingroup Fusion_group
     /// <summary>
@@ -5082,6 +5530,45 @@ namespace sl
         /// then, if any source do not receive data during 5 period, these sources will go to timeout and will be ignored.	    /// if any source does not receive data during 5 periods, these sources will go into timeout and will be ignored.
         /// </summary>
         public uint timeoutPeriodsNumber;
+        /// <summary>
+        /// NVIDIA graphics card id to use.
+        /// By default the SDK will use the most powerful NVIDIA graphics card found.
+        /// \n However, when running several applications, or using several cameras at the same time, splitting the load over available GPUs can be useful.
+        /// \n This parameter allows you to select the GPU used by the sl::Camera using an ID from 0 to n-1 GPUs in your PC.
+        /// \n Default: -1
+        /// \note A non-positive value will search for all CUDA capable devices and select the most powerful.</summary>
+        public int sdkGpuId;
+        /// <summary>
+        /// CUcontext to be used.
+        /// If your application uses another CUDA-capable library, giving its CUDA context to the ZED SDK can be useful when sharing GPU memories.
+        /// \n This parameter allows you to set the CUDA context to be used by the ZED SDK.
+        /// \n Leaving this parameter empty asks the SDK to create its own context.
+        /// \n Default: (empty)
+        /// 
+        /// \note When creating you own CUDA context, you have to define the device you will use. Do not forget to also specify it on \ref sdk_gpu_id.
+        /// \note <b>On Jetson</b>, you have to set the flag CU_CTX_SCHED_YIELD, during CUDA context creation.
+        /// \note You can also let the SDK create its own context, and use sl::Camera::getCUDAContext() to use it.</summary>
+        public int sdkCudaCtx;
+        /// <summary>
+        /// Specifies the parameters used for data synchronization during fusion.
+        /// The SynchronizationParameter struct encapsulates the synchronization parameters that control the data fusion process.
+        /// </summary>
+        public SynchronizationParameter synchronizationParameters;
+
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public InitFusionParameters()
+        {
+            verbose = false;
+            coordinateUnits = UNIT.MILLIMETER;
+            coordinateSystem = COORDINATE_SYSTEM.IMAGE;
+            outputPerformanceMetrics = false;
+            timeoutPeriodsNumber = 5;
+            synchronizationParameters = new SynchronizationParameter();
+            sdkGpuId = -1;
+            sdkCudaCtx = 0;
+        }
     }
 
     /// \ingroup Fusion_group
@@ -5122,6 +5609,28 @@ namespace sl
         /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
         public char[] ipAdd;
+
+        /// <summary>
+        /// Set the IP address of the sender
+        /// </summary>
+        /// <param name="Ip"></param>
+        void SetIP(string Ip)
+        {
+            ipAdd = new char[128];
+            for (int i = 0; i < Ip.Length; i++)
+            {
+                ipAdd[i] = Ip[i];
+            }
+        }
+
+        /// <summary>
+        /// Set the port of the sender²
+        /// </summary>
+        /// <param name="port"></param>
+        void SetPort(uint port)
+        {
+            ipPort = port;
+        }
     };
 
     /// \ingroup Fusion_group
@@ -5152,7 +5661,6 @@ namespace sl
         /// </summary>
         public InputType inputType;
     };
-
 
     /// \ingroup Fusion_group
     /// <summary>
@@ -5222,20 +5730,20 @@ namespace sl
         public ulong sn;
 
         /// <summary>
-        /// Default constructor.
-        /// </summary>
-        public CameraIdentifier()
-        {
-            sn = 0;
-        }
-
-        /// <summary>
         /// Constructor with serial number.
         /// </summary>
         /// <param name="_sn"></param>
         public CameraIdentifier(ulong _sn)
         {
             sn = _sn;
+        }
+
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        public CameraIdentifier()
+        {
+            sn = 0;
         }
     }
 
@@ -5345,6 +5853,7 @@ namespace sl
     /// <summary>
     /// Class containing the overall position fusion status
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public struct FusedPositionalTrackingStatus
     {
         /// <summary>
@@ -5371,6 +5880,38 @@ namespace sl
         /// Represents the current state of positional tracking fusion.
         /// </summary>
         public POSITIONAL_TRACKING_FUSION_STATUS trackingFusionStatus;
+    }
+
+    /// <summary>
+    /// Represents a 3d landmark.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Landmark
+    {
+        /// <summary>
+        /// Unique identifier for the landmark.
+        /// </summary>
+        public ulong id;
+        /// <summary>
+        /// World position of the landmark.
+        /// </summary>
+        public Vector3 position;
+    }
+
+    /// <summary>
+    /// Represents a 2d landmark.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Landmark2D
+    {
+        /// <summary>
+        /// Unique identifier for the landmark.
+        /// </summary>
+        public ulong id;
+        /// <summary>
+        /// Projection of the landmark in the image.
+        /// </summary>
+        public Vector2 imagePosition;
     }
 
     /**
@@ -5406,6 +5947,9 @@ namespace sl
         PPS = 5
     };
 
+    /// <summary>
+    /// Gnss mode
+    /// </summary>
     public enum GNSS_MODE
     {
         /// <summary>
@@ -5467,6 +6011,14 @@ namespace sl
         /// Altitude standard deviation.
         /// </summary>
         public double altitudeStd;
+        /// <summary>
+        /// GNSS status.
+        /// </summary>
+        public GNSS_STATUS status;
+        /// <summary>
+        /// GNSS mode.
+        /// </summary>
+        public GNSS_MODE mode;
     }
 
     /// \ingroup Fusion_group
@@ -5660,12 +6212,37 @@ namespace sl
         /// </summary>
         public GNSSCalibrationParameters gnssCalibrationParameters;
         /// <summary>
+        /// Position of the base footprint with respect to the user world.
+        /// </summary>
+        public Vector3 baseFootprintToWorldTranslation;
+        /// <summary>
+        /// Orientation of the base footprint with respect to the user world.
+        /// </summary>
+        public Quaternion baseFootprintToWorldRotation;
+        /// <summary>
+        /// Position of the base footprint with respect to the baselink.
+        /// </summary>
+        public Vector3 baseFootprintToBaselinkTranslation;
+        /// <summary>
+        /// Orientation of the base footprint with respect to the baselink.
+        /// </summary>
+        public Quaternion baseFootprintToBaselinkRotation;
+        /// <summary>
+        /// Whether to override 2 of the 3 rotations from \ref base_footprint_to_world_transform using the IMU gravity.
+        /// </summary>
+        public bool SetGravityAsOrigin;
+        /// <summary>
         /// Constructor
         /// </summary>
         public PositionalTrackingFusionParameters()
         {
             enableGNSSFusion = false;
             gnssCalibrationParameters = new GNSSCalibrationParameters();
+            baseFootprintToWorldRotation = Quaternion.Identity;
+            baseFootprintToBaselinkTranslation = Vector3.Zero;
+            baseFootprintToBaselinkTranslation = Vector3.Zero;
+            baseFootprintToBaselinkRotation = Quaternion.Identity;
+            SetGravityAsOrigin = false;
         }
     }
 

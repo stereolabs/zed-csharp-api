@@ -288,13 +288,13 @@ namespace sl
         private static extern int dllz_get_svo_data_size(int cameraID, string key, ulong ts_begin, ulong ts_end);
 
         [DllImport(nameDll, EntryPoint = "sl_retrieve_svo_data")]
-        private static extern ERROR_CODE dllz_retrieve_svo_data(int cameraID, string key, int nb_data, [Out] SVOData[] data, ulong ts_begin, ulong ts_end);
+        private static extern ERROR_CODE dllz_retrieve_svo_data(int cameraID, string key, int nb_data, out IntPtr data, ulong ts_begin, ulong ts_end);
 
-        [DllImport(nameDll, EntryPoint = "sl_get_svo_data_size")]
+        [DllImport(nameDll, EntryPoint = "sl_get_svo_data_keys_size")]
         private static extern int dllz_get_svo_data_keys_size(int cameraID);
 
         [DllImport(nameDll, EntryPoint = "sl_get_svo_data_keys")]
-        private static extern void dllz_get_svo_data_keys(int cameraID, int nb_keys, [Out] string[] keys);
+        private static extern void dllz_get_svo_data_keys(int cameraID, int nb_keys, out IntPtr keys);
 
         /*
          * Camera control functions.
@@ -433,6 +433,12 @@ namespace sl
 
         [DllImport(nameDll, EntryPoint = "sl_get_positional_tracking_status")]
         private static extern IntPtr dllz_get_positional_tracking_status(int cameraID);
+
+        [DllImport(nameDll, EntryPoint = "sl_get_positional_tracking_landmarks")]
+        private static extern int dllz_get_positional_tracking_landmarks(int cameraID, ref IntPtr landmarks, ref int count);
+
+        [DllImport(nameDll, EntryPoint = "sl_get_positional_tracking_landmarks_2d")]
+        private static extern int dllz_get_positional_tracking_landmarks_2d(int cameraID, ref IntPtr landmarks, ref int count);
 
         [DllImport(nameDll, EntryPoint = "sl_get_position_at_target_frame")]
         private static extern int dllz_get_position_at_target_frame(int cameraID, ref Quaternion quaternion, ref Vector3 translation, ref Quaternion targetQuaternion, ref Vector3 targetTranslation, int reference_frame);
@@ -592,8 +598,14 @@ namespace sl
         [DllImport(nameDll, EntryPoint = "sl_disable_object_detection")]
         private static extern void dllz_disable_object_detection(int cameraID, uint instanceID, bool forceDisableAllInstances);
 
+        [DllImport(nameDll, EntryPoint = "sl_ingest_custom_mask_objects")]
+        private static extern int dllz_ingest_custom_mask_objects(int cameraID, int nb_objects, CustomMaskObjectData[] objects_in);
+
         [DllImport(nameDll, EntryPoint = "sl_ingest_custom_box_objects")]
         private static extern int dllz_ingest_custom_box_objects(int cameraID, int nb_objects, CustomBoxObjectData[] objects_in);
+
+        [DllImport(nameDll, EntryPoint = "sl_retrieve_custom_objects")]
+        private static extern int dllz_retrieve_custom_objects(int cameraID, ref CustomObjectDetectionRuntimeParameters od_params, IntPtr objs, uint instanceID);
 
         [DllImport(nameDll, EntryPoint = "sl_retrieve_objects")]
         private static extern int dllz_retrieve_objects_data(int cameraID, ref ObjectDetectionRuntimeParameters od_params, IntPtr objs, uint instanceID);
@@ -637,10 +649,10 @@ namespace sl
          * Retrieves used by mat
          */
         [DllImport(nameDll, EntryPoint = "sl_retrieve_measure")]
-        private static extern int dllz_retrieve_measure(int cameraID, System.IntPtr ptr, int type, int mem, int width, int height);
+        private static extern int dllz_retrieve_measure(int cameraID, System.IntPtr ptr, int type, int mem, int width, int height, int cudaStream = 0);
 
         [DllImport(nameDll, EntryPoint = "sl_retrieve_image")]
-        private static extern int dllz_retrieve_image(int cameraID, System.IntPtr ptr, int type, int mem, int width, int height);
+        private static extern int dllz_retrieve_image(int cameraID, System.IntPtr ptr, int type, int mem, int width, int height, int cudaStream = 0);
 
         #endregion
 
@@ -843,6 +855,17 @@ namespace sl
             /// </summary>
             [MarshalAs(UnmanagedType.U1)]
             public bool enableImageValidityCheck;
+            /// <summary>
+            ///  Set a maximum size for all SDK output, like retrieveImage and retrieveMeasure functions.
+            ///  This will override the default (0,0) and instead of outputting native image size sl::Mat, the ZED SDK will take this size as default.
+	        ///A custom lower size can also be used at runtime, but not bigger.This is used for internal optimization of compute and memory allocations
+	        /// The default is similar to previous version with(0,0), meaning native image size
+	        /// 
+	        /// \note: if maximum_working_resolution field are lower than 64, it will be interpreted as dividing scale factor;
+	        /// - maximum_working_resolution = sl::Resolution(1280, 2) -> 1280 x(image_height/2) = 1280 x(half height)
+	        /// - maximum_working_resolution = sl::Resolution(4, 4) -> (image_width/4) x(image_height/4) = quarter size
+            /// </summary>
+            public Resolution maximumWorkingResolution;
 
             /// <summary>
             /// Copy constructor.
@@ -872,6 +895,7 @@ namespace sl
                 asyncGrabCameraRecovery = init.asyncGrabCameraRecovery;
                 grabComputeCappingFPS = init.grabComputeCappingFPS;
                 enableImageValidityCheck = init.enableImageValidityCheck;
+                maximumWorkingResolution = init.maximumWorkingResolution;
             }
         }
 
@@ -964,6 +988,10 @@ namespace sl
             public bool reverseVertexOrder;
             public SPATIAL_MAP_TYPE mapType;
             public int stabilityCounter;
+            public float disparity_std;
+            public float decay;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool enable_forget_past;
         };
 
         /// <summary>
@@ -1816,6 +1844,56 @@ namespace sl
 
             PositionalTrackingStatus positionalTrackingStatus = (PositionalTrackingStatus)Marshal.PtrToStructure(p, typeof(PositionalTrackingStatus));
             return positionalTrackingStatus;
+        }
+
+        /// <summary>
+        /// Get the current positional tracking landmarks.
+        /// </summary>
+        /// <param name="landmarks">Array of presents landmarks.</param>
+        /// <returns>ERROR_CODE that indicate if the function succeed or not.</returns>
+        public sl.ERROR_CODE GetPositionalTrackingLandmarks(ref List<Landmark> landmarks)
+        {
+            IntPtr landmarkArrayPtr = IntPtr.Zero;
+            int count = 0;
+
+            sl.ERROR_CODE err = (sl.ERROR_CODE)dllz_get_positional_tracking_landmarks(CameraID, ref landmarkArrayPtr, ref count);
+            if (landmarkArrayPtr == IntPtr.Zero)
+            {
+                return sl.ERROR_CODE.FAILURE;
+            }
+
+            int structSize = Marshal.SizeOf(typeof(Landmark));
+            // Read the array of Landmark* (individual struct pointers)
+            for (int i = 0; i < count; i++)
+            {
+                IntPtr landmarkPtr = IntPtr.Add(landmarkArrayPtr, i * structSize);
+                if (landmarkPtr == IntPtr.Zero)
+                {
+                    return sl.ERROR_CODE.FAILURE;
+                }
+                landmarks.Add(Marshal.PtrToStructure<Landmark>(landmarkPtr));
+            }
+            return err;
+        }
+
+        /// <summary>
+        /// Get the current positional tracking landmarks 2d.
+        /// </summary>
+        /// <param name="landmarks">Array of presents landmarks.</param>
+        /// <returns>ERROR_CODE that indicate if the function succeed or not.</returns>
+        public sl.ERROR_CODE GetPositionalTrackingLandmarks2D(ref List<Landmark2D> landmarks)
+        {
+            IntPtr landmarkArrayPtr = IntPtr.Zero;
+            int count = 0;
+            sl.ERROR_CODE err = (sl.ERROR_CODE)dllz_get_positional_tracking_landmarks_2d(CameraID, ref landmarkArrayPtr, ref count);
+            int structSize = Marshal.SizeOf(typeof(Landmark2D));
+            // Read the array of Landmark* (individual struct pointers)
+            for (int i = 0; i < count; i++)
+            {
+                IntPtr landmarkPtr = IntPtr.Add(landmarkArrayPtr, i * structSize);
+                landmarks.Add(Marshal.PtrToStructure<Landmark2D>(landmarkPtr));
+            }
+            return err;
         }
 
         /// <summary>
@@ -2776,14 +2854,28 @@ namespace sl
         {
             ERROR_CODE err = ERROR_CODE.FAILURE;
 
-            int nb_data = dllz_get_svo_data_size(CameraID, key, tsBegin, tsEnd);
-
-            if (nb_data > 0)
+            int nbData = dllz_get_svo_data_size(CameraID, key, tsBegin, tsEnd);
+            if (nbData > 0)
             {
-                SVOData[] data_array = new SVOData[nb_data];
+                IntPtr[] dataPtr = new IntPtr[nbData];
+                err = dllz_retrieve_svo_data(CameraID, key, nbData, out dataPtr[0], tsBegin, tsEnd);
 
-                err = dllz_retrieve_svo_data(CameraID, key, nb_data, data_array, tsBegin, tsEnd);
-                data = new List<SVOData>(data_array);
+                SVOData[] data_array = new SVOData[nbData];
+                for (int i = 0; i < nbData; i++)
+                {
+                    if (dataPtr[i] != IntPtr.Zero)
+                    {
+                        data_array[i] = (SVOData)Marshal.PtrToStructure(dataPtr[i], typeof(SVOData));
+                        // Free memory allocated by C (only if allocated in C)
+                        Marshal.FreeHGlobal(dataPtr[i]);
+                    }
+                    else
+                    {
+                        Console.WriteLine(i + " is null");
+                    }
+                }
+
+                data = new(data_array);
             }
 
             return err;
@@ -2795,17 +2887,28 @@ namespace sl
         /// <returns>List of available keys.</returns>
         public List<string> GetSVODataKeys()
         {
-            int nb_keys = dllz_get_svo_data_keys_size(CameraID);
+            int nbKeys = dllz_get_svo_data_keys_size(CameraID);
 
-            if (nb_keys > 0)
+            if (nbKeys > 0)
             {
-                string[] keys_array = new string[nb_keys];
+                // Allocate memory for string pointers
+                IntPtr[] keysPtr = new IntPtr[nbKeys];
 
-                dllz_get_svo_data_keys(CameraID, nb_keys, keys_array);
+                dllz_get_svo_data_keys(CameraID, nbKeys, out keysPtr[0]);
 
-                List<string> keys = new List<string>(keys_array);
+                // Retrieve strings
+                string[] keys = new string[nbKeys];
+                for (int i = 0; i < nbKeys; i++)
+                {
+                    keys[i] = Marshal.PtrToStringAnsi(keysPtr[i]);
 
-                return keys;
+                    // Free memory allocated by C (only if allocated in C)
+                    Marshal.FreeHGlobal(keysPtr[i]);
+                }
+
+                List<string> list = new(keys);
+
+                return list;
             }
 
             return new List<string>();
@@ -3065,6 +3168,16 @@ namespace sl
         }
 
         /// <summary>
+        /// Feed the 3D Object tracking function with your own 2D bounding boxes with masks from your own detection algorithm.
+        /// </summary>
+        /// <param name="masks_in"> Masks</param>
+        /// <returns>sl.ERROR_CODE.SUCCESS if everything went fine.</returns>
+        public sl.ERROR_CODE IngestCustomMaskObjects(List<CustomMaskObjectData> masks_in)
+        {
+            return (sl.ERROR_CODE)dllz_ingest_custom_mask_objects(CameraID, masks_in.Count, masks_in.ToArray());
+        }
+
+        /// <summary>
         /// Retrieve objects detected by the object detection module.
         /// </summary>
         /// <param name="objs"> Retrieved objects. </param>
@@ -3087,7 +3200,31 @@ namespace sl
                 Marshal.FreeHGlobal(p);
                 return sl.ERROR_CODE.FAILURE;
             }
+        }
 
+        /// <summary>
+        /// Retrieve objects detected by the custom object detection module.
+        /// </summary>
+        /// <param name="objs">Custom object detection runtime settings, can be changed at each detection. In async mode, the parameters update is applied on the next iteration.</param>
+        /// <param name="od_params">The detected objects will be saved into this object. If the object already contains data from a previous detection, it will be updated, keeping a unique ID for the same person.</param>
+        /// <param name="instanceID">Id of the object detection instance. Used when multiple instances of the object detection module are enabled at the same time.</param>
+        /// <returns>sl.ERROR_CODE.SUCCESS if everything went fine, sl.ERROR_CODE.FAILURE otherwise.</returns>
+        public sl.ERROR_CODE RetrieveCustomObjects(ref Objects objs, ref CustomObjectDetectionRuntimeParameters od_params, uint instanceID = 0)
+        {
+            IntPtr p = Marshal.AllocHGlobal(System.Runtime.InteropServices.Marshal.SizeOf<sl.Objects>());
+            sl.ERROR_CODE err = (sl.ERROR_CODE)dllz_retrieve_custom_objects(CameraID, ref od_params, p, instanceID);
+
+            if (p != IntPtr.Zero)
+            {
+                objs = (sl.Objects)Marshal.PtrToStructure(p, typeof(sl.Objects));
+                Marshal.FreeHGlobal(p);
+                return err;
+            }
+            else
+            {
+                Marshal.FreeHGlobal(p);
+                return sl.ERROR_CODE.FAILURE;
+            }
         }
 
         /// <summary>
