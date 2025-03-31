@@ -17,7 +17,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE "/platform:x64" )
 set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.6.1")
 
 # Set the C# language version, otherwise default 3.0 is taken
-set(CMAKE_CSharp_FLAGS "/langversion:10")
+set(CMAKE_CSharp_FLAGS "/langversion:7")
 #set(CMAKE_CONFIGURATION_TYPES "Release" CACHE STRING "" FORCE)
 
 

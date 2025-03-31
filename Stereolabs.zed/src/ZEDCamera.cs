@@ -2875,7 +2875,7 @@ namespace sl
                     }
                 }
 
-                data = new(data_array);
+                data = new List<SVOData>(data_array);
             }
 
             return err;
@@ -2906,7 +2906,7 @@ namespace sl
                     Marshal.FreeHGlobal(keysPtr[i]);
                 }
 
-                List<string> list = new(keys);
+                List<string> list = new List<string>(keys);
 
                 return list;
             }

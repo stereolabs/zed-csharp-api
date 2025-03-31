@@ -1415,7 +1415,7 @@ namespace sl
         /// 
         /// </summary>
         /// <returns></returns>
-        public readonly string GetContent()
+        public string GetContent()
         {
             return Marshal.PtrToStringAnsi(content);
         }
@@ -1433,7 +1433,7 @@ namespace sl
         /// 
         /// </summary>
         /// <returns></returns>
-        public readonly string GetKey()
+        public string GetKey()
         {
             return Marshal.PtrToStringAnsi(key);
         }
@@ -3771,7 +3771,7 @@ namespace sl
 
         uint numberCustomDetectionProperties;
 
-        public readonly CustomObjectDetectionProperties[] GetObjectClassDetectionProperties()
+        public CustomObjectDetectionProperties[] GetObjectClassDetectionProperties()
         {
 
             CustomObjectDetectionProperties[] array = new CustomObjectDetectionProperties[numberCustomDetectionProperties];
@@ -5483,12 +5483,12 @@ namespace sl
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public SynchronizationParameter()
+        public SynchronizationParameter(double windowSize = 0, double dataSourceTimeout = 50, bool keepLastData = false, double maximumLateness = 50)
         {
-            windowSize = 0;
-            dataSourceTimeout = 50;
-            keepLastData = false;
-            maximumLateness = 50;
+            this.windowSize = windowSize;
+            this.dataSourceTimeout = dataSourceTimeout;
+            this.keepLastData = keepLastData;
+            this.maximumLateness = maximumLateness;
         }
     };
 
@@ -5558,16 +5558,20 @@ namespace sl
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public InitFusionParameters()
+        public InitFusionParameters(bool verbose = false, UNIT coordinateUnits = UNIT.MILLIMETER,
+                                    COORDINATE_SYSTEM coordinateSystem = COORDINATE_SYSTEM.IMAGE, 
+                                    bool outputPerformanceMetrics = false, uint timeoutPeriodsNumber = 5, 
+                                    SynchronizationParameter synchronizationParameters = new SynchronizationParameter(), 
+                                    int sdkGpuId = -1, int sdkCudaCtx = 0)
         {
-            verbose = false;
-            coordinateUnits = UNIT.MILLIMETER;
-            coordinateSystem = COORDINATE_SYSTEM.IMAGE;
-            outputPerformanceMetrics = false;
-            timeoutPeriodsNumber = 5;
-            synchronizationParameters = new SynchronizationParameter();
-            sdkGpuId = -1;
-            sdkCudaCtx = 0;
+            this.verbose = verbose;
+            this.coordinateUnits = coordinateUnits;
+            this.coordinateSystem = coordinateSystem;
+            this.outputPerformanceMetrics = outputPerformanceMetrics;
+            this.timeoutPeriodsNumber = timeoutPeriodsNumber;
+            this.synchronizationParameters = synchronizationParameters;
+            this.sdkGpuId = sdkGpuId;
+            this.sdkCudaCtx = sdkCudaCtx;
         }
     }
 
@@ -5733,17 +5737,9 @@ namespace sl
         /// Constructor with serial number.
         /// </summary>
         /// <param name="_sn"></param>
-        public CameraIdentifier(ulong _sn)
+        public CameraIdentifier(ulong _sn = 0)
         {
             sn = _sn;
-        }
-
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        public CameraIdentifier()
-        {
-            sn = 0;
         }
     }
 
