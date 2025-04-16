@@ -1026,7 +1026,7 @@ namespace sl
 
             sl_initParameters initP = new sl_initParameters(initParameters); //DLL-friendly version of InitParameters.
             initP.coordinateSystem = initParameters.coordinateSystem; //Left-hand
-            int v = dllz_open(CameraID, ref initP, GetCameraInformation().serialNumber , 
+            int v = dllz_open(CameraID, ref initP, (uint)initParameters.serialNumber, 
                 new System.Text.StringBuilder(initParameters.pathSVO, initParameters.pathSVO.Length),
                 new System.Text.StringBuilder(initParameters.ipStream, initParameters.ipStream.Length),
                 initParameters.portStream,

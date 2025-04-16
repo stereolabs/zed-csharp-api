@@ -4,8 +4,6 @@ using System.Runtime.InteropServices;
 using System.Numerics;
 using System;
 using System.Collections.Generic;
-using System.Windows;
-using System.Windows.Controls;
 
 /// \defgroup Video_group Video Module
 /// \defgroup Depth_group Depth Sensing Module
@@ -21,7 +19,7 @@ namespace sl
 {
     public class ZEDCommon
     {
-        public const string NameDLL = "sl_zed_c.dll";
+        public const string NameDLL = "sl_zed_c";
     }
 
     /// <summary>
@@ -1685,6 +1683,10 @@ namespace sl
         /// </summary>
         public int cameraDeviceID;
         /// <summary>
+        /// SN for identifying which camera to use from the connected cameras.
+        /// </summary>
+        public int serialNumber;
+        /// <summary>
         /// Path to a recorded SVO file to play, including filename.
         /// </summary>
         public string pathSVO = "";
@@ -1950,6 +1952,7 @@ namespace sl
             this.resolution = RESOLUTION.AUTO;
             this.cameraFPS = 0;
             this.cameraDeviceID = 0;
+            this.serialNumber = 0;
             this.pathSVO = "";
             this.svoRealTimeMode = false;
             this.coordinateUnits = UNIT.METER;
