@@ -536,7 +536,7 @@ namespace sl
         /// Frees the memory of the sl.Mat.
         /// </summary>
         /// <param name="mem">Whether the sl.Mat is on CPU or GPU memory.</param>
-        public void Free(MEM mem = MEM.BOTH)
+        public void Free(MEM mem = (MEM.GPU | MEM.CPU))
         {
             dllz_mat_free(_matInternalPtr, (int)mem);
             _matInternalPtr = IntPtr.Zero;

@@ -47,11 +47,15 @@ namespace sl
         [DllImport(nameDll, EntryPoint = "sl_fusion_update_pose")]
         private static extern FUSION_ERROR_CODE dllz_fusion_update_pose(ref CameraIdentifier uuid, ref Vector3 poseTranslation, ref System.Numerics.Quaternion poseRotation);
 
+        [DllImport(nameDll, EntryPoint = "sl_fusion_get_pose")]
+        private static extern FUSION_ERROR_CODE dllz_fusion_get_pose(ref CameraIdentifier uuid, ref Vector3 poseTranslation, ref System.Numerics.Quaternion poseRotation);
+
+
         [DllImport(nameDll, EntryPoint = "sl_fusion_retrieve_image")]
         private static extern FUSION_ERROR_CODE dllz_fusion_retrieve_image(System.IntPtr ptr, ref CameraIdentifier uuid, int width, int height);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_retrieve_measure")]
-        private static extern FUSION_ERROR_CODE dllz_fusion_retrieve_measure(System.IntPtr ptr, ref CameraIdentifier uuid, MEASURE measure, int width, int height);
+        private static extern FUSION_ERROR_CODE dllz_fusion_retrieve_measure(System.IntPtr ptr, ref CameraIdentifier uuid, MEASURE measure, int width, int height, FUSION_REFERENCE_FRAME referenceFrame);
 
         /************************************************************************
          * Body Tracking Fusion
@@ -64,7 +68,7 @@ namespace sl
         private static extern void dllz_fusion_disable_body_tracking();
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_retrieve_bodies")]
-        private static extern FUSION_ERROR_CODE dllz_fusion_retrieve_bodies(IntPtr bodies, ref BodyTrackingFusionRuntimeParameters rtparams, CameraIdentifier uuid);
+        private static extern FUSION_ERROR_CODE dllz_fusion_retrieve_bodies(IntPtr bodies, ref BodyTrackingFusionRuntimeParameters rtparams, CameraIdentifier uuid, FUSION_REFERENCE_FRAME referenceFrame);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_get_process_metrics")]
         private static extern FUSION_ERROR_CODE dllz_fusion_get_process_metrics(ref FusionMetrics metrics);
@@ -106,6 +110,12 @@ namespace sl
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_camera_to_geo")]
         private static extern GNSS_FUSION_STATUS dllz_fusion_camera_to_geo(ref Pose inPose, out GeoPose outGeoPose);
+
+        [DllImport(nameDll, EntryPoint = "sl_fusion_enu_to_geo")]
+        private static extern FUSION_ERROR_CODE dllz_fusion_enu_to_geo(ref ENU inPose, out LatLng outPose);
+
+        [DllImport(nameDll, EntryPoint = "sl_fusion_geo_to_enu")]
+        private static extern FUSION_ERROR_CODE dllz_fusion_geo_to_enu(ref LatLng inPose, out ENU outPose);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_get_current_timestamp")]
         private static extern ulong dllz_fusion_get_current_timestamp();
@@ -336,6 +346,18 @@ namespace sl
         }
 
         /// <summary>
+        /// Get the specified camera position inside fusion WORLD
+        /// </summary>
+        /// <param name="uuid"></param>
+        /// <param name="poseTranslation"></param>
+        /// <param name="poseRotation"></param>
+        /// <returns></returns>
+        public FUSION_ERROR_CODE GetPose(ref CameraIdentifier uuid, ref Vector3 poseTranslation, ref System.Numerics.Quaternion poseRotation)
+        {
+            return dllz_fusion_get_pose(ref uuid, ref poseTranslation, ref poseRotation);
+        }
+
+        /// <summary>
         /// Returns the current sl.VIEW.LEFT of the specified camera, the data is synchronized.
         /// </summary>
         /// <param name="mat">the CPU BGRA image of the requested camera.</param>
@@ -356,9 +378,9 @@ namespace sl
         /// Only MEASURE: DEPTH, XYZ, XYZRGBA, XYZBGRA, XYZARGB, XYZABGR, DEPTH_U16_MM are available.
         /// <param name="resolution">the requested resolution of the output image, can be lower or equal (default) to the original image resolution.</param>
         /// <returns>FUSION_ERROR_CODE "SUCCESS" if it goes as it should, otherwise it returns an FUSION_ERROR_CODE.</returns>
-        public FUSION_ERROR_CODE RetrieveMeasure(Mat mat, ref CameraIdentifier uuid, MEASURE measure = MEASURE.DEPTH, Resolution resolution = new sl.Resolution())
+        public FUSION_ERROR_CODE RetrieveMeasure(Mat mat, ref CameraIdentifier uuid, MEASURE measure = MEASURE.DEPTH, Resolution resolution = new sl.Resolution(), FUSION_REFERENCE_FRAME referenceFrame = FUSION_REFERENCE_FRAME.BASELINK)
         {
-            return dllz_fusion_retrieve_measure(mat.MatPtr, ref uuid, measure, (int)resolution.width, (int)resolution.height);
+            return dllz_fusion_retrieve_measure(mat.MatPtr, ref uuid, measure, (int)resolution.width, (int)resolution.height, referenceFrame);
         }
 
 
@@ -390,10 +412,10 @@ namespace sl
         /// <param name="rtparams"></param>
         /// <param name="uuid"></param>
         /// <returns></returns>
-        public FUSION_ERROR_CODE RetrieveBodies(ref Bodies bodies, ref BodyTrackingFusionRuntimeParameters rtparams, CameraIdentifier uuid)
+        public FUSION_ERROR_CODE RetrieveBodies(ref Bodies bodies, ref BodyTrackingFusionRuntimeParameters rtparams, CameraIdentifier uuid, FUSION_REFERENCE_FRAME referenceFrame = FUSION_REFERENCE_FRAME.BASELINK)
         {
             IntPtr p = Marshal.AllocHGlobal(System.Runtime.InteropServices.Marshal.SizeOf<sl.Bodies>());
-            sl.FUSION_ERROR_CODE err = (sl.FUSION_ERROR_CODE)dllz_fusion_retrieve_bodies(p, ref rtparams, uuid);
+            sl.FUSION_ERROR_CODE err = (sl.FUSION_ERROR_CODE)dllz_fusion_retrieve_bodies(p, ref rtparams, uuid, referenceFrame);
 
             if (p != IntPtr.Zero)
             {
@@ -407,6 +429,7 @@ namespace sl
                 return sl.FUSION_ERROR_CODE.FAILURE;
             }
         }
+
 
         /// <summary>
         /// gets the metrics of the Fusion process, for the fused data as well as individual camera provider data
@@ -527,6 +550,28 @@ namespace sl
         public GNSS_FUSION_STATUS CameraToGeo(ref Pose inPose, out GeoPose outGeoPose)
         {
             return dllz_fusion_camera_to_geo(ref inPose, out outGeoPose);
+        }
+
+        /// <summary>
+        /// Converts a position in ENU coordinate system into latitude / longitude.
+        /// </summary>
+        /// <param name="inPose"></param>
+        /// <param name="outPose"></param>
+        /// <returns></returns>
+        public FUSION_ERROR_CODE EnuToGeo(ref ENU inPose, out LatLng outPose)
+        {
+            return dllz_fusion_enu_to_geo(ref inPose, out outPose);
+        }
+
+        /// <summary>
+        /// Converts a position in latitude / longitude into ENU coordinate system.
+        /// </summary>
+        /// <param name="inPose"></param>
+        /// <param name="outPose"></param>
+        /// <returns></returns>
+        public FUSION_ERROR_CODE GeoToEnu(ref LatLng inPose, out ENU outPose)
+        {
+            return dllz_fusion_geo_to_enu(ref inPose, out outPose);
         }
 
         /// <summary>
