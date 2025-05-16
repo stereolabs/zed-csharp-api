@@ -19,7 +19,7 @@ namespace sl
 {
     public class ZEDCommon
     {
-        public const string NameDLL = "sl_zed_c";
+        public const string NameDLL = "sl_zed_c.dll";
     }
 
     /// <summary>
@@ -1683,10 +1683,6 @@ namespace sl
         /// </summary>
         public int cameraDeviceID;
         /// <summary>
-        /// SN for identifying which camera to use from the connected cameras.
-        /// </summary>
-        public int serialNumber;
-        /// <summary>
         /// Path to a recorded SVO file to play, including filename.
         /// </summary>
         public string pathSVO = "";
@@ -1952,7 +1948,6 @@ namespace sl
             this.resolution = RESOLUTION.AUTO;
             this.cameraFPS = 0;
             this.cameraDeviceID = 0;
-            this.serialNumber = 0;
             this.pathSVO = "";
             this.svoRealTimeMode = false;
             this.coordinateUnits = UNIT.METER;
@@ -5557,6 +5552,17 @@ namespace sl
         /// The SynchronizationParameter struct encapsulates the synchronization parameters that control the data fusion process.
         /// </summary>
         public SynchronizationParameter synchronizationParameters;
+        /// <summary>
+        /// Sets the maximum resolution for all Fusion outputs, such as images and measures.
+        /// 
+        /// The default value is (-1, -1), which allows the Fusion to automatically select the optimal resolution for the best quality/runtime ratio.
+        /// 
+        /// - For images, the output resolution can be up to the native resolution of the camera.
+        /// - For measures involving depth, the output resolution can be up to the maximum working resolution.
+        /// 
+        /// Setting this parameter to (-1, -1) will ensure the best balance between quality and performance for depth measures.
+        /// </summary>
+        public Resolution maximumWorkingResolution;
 
         /// <summary>
         /// Default constructor.
@@ -5565,8 +5571,13 @@ namespace sl
                                     COORDINATE_SYSTEM coordinateSystem = COORDINATE_SYSTEM.IMAGE, 
                                     bool outputPerformanceMetrics = false, uint timeoutPeriodsNumber = 5, 
                                     SynchronizationParameter synchronizationParameters = new SynchronizationParameter(), 
-                                    int sdkGpuId = -1, int sdkCudaCtx = 0)
+                                    int sdkGpuId = -1, int sdkCudaCtx = 0, Resolution? maximumWorkingResolution = null)
         {
+            if (!maximumWorkingResolution.HasValue)
+            {
+                maximumWorkingResolution = new Resolution(-1, -1);
+            }
+
             this.verbose = verbose;
             this.coordinateUnits = coordinateUnits;
             this.coordinateSystem = coordinateSystem;
@@ -5575,6 +5586,7 @@ namespace sl
             this.synchronizationParameters = synchronizationParameters;
             this.sdkGpuId = sdkGpuId;
             this.sdkCudaCtx = sdkCudaCtx;
+            this.maximumWorkingResolution = (Resolution)maximumWorkingResolution;
         }
     }
 
@@ -5969,7 +5981,23 @@ namespace sl
         FIX_3D = 3
     }
 
-    /// \ingroup Sensor_group
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Reference frame used for the positional tracking.
+    /// </summary>
+    public enum FUSION_REFERENCE_FRAME
+    {
+        /// <summary>
+        /// The world frame is the reference frame of the world according to the fused positional Tracking
+        /// </summary>
+        WORLD,
+        /// <summary>
+        /// The base link frame is the reference frame where camera calibration is given
+        /// </summary>
+        BASELINK
+    }
+
+    /// \ingroup Fusion_group
     /// <summary>
     /// Structure containing GNSS data to be used for positional tracking as prior.
     /// </summary>
@@ -6081,6 +6109,27 @@ namespace sl
         /// z coordinate of ECEF.
         /// </summary>
         public double z;
+    }
+
+    /// \ingroup Fusion_group
+    /// <summary>
+    /// Represents a world position in ENU format.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ENU
+    {
+        /// <summary>
+        /// East coordinate
+        /// </summary>
+        public double east;
+        /// <summary>
+        /// north coordinate.
+        /// </summary>
+        public double north;
+        /// <summary>
+        /// up coordinate.
+        /// </summary>
+        public double up;
     }
 
     /// \ingroup Fusion_group
@@ -6231,6 +6280,10 @@ namespace sl
         /// </summary>
         public bool SetGravityAsOrigin;
         /// <summary>
+        /// ID of the camera used for positional tracking. If not specified, will use the first camera called with the subscribe() method.
+        /// </summary>
+        public CameraIdentifier trackingCameraID;
+        /// <summary>
         /// Constructor
         /// </summary>
         public PositionalTrackingFusionParameters()
@@ -6242,6 +6295,7 @@ namespace sl
             baseFootprintToBaselinkTranslation = Vector3.Zero;
             baseFootprintToBaselinkRotation = Quaternion.Identity;
             SetGravityAsOrigin = false;
+            trackingCameraID = new CameraIdentifier();
         }
     }
 

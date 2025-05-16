@@ -595,6 +595,9 @@ namespace sl
         [DllImport(nameDll, EntryPoint = "sl_get_object_detection_parameters")]
         private static extern IntPtr dllz_get_object_detection_parameters(int cameraID);
 
+        [DllImport(nameDll, EntryPoint = "sl_set_object_detection_runtime_parameters")]
+        private static extern int dllz_set_object_detection_runtime_parameters(int cameraID, ObjectDetectionRuntimeParameters od_params, uint instanceID);
+
         [DllImport(nameDll, EntryPoint = "sl_disable_object_detection")]
         private static extern void dllz_disable_object_detection(int cameraID, uint instanceID, bool forceDisableAllInstances);
 
@@ -607,11 +610,17 @@ namespace sl
         [DllImport(nameDll, EntryPoint = "sl_retrieve_custom_objects")]
         private static extern int dllz_retrieve_custom_objects(int cameraID, ref CustomObjectDetectionRuntimeParameters od_params, IntPtr objs, uint instanceID);
 
+        [DllImport(nameDll, EntryPoint = "sl_set_custom_object_detection_runtime_parameters")]
+        private static extern int dllz_set_custom_object_detection_runtime_parameters(int cameraID, CustomObjectDetectionRuntimeParameters custom_od_params, uint instanceID);
+
         [DllImport(nameDll, EntryPoint = "sl_retrieve_objects")]
         private static extern int dllz_retrieve_objects_data(int cameraID, ref ObjectDetectionRuntimeParameters od_params, IntPtr objs, uint instanceID);
 
         [DllImport(nameDll, EntryPoint = "sl_retrieve_bodies")]
         private static extern int dllz_retrieve_bodies_data(int cameraID, ref BodyTrackingRuntimeParameters bt_params, IntPtr objs, uint instanceID);
+
+        [DllImport(nameDll, EntryPoint = "sl_set_body_tracking_runtime_parameters")]
+        private static extern int dllz_set_body_tracking_runtime_parameters(int cameraID, BodyTrackingRuntimeParameters bt_params, uint instanceID);
 
         [DllImport(nameDll, EntryPoint = "sl_update_objects_batch")]
         private static extern int dllz_update_objects_batch(int cameraID, out int nbBatches);
@@ -1026,7 +1035,7 @@ namespace sl
 
             sl_initParameters initP = new sl_initParameters(initParameters); //DLL-friendly version of InitParameters.
             initP.coordinateSystem = initParameters.coordinateSystem; //Left-hand
-            int v = dllz_open(CameraID, ref initP, (uint)initParameters.serialNumber, 
+            int v = dllz_open(CameraID, ref initP, GetCameraInformation().serialNumber , 
                 new System.Text.StringBuilder(initParameters.pathSVO, initParameters.pathSVO.Length),
                 new System.Text.StringBuilder(initParameters.ipStream, initParameters.ipStream.Length),
                 initParameters.portStream,
@@ -3203,6 +3212,20 @@ namespace sl
         }
 
         /// <summary>
+        /// Set the object detection module instance runtime parameters
+        /// By default the object detection module will use the parameters set in the ObjectDetectionRuntimeParameters constructor.
+        /// This can be changed at any time, however since the processing is done in parallel, the parameters will be used for the next inference.
+        /// This function can be called only on parameters change, the previous values will be applied during inference.
+        /// </summary>
+        /// <param name="objectDetectionRuntimeParameters"> </param>
+        /// <param name="instanceID"></param>
+        /// <returns></returns>
+        public sl.ERROR_CODE SetObjectDetectionRuntimeParameters(ObjectDetectionRuntimeParameters objectDetectionRuntimeParameters, uint instanceID = 0)
+        {
+            return (sl.ERROR_CODE)dllz_set_object_detection_runtime_parameters(CameraID, objectDetectionRuntimeParameters, instanceID);
+        }
+
+        /// <summary>
         /// Retrieve objects detected by the custom object detection module.
         /// </summary>
         /// <param name="objs">Custom object detection runtime settings, can be changed at each detection. In async mode, the parameters update is applied on the next iteration.</param>
@@ -3225,6 +3248,20 @@ namespace sl
                 Marshal.FreeHGlobal(p);
                 return sl.ERROR_CODE.FAILURE;
             }
+        }
+
+        /// <summary>
+        /// Set the Object detection module instance runtime parameters when using the Custom model (OBJECT_DETECTION_MODEL::CUSTOM_BOX_OBJECTS and CUSTOM_BOX_OBJECTS::CUSTOM_YOLOLIKE_BOX_OBJECTS)
+        /// By default the object detection module will use the parameters set in the CustomObjectDetectionRuntimeParameters constructor.
+        /// This can be changed at any time, however since the processing is done in parallel, the parameters will be used for the next inference.
+        /// This function can be called only on parameters change, the previous values will be applied during inference.
+        /// </summary>
+        /// <param name="customObjectDetectionRuntimeParameters"> </param>
+        /// <param name="instanceID"></param>
+        /// <returns></returns>
+        public sl.ERROR_CODE SetCustomObjectDetectionRuntimeParameters(CustomObjectDetectionRuntimeParameters customObjectDetectionRuntimeParameters, uint instanceID = 0)
+        {
+            return (sl.ERROR_CODE)dllz_set_custom_object_detection_runtime_parameters(CameraID, customObjectDetectionRuntimeParameters, instanceID);
         }
 
         /// <summary>
@@ -3252,6 +3289,19 @@ namespace sl
             }
         }
 
+        /// <summary>
+        /// Set the Body tracking module instance runtime parameters
+        /// By default the Body tracking module will use the parameters set in the BodyTrackingRuntimeParameters constructor.
+        /// This can be changed at any time, however since the processing is done in parallel, the parameters will be used for the next inference.
+        /// This function can be called only on parameters change, the previous values will be applied during inference.
+        /// </summary>
+        /// <param name="bodyTrackingRuntimeParameters"> </param>
+        /// <param name="instanceID"></param>
+        /// <returns></returns>
+        public sl.ERROR_CODE SetBodyTrackingRuntimeParameters(BodyTrackingRuntimeParameters bodyTrackingRuntimeParameters, uint instanceID = 0)
+        {
+            return (sl.ERROR_CODE)dllz_set_body_tracking_runtime_parameters(CameraID, bodyTrackingRuntimeParameters, instanceID);
+        }
 
         /// <summary>
         /// Update the batch trajectories and retrieve the number of batches.
