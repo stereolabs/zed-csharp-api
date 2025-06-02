@@ -1,9 +1,9 @@
 //======= Copyright (c) Stereolabs Corporation, All rights reserved. ===============
 
-using System.Runtime.InteropServices;
-using System.Numerics;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
+using System.Runtime.InteropServices;
 
 /// \defgroup Video_group Video Module
 /// \defgroup Depth_group Depth Sensing Module
@@ -19,7 +19,7 @@ namespace sl
 {
     public class ZEDCommon
     {
-        public const string NameDLL = "sl_zed_c.dll";
+        public const string NameDLL = "sl_zed_c";
     }
 
     /// <summary>
@@ -1683,6 +1683,10 @@ namespace sl
         /// </summary>
         public int cameraDeviceID;
         /// <summary>
+        /// SN for identifying which camera to use from the connected cameras.
+        /// </summary>
+        public uint serialNumber;
+        /// <summary>
         /// Path to a recorded SVO file to play, including filename.
         /// </summary>
         public string pathSVO = "";
@@ -1948,6 +1952,7 @@ namespace sl
             this.resolution = RESOLUTION.AUTO;
             this.cameraFPS = 0;
             this.cameraDeviceID = 0;
+            this.serialNumber = 0;
             this.pathSVO = "";
             this.svoRealTimeMode = false;
             this.coordinateUnits = UNIT.METER;
@@ -5481,7 +5486,7 @@ namespace sl
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public SynchronizationParameter(double windowSize = 0, double dataSourceTimeout = 50, bool keepLastData = false, double maximumLateness = 50)
+        public SynchronizationParameter(double windowSize, double dataSourceTimeout, bool keepLastData , double maximumLateness)
         {
             this.windowSize = windowSize;
             this.dataSourceTimeout = dataSourceTimeout;
@@ -5546,7 +5551,7 @@ namespace sl
         /// \note When creating you own CUDA context, you have to define the device you will use. Do not forget to also specify it on \ref sdk_gpu_id.
         /// \note <b>On Jetson</b>, you have to set the flag CU_CTX_SCHED_YIELD, during CUDA context creation.
         /// \note You can also let the SDK create its own context, and use sl::Camera::getCUDAContext() to use it.</summary>
-        public int sdkCudaCtx;
+        public IntPtr sdkCudaCtx;
         /// <summary>
         /// Specifies the parameters used for data synchronization during fusion.
         /// The SynchronizationParameter struct encapsulates the synchronization parameters that control the data fusion process.
@@ -5571,11 +5576,16 @@ namespace sl
                                     COORDINATE_SYSTEM coordinateSystem = COORDINATE_SYSTEM.IMAGE, 
                                     bool outputPerformanceMetrics = false, uint timeoutPeriodsNumber = 5, 
                                     SynchronizationParameter synchronizationParameters = new SynchronizationParameter(), 
-                                    int sdkGpuId = -1, int sdkCudaCtx = 0, Resolution? maximumWorkingResolution = null)
+                                    int sdkGpuId = -1, IntPtr? sdkCudaCtx = null, Resolution? maximumWorkingResolution = null)
         {
             if (!maximumWorkingResolution.HasValue)
             {
                 maximumWorkingResolution = new Resolution(-1, -1);
+            }
+
+            if (!sdkCudaCtx.HasValue)
+            {
+                sdkCudaCtx = IntPtr.Zero;
             }
 
             this.verbose = verbose;
@@ -5585,7 +5595,7 @@ namespace sl
             this.timeoutPeriodsNumber = timeoutPeriodsNumber;
             this.synchronizationParameters = synchronizationParameters;
             this.sdkGpuId = sdkGpuId;
-            this.sdkCudaCtx = sdkCudaCtx;
+            this.sdkCudaCtx = (IntPtr)sdkCudaCtx;
             this.maximumWorkingResolution = (Resolution)maximumWorkingResolution;
         }
     }
@@ -5679,6 +5689,13 @@ namespace sl
         /// The input type for the current camera.
         /// </summary>
         public InputType inputType;
+        /// <summary>
+        /// Indicates the behavior of the fusion with respect to given calibration pose.
+        /// The calibration pose directly specifies the camera's absolute pose relative to a global reference frame.
+        /// The calibration pose (Pose_rel) is defined relative to the camera's IMU rotational pose. To determine the true absolute position, the Fusion process will compute Pose_abs = Pose_rel * Rot_IMU_camera.
+        /// </summary>
+        [MarshalAs(UnmanagedType.U1)]
+        public bool overrideGravity;
     };
 
     /// \ingroup Fusion_group

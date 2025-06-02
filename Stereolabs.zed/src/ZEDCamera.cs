@@ -658,10 +658,10 @@ namespace sl
          * Retrieves used by mat
          */
         [DllImport(nameDll, EntryPoint = "sl_retrieve_measure")]
-        private static extern int dllz_retrieve_measure(int cameraID, System.IntPtr ptr, int type, int mem, int width, int height, int cudaStream = 0);
+        private static extern int dllz_retrieve_measure(int cameraID, System.IntPtr ptr, int type, int mem, int width, int height, IntPtr cudaStream);
 
         [DllImport(nameDll, EntryPoint = "sl_retrieve_image")]
-        private static extern int dllz_retrieve_image(int cameraID, System.IntPtr ptr, int type, int mem, int width, int height, int cudaStream = 0);
+        private static extern int dllz_retrieve_image(int cameraID, System.IntPtr ptr, int type, int mem, int width, int height, IntPtr cudaStream);
 
         #endregion
 
@@ -1035,7 +1035,7 @@ namespace sl
 
             sl_initParameters initP = new sl_initParameters(initParameters); //DLL-friendly version of InitParameters.
             initP.coordinateSystem = initParameters.coordinateSystem; //Left-hand
-            int v = dllz_open(CameraID, ref initP, GetCameraInformation().serialNumber , 
+            int v = dllz_open(CameraID, ref initP, initParameters.serialNumber, 
                 new System.Text.StringBuilder(initParameters.pathSVO, initParameters.pathSVO.Length),
                 new System.Text.StringBuilder(initParameters.ipStream, initParameters.ipStream.Length),
                 initParameters.portStream,
@@ -1140,7 +1140,7 @@ namespace sl
         /// <returns>sl.ERROR_CODE indicating if the retrieval was successful, and why it wasn't otherwise.</returns>
         public sl.ERROR_CODE RetrieveImage(sl.Mat mat, sl.VIEW view, sl.MEM mem = sl.MEM.CPU, sl.Resolution resolution = new sl.Resolution())
         {
-            return (sl.ERROR_CODE)(dllz_retrieve_image(CameraID, mat.MatPtr, (int)view, (int)mem, (int)resolution.width, (int)resolution.height));
+            return (sl.ERROR_CODE)(dllz_retrieve_image(CameraID, mat.MatPtr, (int)view, (int)mem, (int)resolution.width, (int)resolution.height, IntPtr.Zero));
         }
 
         /// <summary>
@@ -1667,7 +1667,7 @@ namespace sl
         /// <returns>sl.ERROR_CODE indicating if the retrieval was successful, and why it wasn't otherwise.</returns>
         public sl.ERROR_CODE RetrieveMeasure(sl.Mat mat, sl.MEASURE measure, sl.MEM mem = sl.MEM.CPU, sl.Resolution resolution = new sl.Resolution())
         {
-            return (sl.ERROR_CODE)(dllz_retrieve_measure(CameraID, mat.MatPtr, (int)measure, (int)mem, (int)resolution.width, (int)resolution.height));
+            return (sl.ERROR_CODE)(dllz_retrieve_measure(CameraID, mat.MatPtr, (int)measure, (int)mem, (int)resolution.width, (int)resolution.height, IntPtr.Zero));
         }
 
         /// <summary>

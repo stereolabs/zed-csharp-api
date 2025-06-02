@@ -434,20 +434,20 @@ namespace sl
         private static extern void dllz_mat_clone(System.IntPtr ptr, System.IntPtr ptrSource);
 
         [DllImport(nameDll, EntryPoint = "sl_mat_convert_color")]
-        private static extern int dllz_mat_convert_color(System.IntPtr ptr, int mem, bool swapRBChannels, int cudaStream = 0);
+        private static extern int dllz_mat_convert_color(System.IntPtr ptr, int mem, bool swapRBChannels, IntPtr cudaStream);
 
         [DllImport(nameDll, EntryPoint = "sl_convert_color")]
-        private static extern int dllz_convert_color(System.IntPtr ptr1, System.IntPtr ptr2, bool swapRBChannels, bool removeAlphaChannel, int mem, int cudaStream = 0);
+        private static extern int dllz_convert_color(System.IntPtr ptr1, System.IntPtr ptr2, bool swapRBChannels, bool removeAlphaChannel, int mem, IntPtr cudaStream);
 
         [DllImport(nameDll, EntryPoint = "sl_blob_from_image")]
         private static extern int dllz_blob_from_image(System.IntPtr image_in, System.IntPtr tensor_out, sl.Resolution resolution,
                                     float scaleFactor, float3 mean, float3 stdDev, bool keepAspectRatio, bool swapRBChannels,
-                                    int cudaStream = 0);
+                                    IntPtr cudaStream);
 
         [DllImport(nameDll, EntryPoint = "sl_blob_from_images")]
         private static extern int dllz_blob_from_images(System.IntPtr[] images_in, int nbImages, System.IntPtr tensor_out, sl.Resolution resolution,
                             float scaleFactor, float3 mean, float3 stdDev, bool keepAspectRatio, bool swapRBChannels,
-                            int cudaStream = 0);
+                            IntPtr cudaStream);
 
         #endregion
 
@@ -536,7 +536,7 @@ namespace sl
         /// Frees the memory of the sl.Mat.
         /// </summary>
         /// <param name="mem">Whether the sl.Mat is on CPU or GPU memory.</param>
-        public void Free(MEM mem = (MEM.GPU | MEM.CPU))
+        public void Free(MEM mem = MEM.BOTH)
         {
             dllz_mat_free(_matInternalPtr, (int)mem);
             _matInternalPtr = IntPtr.Zero;
@@ -1045,7 +1045,7 @@ namespace sl
         /// <returns>sl.ERROR_CODE indicating if the get was successful, or why it wasn't.</returns>
         public sl.ERROR_CODE ConvertColor(sl.MEM mem = sl.MEM.CPU, bool swapRBChannels = false)
         {
-            return (sl.ERROR_CODE)dllz_mat_convert_color(_matInternalPtr, (int)mem, swapRBChannels);
+            return (sl.ERROR_CODE)dllz_mat_convert_color(_matInternalPtr, (int)mem, swapRBChannels, IntPtr.Zero);
         }
 
         /// <summary>
@@ -1060,7 +1060,7 @@ namespace sl
         /// <returns>sl.ERROR_CODE indicating if the get was successful, or why it wasn't.</returns>
         public static sl.ERROR_CODE ConvertColor(sl.Mat src, sl.Mat dst, bool swapRBChannels = false, bool removeAlphaChannel = false, sl.MEM mem = sl.MEM.CPU)
         {
-            return (sl.ERROR_CODE)dllz_convert_color(src._matInternalPtr, dst._matInternalPtr, swapRBChannels, removeAlphaChannel, (int)mem);
+            return (sl.ERROR_CODE)dllz_convert_color(src._matInternalPtr, dst._matInternalPtr, swapRBChannels, removeAlphaChannel, (int)mem, IntPtr.Zero);
         }
 
         /// <summary>
@@ -1079,7 +1079,7 @@ namespace sl
                                                float scaleFactor, float3 mean, float3 stdDev, bool keepAspectRatio, 
                                                bool swapRBChannels)
         {
-            return (sl.ERROR_CODE)dllz_blob_from_image(image_in._matInternalPtr, tensor_out._matInternalPtr, resolution, scaleFactor, mean, stdDev, keepAspectRatio, swapRBChannels, 0);
+            return (sl.ERROR_CODE)dllz_blob_from_image(image_in._matInternalPtr, tensor_out._matInternalPtr, resolution, scaleFactor, mean, stdDev, keepAspectRatio, swapRBChannels, IntPtr.Zero);
         }
 
         /// <summary>
@@ -1104,7 +1104,7 @@ namespace sl
                 ptrArray[i] = images_in[i]._matInternalPtr;
             }
 
-            return (sl.ERROR_CODE) dllz_blob_from_images(ptrArray, images_in.Length, tensor_out._matInternalPtr, resolution, scaleFactor, mean, stdDev, keepAspectRatio, swapRBChannels, 0);
+            return (sl.ERROR_CODE) dllz_blob_from_images(ptrArray, images_in.Length, tensor_out._matInternalPtr, resolution, scaleFactor, mean, stdDev, keepAspectRatio, swapRBChannels, IntPtr.Zero);
         }
     }
 
