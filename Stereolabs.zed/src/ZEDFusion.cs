@@ -97,25 +97,25 @@ namespace sl
          ************************************************************************/
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_ingest_gnss_data")]
-        private static extern FUSION_ERROR_CODE dllz_fusion_ingest_gnss_data(ref GNSSData data, bool Radian);
+        private static extern FUSION_ERROR_CODE dllz_fusion_ingest_gnss_data(ref GNSSData data, bool radian);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_get_current_gnss_data")]
-        private static extern POSITIONAL_TRACKING_STATE dllz_fusion_get_current_gnss_data(ref GNSSData data);
+        private static extern POSITIONAL_TRACKING_STATE dllz_fusion_get_current_gnss_data(ref GNSSData data, bool radian);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_get_geo_pose")]
-        private static extern GNSS_FUSION_STATUS dllz_fusion_get_geo_pose(ref GeoPose pose);
+        private static extern GNSS_FUSION_STATUS dllz_fusion_get_geo_pose(ref GeoPose pose, bool radian);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_geo_to_camera")]
         private static extern GNSS_FUSION_STATUS dllz_fusion_geo_to_camera(ref LatLng inLatLng, out Pose outPose);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_camera_to_geo")]
-        private static extern GNSS_FUSION_STATUS dllz_fusion_camera_to_geo(ref Pose inPose, out GeoPose outGeoPose);
+        private static extern GNSS_FUSION_STATUS dllz_fusion_camera_to_geo(ref Pose inPose, out GeoPose outGeoPose, bool radian);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_enu_to_geo")]
-        private static extern FUSION_ERROR_CODE dllz_fusion_enu_to_geo(ref ENU inPose, out LatLng outPose);
+        private static extern FUSION_ERROR_CODE dllz_fusion_enu_to_geo(ref ENU inPose, out LatLng outPose, bool radian);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_geo_to_enu")]
-        private static extern FUSION_ERROR_CODE dllz_fusion_geo_to_enu(ref LatLng inPose, out ENU outPose);
+        private static extern FUSION_ERROR_CODE dllz_fusion_geo_to_enu(ref LatLng inPose, out ENU outPose, bool radian);
 
         [DllImport(nameDll, EntryPoint = "sl_fusion_get_current_timestamp")]
         private static extern ulong dllz_fusion_get_current_timestamp();
@@ -505,9 +505,9 @@ namespace sl
         /// ingests GNSS data from an external sensor into the fusion module
         /// </summary>
         /// <param name="data">the current GNSS data to combine with the current positional tracking data</param>
-        public FUSION_ERROR_CODE IngestGNSSData(ref GNSSData data)
+        public FUSION_ERROR_CODE IngestGNSSData(ref GNSSData data, bool radian)
         {
-            return dllz_fusion_ingest_gnss_data(ref data, true);
+            return dllz_fusion_ingest_gnss_data(ref data, radian);
         }
 
         /// <summary>
@@ -515,9 +515,9 @@ namespace sl
         /// </summary>
         /// <param name="data">the current GNSS data </param>
         /// <returns></returns>
-        public POSITIONAL_TRACKING_STATE GetCurrentGNSSData(ref GNSSData data)
+        public POSITIONAL_TRACKING_STATE GetCurrentGNSSData(ref GNSSData data, bool radian)
         {
-            return dllz_fusion_get_current_gnss_data(ref data);
+            return dllz_fusion_get_current_gnss_data(ref data, radian);
         }
 
         /// <summary>
@@ -527,7 +527,7 @@ namespace sl
         /// <returns></returns>
         public GNSS_FUSION_STATUS GetGeoPose(ref GeoPose pose)
         {
-            return dllz_fusion_get_geo_pose(ref pose);
+            return dllz_fusion_get_geo_pose(ref pose, false);
         }
 
         /// <summary>
@@ -547,9 +547,9 @@ namespace sl
         /// <param name="inPose"></param>
         /// <param name="outGeoPose"></param>
         /// <returns></returns>
-        public GNSS_FUSION_STATUS CameraToGeo(ref Pose inPose, out GeoPose outGeoPose)
+        public GNSS_FUSION_STATUS CameraToGeo(ref Pose inPose, out GeoPose outGeoPose, bool radian)
         {
-            return dllz_fusion_camera_to_geo(ref inPose, out outGeoPose);
+            return dllz_fusion_camera_to_geo(ref inPose, out outGeoPose, radian);
         }
 
         /// <summary>
@@ -558,9 +558,9 @@ namespace sl
         /// <param name="inPose"></param>
         /// <param name="outPose"></param>
         /// <returns></returns>
-        public FUSION_ERROR_CODE EnuToGeo(ref ENU inPose, out LatLng outPose)
+        public FUSION_ERROR_CODE EnuToGeo(ref ENU inPose, out LatLng outPose, bool radian)
         {
-            return dllz_fusion_enu_to_geo(ref inPose, out outPose);
+            return dllz_fusion_enu_to_geo(ref inPose, out outPose, radian);
         }
 
         /// <summary>
@@ -569,9 +569,9 @@ namespace sl
         /// <param name="inPose"></param>
         /// <param name="outPose"></param>
         /// <returns></returns>
-        public FUSION_ERROR_CODE GeoToEnu(ref LatLng inPose, out ENU outPose)
+        public FUSION_ERROR_CODE GeoToEnu(ref LatLng inPose, out ENU outPose, bool radian)
         {
-            return dllz_fusion_geo_to_enu(ref inPose, out outPose);
+            return dllz_fusion_geo_to_enu(ref inPose, out outPose, radian);
         }
 
         /// <summary>
