@@ -525,9 +525,9 @@ namespace sl
         /// </summary>
         /// <param name="pose">the current GeoPose</param>
         /// <returns></returns>
-        public GNSS_FUSION_STATUS GetGeoPose(ref GeoPose pose)
+        public GNSS_FUSION_STATUS GetGeoPose(ref GeoPose pose, bool radian)
         {
-            return dllz_fusion_get_geo_pose(ref pose, false);
+            return dllz_fusion_get_geo_pose(ref pose, radian);
         }
 
         /// <summary>

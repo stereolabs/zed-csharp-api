@@ -69,29 +69,6 @@ namespace sl
         private static bool pluginIsReady = true;
 
         /// <summary>
-        /// Current ZED resolution setting. Set at initialization.
-        /// </summary>
-        private RESOLUTION currentResolution;
-
-        /// <summary>
-        /// Desired FPS from the ZED camera.
-        ///
-        /// This is the maximum FPS for the camera's current resolution unless a lower setting was specified in Open().
-        /// Maximum values are bound by the camera's output, not system performance.
-        /// </summary>
-        private uint fpsMax = 60; //Defaults to HD720 resolution's output.
-        /// <summary>
-        /// Desired FPS from the ZED camera.
-        /// 
-        /// This is the maximum FPS for the camera's current resolution unless a lower setting was specified in Open().
-        /// \n Maximum values are bound by the camera's output, not system performance.
-        /// </summary>
-        public float GetRequestedCameraFPS()
-        {
-            return fpsMax;
-        }
-
-        /// <summary>
         /// Baseline of the camera (distance between the cameras).
         ///
         /// Extracted from calibration files.
@@ -201,6 +178,8 @@ namespace sl
         /*
           * Utils function.
         */
+        [DllImport(nameDll, EntryPoint = "sl_free")]
+        public static extern void dllz_free(IntPtr ptr);
 
         [DllImport(nameDll, EntryPoint = "sl_unload_all_instances")]
         private static extern void dllz_unload_all_instances();
@@ -457,6 +436,12 @@ namespace sl
 
         [DllImport(nameDll, EntryPoint = "sl_get_sensors_data")]
         private static extern int dllz_get_internal_sensors_data(int cameraID, ref SensorsData imuData, int reference_time);
+
+        [DllImport(nameDll, EntryPoint = "sl_get_sensors_data_batch_count")]
+        private static extern int dllz_get_sensors_data_batch_count(int cameraID, out int count);
+
+        [DllImport(nameDll, EntryPoint = "sl_get_sensors_data_batch")]
+        private static extern int dllz_get_sensors_data_batch(int cameraID, ref SensorsData[] imuData);
 
         [DllImport(nameDll, EntryPoint = "sl_get_area_export_state")]
         private static extern int dllz_get_area_export_state(int cameraID);
@@ -1025,13 +1010,6 @@ namespace sl
         /// </returns>
         public ERROR_CODE Open(ref InitParameters initParameters)
         {
-            //Update values with what we're about to pass to the camera.
-            currentResolution = initParameters.resolution;
-            fpsMax = GetFpsForResolution(currentResolution);
-            if (initParameters.cameraFPS == 0)
-            {
-                initParameters.cameraFPS = (int)fpsMax;
-            }
 
             sl_initParameters initP = new sl_initParameters(initParameters); //DLL-friendly version of InitParameters.
             initP.coordinateSystem = initParameters.coordinateSystem; //Left-hand
@@ -1058,6 +1036,7 @@ namespace sl
                 GetCalibrationParameters(false);
                 cameraModel = GetCameraModel();
                 cameraReady = true;
+
                 return (ERROR_CODE)v;
             }
             else
@@ -1361,19 +1340,8 @@ namespace sl
         public void ResetCameraSettings()
         {
             AssertCameraIsReady();
-            //cameraSettingsManager.ResetCameraSettings(this);
-
-            SetCameraSettings(sl.VIDEO_SETTINGS.BRIGHTNESS, sl.Camera.brightnessDefault);
-            SetCameraSettings(sl.VIDEO_SETTINGS.CONTRAST, sl.Camera.contrastDefault);
-            SetCameraSettings(sl.VIDEO_SETTINGS.HUE, sl.Camera.hueDefault);
-            SetCameraSettings(sl.VIDEO_SETTINGS.SATURATION, sl.Camera.saturationDefault);
-            SetCameraSettings(sl.VIDEO_SETTINGS.SHARPNESS, sl.Camera.sharpnessDefault);
-            SetCameraSettings(sl.VIDEO_SETTINGS.GAMMA, sl.Camera.gammaDefault);
-            SetCameraSettings(sl.VIDEO_SETTINGS.WHITEBALANCE_AUTO, 1);
-            SetCameraSettings(sl.VIDEO_SETTINGS.AEC_AGC, 1);
-            SetCameraSettings(sl.VIDEO_SETTINGS.LED_STATUS, 1);
-
-            SetCameraSettings(sl.VIDEO_SETTINGS.AEC_AGC_ROI, SIDE.BOTH, new sl.Rect(), true);
+            foreach (sl.VIDEO_SETTINGS setting_ in Enum.GetValues(typeof(sl.VIDEO_SETTINGS)))
+                SetCameraSettings(setting_, -1);
         }
 
         /// <summary>
@@ -1921,37 +1889,6 @@ namespace sl
         }
 
         /// <summary>
-        /// Gets the current position of the camera and state of the tracking, with a defined tracking frame.
-        ///
-        /// A tracking frame defines what part of the camera is its center for tracking purposes. See sl.TRACKING_FRAME.
-        /// </summary>
-        /// <param name="rotation">Quaternion filled with the current rotation of the camera depending on its reference frame.</param>
-        /// <param name="position">Vector filled with the current position of the camera depending on its reference frame.</param>
-        /// <param name="trackingFrame">Center of the camera for tracking purposes (left eye, center, right eye).</param>
-        /// <param name="referenceFrame">Reference frame for setting the rotation/position. REFERENCE_FRAME.CAMERA gives movement relative to the last pose.
-        /// REFERENCE_FRAME.WORLD gives cumulative movements since tracking started.</param>
-        /// <returns>The current \ref POSITIONAL_TRACKING_STATE "state" of the tracking process.</returns>
-        public POSITIONAL_TRACKING_STATE GetPosition(ref Quaternion rotation, ref Vector3 translation, TRACKING_FRAME trackingFrame, REFERENCE_FRAME referenceFrame = REFERENCE_FRAME.WORLD)
-        {
-            Quaternion rotationOffset = Quaternion.Identity;
-            Vector3 positionOffset = Vector3.Zero;
-            switch (trackingFrame) //Add offsets to account for different tracking frames.
-            {
-                case sl.TRACKING_FRAME.LEFT_EYE:
-                    positionOffset = new Vector3(0, 0, 0);
-                    break;
-                case sl.TRACKING_FRAME.RIGHT_EYE:
-                    positionOffset = new Vector3(Baseline, 0, 0);
-                    break;
-                case sl.TRACKING_FRAME.CENTER_EYE:
-                    positionOffset = new Vector3(Baseline / 2.0f, 0, 0);
-                    break;
-            }
-
-            return (POSITIONAL_TRACKING_STATE)dllz_get_position_at_target_frame(CameraID, ref rotation, ref translation, ref rotationOffset, ref positionOffset, (int)referenceFrame);
-        }
-
-        /// <summary>
         /// Gets the current position of the camera and state of the tracking, filling a Pose struct useful for AR pass-through.
         /// </summary>
         /// <param name="pose">Current pose.</param>
@@ -1997,6 +1934,26 @@ namespace sl
         public ERROR_CODE GetSensorsData(ref SensorsData data, TIME_REFERENCE referenceTime = TIME_REFERENCE.IMAGE)
         {
             return (sl.ERROR_CODE)dllz_get_internal_sensors_data(CameraID, ref data, (int)referenceTime);
+        }
+
+        /// <summary>
+        /// Retrieves all SensorsData associated to most recent grabbed frame in the specified \ref COORDINATE_SYSTEM of InitParameters.
+        /// </summary>
+        /// <param name="data">SensorsData array that store the data batch.</param>
+        /// <returns></returns>
+        public ERROR_CODE GetSensorsDataBatch(out List<SensorsData> data)
+        {
+            data = new List<SensorsData>();
+            ERROR_CODE err = (ERROR_CODE)dllz_get_sensors_data_batch_count(CameraID, out int count);
+
+            if (err == ERROR_CODE.SUCCESS)
+            {
+                SensorsData[] sensorsDataArray = new SensorsData[count];
+                err = (ERROR_CODE)dllz_get_sensors_data_batch(CameraID, ref sensorsDataArray); // Get the size of the data
+
+                data.AddRange(sensorsDataArray);
+            }
+            return err;
         }
 
         /// <summary>
@@ -2859,7 +2816,7 @@ namespace sl
         /// <param name="tsBegin"> The beginning of the range.</param>
         /// <param name="tsEnd">The end of the range.</param>
         /// <returns>sl.ERROR_CODE.SUCCESS in case of success, sl.ERROR_CODE.FAILURE otherwise.</returns>
-        public ERROR_CODE RetrieveSVOData(string key, ref List<SVOData> data, ulong tsBegin, ulong tsEnd)
+        public ERROR_CODE RetrieveSVOData(string key, ref List<SVOData> data, ulong tsBegin = 0, ulong tsEnd = 0)
         {
             ERROR_CODE err = ERROR_CODE.FAILURE;
 

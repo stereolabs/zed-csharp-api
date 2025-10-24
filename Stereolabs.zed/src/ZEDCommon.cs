@@ -158,9 +158,13 @@ namespace sl
     public enum ERROR_CODE
     {
         /// <summary>
+        /// The camera has a potential calibration issue.
+        /// </summary>
+        POTENTIAL_CALIBRATION_ISSUE = -5,
+        /// <summary>
         /// The operation could not proceed with the target configuration but did success with a fallback.
         /// </summary>
-        CONFIGURATION_FALLBACK= -4,
+        CONFIGURATION_FALLBACK = -4,
         /// <summary>
         /// The input data does not contains the high frequency sensors data, this is usually because it requires newer SVO/Streaming. In order to work this modules needs inertial data present in it input.
         /// </summary>
@@ -311,6 +315,11 @@ namespace sl
         /// The module needs a newer version of CUDA.
         /// </summary>
         MODULE_NOT_COMPATIBLE_WITH_CUDA_VERSION,
+        /// <summary>
+        /// The drivers initialization has failed. When using gmsl cameras, try restarting with sudo systemctl
+        /// restart zed_x_daemon.service
+        /// </summary>
+        DRIVER_FAILURE,
         /// @cond SHOWHIDDEN 
         LAST
         /// @endcond
@@ -529,6 +538,17 @@ namespace sl
         /// </summary>
         /// Can be used to improve accuracy in some types of scene at the cost of longer runtime.
         public sl.POSITIONAL_TRACKING_MODE mode = sl.POSITIONAL_TRACKING_MODE.GEN_1;
+
+
+        /// <summary>
+        /// Whether to enable the area mode in localize only mode.
+        /// </summary>
+        public bool enableLocalizationOnly;
+
+        /// <summary>
+        /// Whether to enable the 2D ground mode.
+        /// </summary>
+        public bool enable2DGroundMode;
     }
     /// \ingroup PositionalTracking_group
     /// <summary>
@@ -741,13 +761,17 @@ namespace sl
     public enum POSITIONAL_TRACKING_MODE
     {
         /// <summary>
-        /// Default mode. Best compromise in performance and accuracy.
+        /// Default mode. Fast and stable mode, requires depth computation. Less accurate than GEN_3.
         /// </summary>
         GEN_1,
         /// <summary>
-        /// Next generation of positional tracking, allow better accuracy.
+        /// /Deprecated mode. Use GEN_3 instead.\n
         /// </summary>
-        GEN_2
+        GEN_2,
+        /// <summary>
+        /// Fast and accurate, in both exploratory mode and mapped environments.\Note Can be used even if depth_mode is set to \ref DEPTH_MODE::NONE.
+        /// </summary>
+        GEN_3
     }
 
     /// \ingroup PositionalTracking_group
@@ -764,27 +788,6 @@ namespace sl
         /// The transform of sl.Pose will contain the motion with reference to the previous camera frame (previously called sl.POSE).
         /// </summary>
         CAMERA
-    };
-
-
-    /// \ingroup PositionalTracking_group
-    /// <summary>
-    /// Part of the ZED (left/right sensor, center) that's considered its center for tracking purposes.
-    /// </summary>
-    public enum TRACKING_FRAME
-    {
-        /// <summary>
-        /// Camera's center is at the left sensor.
-        /// </summary>
-		LEFT_EYE,
-        /// <summary>
-        /// Camera's center is in the camera's physical center, between the sensors.
-        /// </summary>
-		CENTER_EYE,
-        /// <summary>
-        /// Camera's center is at the right sensor.
-        /// </summary>
-		RIGHT_EYE
     };
 
     #endregion
@@ -1192,8 +1195,10 @@ namespace sl
         /// </summary>
         /// <param name="sensor_type">Sensor type to check.</param>
         /// <returns>true if the sensor is available on the device, otherwise false.</returns>
-        public bool isSensorAvailable(SENSOR_TYPE sensor_type) {
-            switch (sensor_type) {
+        public bool isSensorAvailable(SENSOR_TYPE sensor_type)
+        {
+            switch (sensor_type)
+            {
                 case SENSOR_TYPE.ACCELEROMETER:
                     return accelerometer_parameters.isAvailable;
                 case SENSOR_TYPE.GYROSCOPE:
@@ -1415,7 +1420,10 @@ namespace sl
         /// <returns></returns>
         public string GetContent()
         {
-            return Marshal.PtrToStringAnsi(content);
+            string result = Marshal.PtrToStringAnsi(content);
+            Camera.dllz_free(content);
+            content = IntPtr.Zero;
+            return result;
         }
 
         /// <summary>
@@ -1433,7 +1441,10 @@ namespace sl
         /// <returns></returns>
         public string GetKey()
         {
-            return Marshal.PtrToStringAnsi(key);
+            string result = Marshal.PtrToStringAnsi(key);
+            Camera.dllz_free(key);
+            key = IntPtr.Zero;
+            return result;
         }
 
         /// <summary>
@@ -1738,7 +1749,7 @@ namespace sl
         /// (those values are available <a href="https://www.stereolabs.com/docs/depth-sensing/depth-settings#depth-range">here</a>).
         /// </summary>
         public float depthMinimumDistance;
-        
+
         /// <summary>
         /// Maximum depth distance to be returned, measured in the sl.UNIT defined in \ref coordinateUnits.
         ///
@@ -1857,11 +1868,11 @@ namespace sl
         /// \n\note This setting is not taken into account for \ref sl.MODEL.ZED camera since it does not include sensors.
         /// </summary>
         public bool sensorsRequired;
-        
+
         /// <summary>
         /// IP address of the streaming sender to connect to.
         /// </summary>
-        
+
         public string ipStream = "";
 
         /// <summary>
@@ -2062,7 +2073,7 @@ namespace sl
         /// Filename of the file to save the recording into.
         /// </summary>
         public string videoFilename;
-    
+
         /// <summary>
         /// Compression mode the recording.
         ///
@@ -2259,15 +2270,18 @@ namespace sl
         /// <summary>
         ///  badge name (zedx_ar0234)
         /// </summary>
-        public IntPtr camera_badge;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+        public string camera_badge;
         /// <summary>
         /// Name of sensor (zedx)
         /// </summary>
-        public IntPtr camera_sensor_model;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+        public string camera_sensor_model;
         /// <summary>
         /// Name of Camera in DT (ZED_CAM1)
         /// </summary>
-        public IntPtr camera_name;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+        public string camera_name;
         /// <summary>
         /// Input type of the camera.
         /// </summary>
@@ -2477,15 +2491,15 @@ namespace sl
         /// </summary>
         VIRTUAL_ZED_X = 11,
         /// <summary>
-        /// ZED XOne with global shutter AR0234 sensor 
+        /// ZED X One with global shutter AR0234 sensor 
         /// </summary>
         ZED_XONE_GS = 30,
         /// <summary>
-        /// ZED XOne with 4K rolling shutter IMX678 sensor
+        /// ZED X One with 4K rolling shutter IMX678 sensor
         /// </summary>
         ZED_XONE_UHD = 31,
         /// <summary>
-        /// ZED XOne HDR.
+        /// ZED X One HDR.
         /// </summary>
         ZED_XONE_HDR = 32
     };
@@ -2573,6 +2587,141 @@ namespace sl
         /// \note Use \ref MEASURE "sl.MEASURE.NORMALS_RIGHT" with sl.Camera.RetrieveMeasure() to get normal right values.
         /// </summary>
         NORMALS_RIGHT,
+        /// <summary>
+        /// Alias of LEFT
+        /// </summary>
+        LEFT_BGRA,
+        /// <summary>
+        /// Left image. Each pixel contains 3 unsigned char (B, G, R).
+        ///\n Type: sl.MAT_TYPE.MAT_8U_C3.
+        /// </summary>
+        LEFT_BGR,
+        /// <summary>
+        /// Alias of RIGHT
+        /// </summary>
+        RIGHT_BGRA,
+        /// <summary>
+        /// Right image. Each pixel contains 3 unsigned char (B, G, R).
+        ///\n Type: sl.MAT_TYPE.MAT_8U_C3.
+        /// </summary>
+        RIGHT_BGR,
+        /// <summary>
+        /// Alias of LEFT_UNRECTIFIED
+        /// </summary>
+        LEFT_UNRECTIFIED_BGRA,
+        /// <summary>
+        /// Left unrectified image. Each pixel contains 3 unsigned char (B, G, R).
+        ///\n Type: sl.MAT_TYPE.MAT_8U_C3.
+        /// </summary>
+        LEFT_UNRECTIFIED_BGR,
+        /// <summary>
+        /// Alias of RIGHT_UNRECTIFIED
+        /// </summary>
+        RIGHT_UNRECTIFIED_BGRA,
+        /// <summary>
+        /// Right unrectified image. Each pixel contains 3 unsigned char (B, G, R).
+        ///\n Type: sl.MAT_TYPE.MAT_8U_C3.
+        /// </summary>
+        RIGHT_UNRECTIFIED_BGR,
+        /// <summary>
+        /// Alias of SIDE_BY_SIDE
+        /// </summary>
+        SIDE_BY_SIDE_BGRA,
+        /// <summary>
+        /// Side by side image. Each pixel contains 3 unsigned char (B, G, R).
+        ///\n Type: sl.MAT_TYPE.MAT_8U_C3.
+        /// </summary>
+        SIDE_BY_SIDE_BGR,
+        /// <summary>
+        /// gray scale side by side image. Each pixel contains 1 unsigned char.
+        ///\n Type: sl.MAT_TYPE.MAT_8U_C1.
+        /// </summary>
+        SIDE_BY_SIDE_GRAY,
+        /// <summary>
+        /// Unrectified side by side image. Each pixel contains 4 unsigned char (B, G, R, A).
+        ///\n Type: sl.MAT_TYPE.MAT_8U_C4.
+        /// </summary>
+        SIDE_BY_SIDE_UNRECTIFIED_BGRA,
+        /// <summary>
+        /// Unrectified side by side image. Each pixel contains 3 unsigned char (B, G, R).
+        ///\n Type: sl.MAT_TYPE.MAT_8U_C3.
+        /// </summary>
+        SIDE_BY_SIDE_UNRECTIFIED_BGR,
+        /// <summary>
+        /// Grayscale unrectified side by side image. Each pixel contains 1 unsigned char.
+        ///\n Type: sl.MAT_TYPE.MAT_8U_C1.
+        /// </summary>
+        SIDE_BY_SIDE_UNRECTIFIED_GRAY,
+        /// <summary>
+        /// Alias of DEPTH
+        /// </summary>
+        DEPTH_BGRA,
+        /// <summary>
+        /// Depth image. Each pixel contains 3 unsigned char (B, G, R).
+        ///\n Type: sl.MAT_TYPE.MAT_8U_C3.
+        /// </summary>
+        DEPTH_BGR,
+        /// <summary>
+        /// Grayscale depth image. Each pixel contains 1 unsigned char.
+        ///\n Type: sl.MAT_TYPE.MAT_8U_C1.
+        /// </summary>
+        DEPTH_GRAY,
+        /// <summary>
+        /// Alias of CONFIDENCE
+        /// </summary>
+        CONFIDENCE_BGRA,
+        /// <summary>
+        /// Confidence image. Each pixel contains 3 unsigned char (B, G, R).
+        ///\n Type: sl.MAT_TYPE.MAT_8U_C3.
+        /// </summary>
+        CONFIDENCE_BGR,
+        /// <summary>
+        /// Grayscale confidence image. Each pixel contains 1 unsigned char.
+        ///\n Type: sl.MAT_TYPE.MAT_8U_C1.
+        /// </summary>
+        CONFIDENCE_GRAY,
+        /// <summary>
+        /// Alias of NORMALS
+        /// </summary>
+        NORMALS_BGRA,
+        /// <summary>
+        /// Normals image. Each pixel contains 3 unsigned char (B, G, R).
+        ///\n Type: sl.MAT_TYPE.MAT_8U_C3.
+        /// </summary>
+        NORMALS_BGR,
+        /// <summary>
+        /// Grayscale normals image. Each pixel contains 1 unsigned char.
+        ///\n Type: sl.MAT_TYPE.MAT_8U_C1.
+        /// </summary>
+        NORMALS_GRAY,
+        /// <summary>
+        /// Alias of DEPTH_RIGHT
+        /// </summary>
+        DEPTH_RIGHT_BGRA,
+        /// <summary>
+        /// Depth right image. Each pixel contains 3 unsigned char (B, G, R).
+        ///\n Type: sl.MAT_TYPE.MAT_8U_C3.
+        /// </summary>
+        DEPTH_RIGHT_BGR,
+        /// <summary>
+        /// Grayscale depth right image. Each pixel contains 1 unsigned char.
+        ///\n Type: sl.MAT_TYPE.MAT_8U_C1.
+        /// </summary>
+        DEPTH_RIGHT_GRAY,
+        /// <summary>
+        /// Alias of NORMALS_RIGHT
+        /// </summary>
+        NORMALS_RIGHT_BGRA,
+        /// <summary>
+        /// Normals right image. Each pixel contains 3 unsigned char (B, G, R).
+        ///\n Type: sl.MAT_TYPE.MAT_8U_C3.
+        /// </summary>
+        NORMALS_RIGHT_BGR,
+        /// <summary>
+        /// Grayscale normals right image. Each pixel contains 1 unsigned char.
+        ///\n Type: sl.MAT_TYPE.MAT_8U_C1.
+        /// </summary>
+        NORMALS_RIGHT_GRAY
     };
 
     ///\ingroup  Video_group
@@ -3914,7 +4063,7 @@ namespace sl
         /// It is used as a reference when tracking the object through the frames.
         /// \note Only available if sl.ObjectDetectionParameters.enableTracking is activated.
         /// \note Otherwise, it will be set to -1.
-        public int id; 
+        public int id;
         /// <summary>
         /// Unique id to help identify and track AI detections.
         /// </summary>
@@ -4529,8 +4678,8 @@ namespace sl
         /// Body model, including feet, simplified face and detailed hands
         /// </summary>
         BODY_70
-#endif     
-        };
+#endif
+    };
 
     ///\ingroup Body_group
     /// <summary>
@@ -4717,8 +4866,12 @@ namespace sl
         /// sl.OBJECT_CLASS.SPORT
         /// </summary>
         SPORTSBALL = 23,
+        /// <summary>
+        /// sl.OBJECT_CLASS.VEHICLE
+        /// </summary>
+        MACHINERY = 24,
         ///@cond SHOWHIDDEN
-        LAST = 24
+        LAST = 25
         ///@endcond
     };
 
@@ -4769,7 +4922,8 @@ namespace sl
 	/// <summary>
 	/// Lists available models for the object detection module.
 	/// </summary>
-	public enum OBJECT_DETECTION_MODEL {
+	public enum OBJECT_DETECTION_MODEL
+    {
         /// <summary>
         /// Any objects, bounding box based.
         /// </summary>
@@ -4925,26 +5079,26 @@ namespace sl
     /// </summary>
     public enum BODY_18_PARTS
     {
-        NOSE            = 0,
-        NECK            = 1,
-        RIGHT_SHOULDER  = 2,
-        RIGHT_ELBOW     = 3,
-        RIGHT_WRIST     = 4,
-        LEFT_SHOULDER   = 5,
-        LEFT_ELBOW      = 6,
-        LEFT_WRIST      = 7,
-        RIGHT_HIP       = 8,
-        RIGHT_KNEE      = 9,
-        RIGHT_ANKLE     = 10,
-        LEFT_HIP        = 11,
-        LEFT_KNEE       = 12,
-        LEFT_ANKLE      = 13,
-        RIGHT_EYE       = 14,
-        LEFT_EYE        = 15,
-        RIGHT_EAR       = 16,
-        LEFT_EAR        = 17,
+        NOSE = 0,
+        NECK = 1,
+        RIGHT_SHOULDER = 2,
+        RIGHT_ELBOW = 3,
+        RIGHT_WRIST = 4,
+        LEFT_SHOULDER = 5,
+        LEFT_ELBOW = 6,
+        LEFT_WRIST = 7,
+        RIGHT_HIP = 8,
+        RIGHT_KNEE = 9,
+        RIGHT_ANKLE = 10,
+        LEFT_HIP = 11,
+        LEFT_KNEE = 12,
+        LEFT_ANKLE = 13,
+        RIGHT_EYE = 14,
+        LEFT_EYE = 15,
+        RIGHT_EAR = 16,
+        LEFT_EAR = 17,
         ///@cond SHOWHIDDEN
-        LAST            = 18
+        LAST = 18
         ///@endcond
     };
 
@@ -4954,42 +5108,42 @@ namespace sl
     /// </summary>
     public enum BODY_34_PARTS
     {
-        PELVIS              = 0,
-        NAVAL_SPINE         = 1,
-        CHEST_SPINE         = 2,
-        NECK                = 3,
-        LEFT_CLAVICLE       = 4,
-        LEFT_SHOULDER       = 5,
-        LEFT_ELBOW          = 6,
-        LEFT_WRIST          = 7,
-        LEFT_HAND           = 8, 
-        LEFT_HANDTIP        = 9,
-        LEFT_THUMB          = 10,
-        RIGHT_CLAVICLE      = 11,
-        RIGHT_SHOULDER      = 12,
-        RIGHT_ELBOW         = 13,
-        RIGHT_WRIST         = 14,
-        RIGHT_HAND          = 15,
-        RIGHT_HANDTIP       = 16,
-        RIGHT_THUMB         = 17,
-        LEFT_HIP            = 18,
-        LEFT_KNEE           = 19,
-        LEFT_ANKLE          = 20,
-        LEFT_FOOT           = 21,
-        RIGHT_HIP           = 22,
-        RIGHT_KNEE          = 23,
-        RIGHT_ANKLE         = 24,
-        RIGHT_FOOT          = 25,
-        HEAD                = 26,
-        NOSE                = 27,
-        LEFT_EYE            = 28,
-        LEFT_EAR            = 29,
-        RIGHT_EYE           = 30,
-        RIGHT_EAR           = 31,
-        LEFT_HEEL           = 32,
-        RIGHT_HEEL          = 33,
+        PELVIS = 0,
+        NAVAL_SPINE = 1,
+        CHEST_SPINE = 2,
+        NECK = 3,
+        LEFT_CLAVICLE = 4,
+        LEFT_SHOULDER = 5,
+        LEFT_ELBOW = 6,
+        LEFT_WRIST = 7,
+        LEFT_HAND = 8,
+        LEFT_HANDTIP = 9,
+        LEFT_THUMB = 10,
+        RIGHT_CLAVICLE = 11,
+        RIGHT_SHOULDER = 12,
+        RIGHT_ELBOW = 13,
+        RIGHT_WRIST = 14,
+        RIGHT_HAND = 15,
+        RIGHT_HANDTIP = 16,
+        RIGHT_THUMB = 17,
+        LEFT_HIP = 18,
+        LEFT_KNEE = 19,
+        LEFT_ANKLE = 20,
+        LEFT_FOOT = 21,
+        RIGHT_HIP = 22,
+        RIGHT_KNEE = 23,
+        RIGHT_ANKLE = 24,
+        RIGHT_FOOT = 25,
+        HEAD = 26,
+        NOSE = 27,
+        LEFT_EYE = 28,
+        LEFT_EAR = 29,
+        RIGHT_EYE = 30,
+        RIGHT_EAR = 31,
+        LEFT_HEEL = 32,
+        RIGHT_HEEL = 33,
         ///@cond SHOWHIDDEN
-        LAST                = 34
+        LAST = 34
         ///@endcond
     };
 
@@ -4997,49 +5151,49 @@ namespace sl
     /// <summary>
     /// Semantic of human body parts and order of \ref sl.BodyData.keypoints for \ref sl.BODY_FORMAT.BODY_38.
 	/// </summary>
-	public enum BODY_38_PARTS 
+	public enum BODY_38_PARTS
     {
-        PELVIS              = 0,
-        SPINE_1             = 1,
-        SPINE_2             = 2,
-        SPINE_3             = 3,
-        NECK                = 4,
-        NOSE                = 5,
-        LEFT_EYE            = 6,
-        RIGHT_EYE           = 7,
-        LEFT_EAR            = 8,
-        RIGHT_EAR           = 9,
-        LEFT_CLAVICLE       = 10,
-        RIGHT_CLAVICLE      = 11,
-        LEFT_SHOULDER       = 12,
-        RIGHT_SHOULDER      = 13,
-        LEFT_ELBOW          = 14,
-        RIGHT_ELBOW         = 15,
-        LEFT_WRIST          = 16,
-        RIGHT_WRIST         = 17,
-        LEFT_HIP            = 18,
-        RIGHT_HIP           = 19,
-        LEFT_KNEE           = 20,
-        RIGHT_KNEE          = 21,
-        LEFT_ANKLE          = 22,
-        RIGHT_ANKLE         = 23,
-        LEFT_BIG_TOE        = 24,
-        RIGHT_BIG_TOE       = 25,
-        LEFT_SMALL_TOE      = 26,
-        RIGHT_SMALL_TOE     = 27,
-        LEFT_HEEL           = 28,
-        RIGHT_HEEL          = 29,
+        PELVIS = 0,
+        SPINE_1 = 1,
+        SPINE_2 = 2,
+        SPINE_3 = 3,
+        NECK = 4,
+        NOSE = 5,
+        LEFT_EYE = 6,
+        RIGHT_EYE = 7,
+        LEFT_EAR = 8,
+        RIGHT_EAR = 9,
+        LEFT_CLAVICLE = 10,
+        RIGHT_CLAVICLE = 11,
+        LEFT_SHOULDER = 12,
+        RIGHT_SHOULDER = 13,
+        LEFT_ELBOW = 14,
+        RIGHT_ELBOW = 15,
+        LEFT_WRIST = 16,
+        RIGHT_WRIST = 17,
+        LEFT_HIP = 18,
+        RIGHT_HIP = 19,
+        LEFT_KNEE = 20,
+        RIGHT_KNEE = 21,
+        LEFT_ANKLE = 22,
+        RIGHT_ANKLE = 23,
+        LEFT_BIG_TOE = 24,
+        RIGHT_BIG_TOE = 25,
+        LEFT_SMALL_TOE = 26,
+        RIGHT_SMALL_TOE = 27,
+        LEFT_HEEL = 28,
+        RIGHT_HEEL = 29,
         // Hands
-        LEFT_HAND_THUMB_4   = 30,
-        RIGHT_HAND_THUMB_4  = 31,
-        LEFT_HAND_INDEX_1   = 32,
-        RIGHT_HAND_INDEX_1  = 33,
-        LEFT_HAND_MIDDLE_4  = 34,
+        LEFT_HAND_THUMB_4 = 30,
+        RIGHT_HAND_THUMB_4 = 31,
+        LEFT_HAND_INDEX_1 = 32,
+        RIGHT_HAND_INDEX_1 = 33,
+        LEFT_HAND_MIDDLE_4 = 34,
         RIGHT_HAND_MIDDLE_4 = 35,
-        LEFT_HAND_PINKY_1   = 36,
-        RIGHT_HAND_PINKY_1  = 37,
+        LEFT_HAND_PINKY_1 = 36,
+        RIGHT_HAND_PINKY_1 = 37,
         ///@cond SHOWHIDDEN
-        LAST                = 38
+        LAST = 38
         ///@endcond
     };
 
@@ -5486,7 +5640,7 @@ namespace sl
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public SynchronizationParameter(double windowSize, double dataSourceTimeout, bool keepLastData , double maximumLateness)
+        public SynchronizationParameter(double windowSize, double dataSourceTimeout, bool keepLastData, double maximumLateness)
         {
             this.windowSize = windowSize;
             this.dataSourceTimeout = dataSourceTimeout;
@@ -5573,9 +5727,9 @@ namespace sl
         /// Default constructor.
         /// </summary>
         public InitFusionParameters(bool verbose = false, UNIT coordinateUnits = UNIT.MILLIMETER,
-                                    COORDINATE_SYSTEM coordinateSystem = COORDINATE_SYSTEM.IMAGE, 
-                                    bool outputPerformanceMetrics = false, uint timeoutPeriodsNumber = 5, 
-                                    SynchronizationParameter synchronizationParameters = new SynchronizationParameter(), 
+                                    COORDINATE_SYSTEM coordinateSystem = COORDINATE_SYSTEM.IMAGE,
+                                    bool outputPerformanceMetrics = false, uint timeoutPeriodsNumber = 5,
+                                    SynchronizationParameter synchronizationParameters = new SynchronizationParameter(),
                                     int sdkGpuId = -1, IntPtr? sdkCudaCtx = null, Resolution? maximumWorkingResolution = null)
         {
             if (!maximumWorkingResolution.HasValue)
@@ -5610,12 +5764,12 @@ namespace sl
         /// The sender and receiver are on the same local network and communicate by RTP.
         /// \n The communication can be affected by the local network load.
         /// </summary>
-        LOCAL_NETWORK, 
+        LOCAL_NETWORK,
         /// <summary>
         /// Both sender and receiver are declared by the same process and can be in different threads.
         /// \n This type of communication is optimized.
         /// </summary>
-        INTRA_PROCESS 
+        INTRA_PROCESS
     };
 
     /// \ingroup Fusion_group
@@ -5940,6 +6094,11 @@ namespace sl
         /// Projection of the landmark in the image.
         /// </summary>
         public Vector2 imagePosition;
+        /// <summary>
+        /// Confidence score indicating the likelihood that the landmark is associated with a dynamic object.
+        /// The value ranges from 0 to 1, where a smaller value indicates greater confidence that the landmark is owned by a dynamic object.
+        /// </summary>
+        public float dynamic_confidence;
     }
 
     /**
