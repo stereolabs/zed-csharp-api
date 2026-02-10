@@ -201,7 +201,7 @@ namespace sl
         * Opening function (Opens camera and creates textures).
         */
         [DllImport(nameDll, EntryPoint = "sl_open_camera")]
-        private static extern int dllz_open(int cameraID, ref sl_initParameters parameters, uint serialNumber, System.Text.StringBuilder svoPath, System.Text.StringBuilder ipStream, int portStream, System.Text.StringBuilder output, System.Text.StringBuilder opt_settings_path, System.Text.StringBuilder opencv_calib_path);
+        private static extern int dllz_open(int cameraID, ref sl_initParameters parameters, uint serialNumber, System.Text.StringBuilder svoPath, System.Text.StringBuilder ipStream, int portStream, int gmslPort, System.Text.StringBuilder output, System.Text.StringBuilder opt_settings_path, System.Text.StringBuilder opencv_calib_path);
 
         [DllImport(nameDll, EntryPoint = "sl_start_publishing")]
         private static extern ERROR_CODE dllz_start_publishing(int cameraID, ref CommunicationParameters commParams);
@@ -366,7 +366,7 @@ namespace sl
          */
 
         [DllImport(nameDll, EntryPoint = "sl_set_svo_position")]
-        private static extern void dllz_set_svo_position(int cameraID, int frame);
+        private static extern ERROR_CODE dllz_set_svo_position(int cameraID, int position);
 
         [DllImport(nameDll, EntryPoint = "sl_get_svo_number_of_frames")]
         private static extern int dllz_get_svo_number_of_frames(int cameraID);
@@ -1017,6 +1017,7 @@ namespace sl
                 new System.Text.StringBuilder(initParameters.pathSVO, initParameters.pathSVO.Length),
                 new System.Text.StringBuilder(initParameters.ipStream, initParameters.ipStream.Length),
                 initParameters.portStream,
+                initParameters.gmslPort,
                 new System.Text.StringBuilder(initParameters.sdkVerboseLogFile, initParameters.sdkVerboseLogFile.Length),
                 new System.Text.StringBuilder(initParameters.optionalSettingsPath, initParameters.optionalSettingsPath.Length),
                 new System.Text.StringBuilder(initParameters.optionalOpencvCalibrationFile, initParameters.optionalOpencvCalibrationFile.Length));
@@ -1396,12 +1397,13 @@ namespace sl
         }
 
         /// <summary>
-        /// Sets the position of the SVO file currently being read to a desired frame.
+        /// Sets the position of the SVO file currently being read to a desired position.
         /// </summary>
-        /// <param name="frame">Index of the desired frame to be decoded.</param>
-        public void SetSVOPosition(int frame)
+        /// <param name="position">Index of the desired position to be decoded.</param>
+        /// <returns>An sl.ERROR_CODE to indicate if the method was successful.</returns>
+        public ERROR_CODE SetSVOPosition(int position)
         {
-            dllz_set_svo_position(CameraID, frame);
+            return dllz_set_svo_position(CameraID, position);
         }
 
         /// <summary>

@@ -158,6 +158,10 @@ namespace sl
     public enum ERROR_CODE
     {
         /// <summary>
+        /// The sensor's configuration (mode, multicast, etc.) was changed externally while streaming. If auto_recovery_on_config_change is enabled, the SDK will automatically reconnect. This warning code is returned once after successful recovery.
+        /// </summary>
+        SENSOR_CONFIGURATION_CHANGED = -6,
+        /// <summary>
         /// The camera has a potential calibration issue.
         /// </summary>
         POTENTIAL_CALIBRATION_ISSUE = -5,
@@ -170,7 +174,7 @@ namespace sl
         /// </summary>
         SENSORS_DATA_REQUIRED = -3,
         /// <summary>
-        ///  The image could be corrupted, Enabled with the parameter InitParameters.enable_image_validity_check
+        /// The image is corrupted with invalid colors (green/purple images). This indicates a serious hardware or driver issue.
         /// </summary>
         CORRUPTED_FRAME = -2,
         /// <summary>
@@ -1702,6 +1706,10 @@ namespace sl
         /// </summary>
         public string pathSVO = "";
         /// <summary>
+        /// gmsl port used to open a ZED camera connected through GMSL interface.
+        /// </summary>
+        public int gmslPort = 0;
+        /// <summary>
         /// Defines if sl.Camera object return the frame in real time mode.
         ///
         /// When playing back an SVO file, each call to sl.Camera.Grab() will extract a new frame and use it.
@@ -1951,6 +1959,58 @@ namespace sl
         /// </summary>
         public Resolution maximumWorkingResolution;
 
+        /// <summary>
+        ///  Set the input as the camera with specified id.
+        /// </summary>
+        /// <param name="cameraID"></param>
+        public void SetFromCameraID(int cameraID)
+        {
+            this.cameraDeviceID = cameraID;
+            this.pathSVO = "";
+            this.gmslPort = -1;
+            this.inputType = sl.INPUT_TYPE.USB;
+        }
+
+        /// <summary>
+        /// Set the input as the camera with specified serial number.
+        /// </summary>
+        /// <param name="serialNumber"></param>
+        public void SetFromSerialNumber(uint serialNumber)
+        {
+            this.serialNumber = serialNumber;
+            this.pathSVO = "";
+            this.gmslPort = -1;
+            this.inputType = sl.INPUT_TYPE.USB;
+        }
+
+        /// <summary>
+        ///  Set the input as the SVO specified with the filename.
+        /// </summary>
+        /// <param name="svoFilePath"></param>
+        public void SetFromSVOFile(string svoFilePath)
+        {
+            this.pathSVO = svoFilePath;
+            this.gmslPort = -1;
+            this.inputType = sl.INPUT_TYPE.SVO;
+        }
+
+        public void SetFromGMSLPort(int port)
+        {
+            this.gmslPort = port;
+            this.pathSVO = "";
+            this.inputType = sl.INPUT_TYPE.GMSL;
+            this.serialNumber = 0;
+        }
+
+        public void SetFromStream(string ipAddress, ushort port = 30000)
+        {
+            this.ipStream = ipAddress;
+            this.portStream = port;
+            this.pathSVO = "";
+            this.gmslPort = -1;
+            this.inputType = sl.INPUT_TYPE.STREAM;
+            this.serialNumber = 0;
+        }
 
         /// <summary>
         /// Default constructor.
@@ -1964,6 +2024,7 @@ namespace sl
             this.cameraFPS = 0;
             this.cameraDeviceID = 0;
             this.serialNumber = 0;
+            this.gmslPort = -1;
             this.pathSVO = "";
             this.svoRealTimeMode = false;
             this.coordinateUnits = UNIT.METER;
@@ -2247,6 +2308,12 @@ namespace sl
         /// </summary>
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 512)]
         public string path;
+
+        /// <summary>
+        ///  System path of the camera
+        /// </summary>
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 512)]
+        public string videoDevice;
         /// <summary>
         /// i2c port of the camera.
         /// </summary>
@@ -2262,6 +2329,10 @@ namespace sl
         /// \warning Not provided for Windows.
         /// </summary>
         public uint sn;
+        /// <summary>
+        ///  GMSL port of the camera.
+        /// </summary>
+        int gmslPort;
         /// <summary>
         /// [Cam model, eeprom version, white balance param]
         /// </summary>
@@ -2317,11 +2388,25 @@ namespace sl
         public ushort port;
 
         /// <summary>
+        /// Serial number of the streaming camera.
+        ///
+        /// Default: 0
+        /// </summary>
+        public uint serialNumber;
+
+        /// <summary>
         /// Current bitrate of encoding of the streaming device.
         ///
         /// Default: 0
         /// </summary>
         public int currentBitrate;
+
+        /// <summary>
+        /// Model of the streaming device.
+        ///
+        /// Default: sl.MODEL.LAST
+        /// </summary>
+        public sl.MODEL cameraModel;
 
         /// <summary>
         /// Current codec used for compression in streaming device.
@@ -3750,6 +3835,63 @@ namespace sl
 
     ///\ingroup Object_group
     /// <summary>
+    /// Structure containing a set of parameters for the object tracking module.
+    /// </summary>
+    /// The default constructor sets all parameters to their default settings.
+    /// \note Parameters can be adjusted by the user.
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ObjectTrackingParameters
+    {
+        /// <summary>
+        /// Preset defining the expected maximum acceleration of the tracked object.
+        /// </summary>
+        /// Determines how the ZED SDK interprets object acceleration, affecting tracking behavior and predictions.
+        public OBJECT_ACCELERATION_PRESET objectAccelerationPreset;
+
+        /// <summary>
+        /// Control the smoothing of the velocity estimation. Manually override the acceleration preset.
+        /// </summary>
+        /// Values between 0.0 and 1.0.
+        /// - High value (closer to 1.0): Very smooth, but may lag behind rapid changes.
+        /// - Low value (closer to 0.0): Very responsive to velocity changes, but may be jittery.
+        /// - 0.5: ZED SDK base tuning. Balanced smoothing and responsiveness.
+        /// A negative value (e.g. -1) lets the ZED SDK interpret velocitySmoothingFactor.
+        /// Default: -1
+        public float velocitySmoothingFactor;
+
+        /// <summary>
+        /// Threshold to force an object's velocity to zero.
+        /// </summary>
+        /// If the calculated speed (m/s) is below this threshold, the object is considered static.
+        /// This helps eliminate drift on stationary objects.
+        /// A negative value (e.g. -1) lets the ZED SDK interpret minVelocityThreshold.
+        /// Default: -1
+        public float minVelocityThreshold;
+
+        /// <summary>
+        /// Duration to keep predicting a track's position after occlusion.
+        /// </summary>
+        /// When an object is no longer visible (occluded or out of frame),
+        /// the tracker will predict its position for this duration before deleting the track.
+        /// - Short (e.g., 0.2s): Prevents "ghost" objects but may break tracks during short occlusions.
+        /// - Long (e.g., 2.0s): Maintains ID during long occlusions but may report objects that are gone.
+        /// A negative value (e.g. -1) lets the ZED SDK interpret predictionTimeoutS.
+        /// Default: -1
+        public float predictionTimeoutS;
+
+        /// <summary>
+        /// Minimum confirmation time required to validate a track.
+        /// </summary>
+        /// The minimum duration (in seconds) an object must be continuously detected
+        /// before it is reported as a valid track. Helps filter out spurious false
+        /// positives that appear only briefly.
+        /// A negative value (e.g. -1) lets the ZED SDK interpret minConfirmationTimeS.
+        /// Default: -1
+        public float minConfirmationTimeS;
+    };
+
+    ///\ingroup Object_group
+    /// <summary>
     /// Structure containing a set of runtime parameters for the object detection module.
     /// </summary>
     /// The default constructor sets all parameters to their default settings.
@@ -3792,6 +3934,18 @@ namespace sl
         /// \note sl::ObjectDetectionRuntimeParameters.detectionConfidenceThreshold will be taken as fallback/default value.
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = (int)sl.OBJECT_CLASS.LAST)]
         public int[] objectConfidenceThreshold;
+
+        /// <summary>
+        /// Global tracking parameters.
+        /// </summary>
+        public ObjectTrackingParameters objectTrackingParameters;
+
+        /// <summary>
+        /// Array of tracking parameters for each class (can be empty for some classes).
+        /// </summary>
+        /// \note sl::ObjectDetectionRuntimeParameters.objectTrackingParameters will be taken as fallback/default value.
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = (int)sl.OBJECT_CLASS.LAST)]
+        public ObjectTrackingParameters[] objectClassTrackingParameters;
     };
 
     /// <summary>
@@ -3909,6 +4063,10 @@ namespace sl
         /// Default: nan (no override)
         /// </summary>
         public float maxAllowedAcceleration;
+        /// <summary>
+        /// Object tracking parameters for this class.
+        /// </summary>
+        public ObjectTrackingParameters objectTrackingParameters;
     };
 
     /// <summary>
@@ -6097,6 +6255,7 @@ namespace sl
         /// <summary>
         /// Confidence score indicating the likelihood that the landmark is associated with a dynamic object.
         /// The value ranges from 0 to 1, where a smaller value indicates greater confidence that the landmark is owned by a dynamic object.
+        /// The value is -1 if the dynamic confidence is not computed.
         /// </summary>
         public float dynamic_confidence;
     }
