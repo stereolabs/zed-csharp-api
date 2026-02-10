@@ -366,7 +366,7 @@ namespace sl
          */
 
         [DllImport(nameDll, EntryPoint = "sl_set_svo_position")]
-        private static extern void dllz_set_svo_position(int cameraID, int frame);
+        private static extern ERROR_CODE dllz_set_svo_position(int cameraID, int position);
 
         [DllImport(nameDll, EntryPoint = "sl_get_svo_number_of_frames")]
         private static extern int dllz_get_svo_number_of_frames(int cameraID);
@@ -1397,12 +1397,13 @@ namespace sl
         }
 
         /// <summary>
-        /// Sets the position of the SVO file currently being read to a desired frame.
+        /// Sets the position of the SVO file currently being read to a desired position.
         /// </summary>
-        /// <param name="frame">Index of the desired frame to be decoded.</param>
-        public void SetSVOPosition(int frame)
+        /// <param name="position">Index of the desired position to be decoded.</param>
+        /// <returns>An sl.ERROR_CODE to indicate if the method was successful.</returns>
+        public ERROR_CODE SetSVOPosition(int position)
         {
-            dllz_set_svo_position(CameraID, frame);
+            return dllz_set_svo_position(CameraID, position);
         }
 
         /// <summary>

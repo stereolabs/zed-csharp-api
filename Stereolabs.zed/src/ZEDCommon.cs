@@ -158,6 +158,10 @@ namespace sl
     public enum ERROR_CODE
     {
         /// <summary>
+        /// The sensor's configuration (mode, multicast, etc.) was changed externally while streaming. If auto_recovery_on_config_change is enabled, the SDK will automatically reconnect. This warning code is returned once after successful recovery.
+        /// </summary>
+        SENSOR_CONFIGURATION_CHANGED = -6,
+        /// <summary>
         /// The camera has a potential calibration issue.
         /// </summary>
         POTENTIAL_CALIBRATION_ISSUE = -5,
@@ -170,7 +174,7 @@ namespace sl
         /// </summary>
         SENSORS_DATA_REQUIRED = -3,
         /// <summary>
-        ///  The image could be corrupted, Enabled with the parameter InitParameters.enable_image_validity_check
+        /// The image is corrupted with invalid colors (green/purple images). This indicates a serious hardware or driver issue.
         /// </summary>
         CORRUPTED_FRAME = -2,
         /// <summary>
