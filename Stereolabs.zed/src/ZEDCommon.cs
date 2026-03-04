@@ -12,7 +12,6 @@ using System.Runtime.InteropServices;
 /// \defgroup PositionalTracking_group Positional Tracking Module
 /// \defgroup Object_group Object Detection Module
 /// \defgroup Body_group Body Tracking Module
-/// \defgroup Sensors_group Sensors Module
 /// \defgroup Fusion_group Fusion Module
 
 namespace sl
@@ -541,7 +540,7 @@ namespace sl
         /// Positional tracking mode used.
         /// </summary>
         /// Can be used to improve accuracy in some types of scene at the cost of longer runtime.
-        public sl.POSITIONAL_TRACKING_MODE mode = sl.POSITIONAL_TRACKING_MODE.GEN_1;
+        public sl.POSITIONAL_TRACKING_MODE mode = sl.POSITIONAL_TRACKING_MODE.GEN_3;
 
 
         /// <summary>
@@ -802,7 +801,7 @@ namespace sl
 
     #region Sensors Module
 
-    /// \ingroup Sensors_group
+    /// \ingroup Core_group
     /// <summary>
     /// Structure containing data from the IMU sensor.
     /// </summary>
@@ -864,7 +863,7 @@ namespace sl
 		public Matrix3x3 linearAccelerationCovariance;
     };
 
-    /// \ingroup Sensors_group
+    /// \ingroup Core_group
     /// <summary>
     /// Structure containing data from the barometer sensor.
     /// </summary>
@@ -921,7 +920,7 @@ namespace sl
         ///@endcond
     };
 
-    /// \ingroup Sensors_group
+    /// \ingroup Core_group
     /// <summary>
     /// Structure containing data from the magnetometer sensor.
     /// </summary>
@@ -970,7 +969,7 @@ namespace sl
         public float effective_rate;
     };
 
-    /// \ingroup Sensors_group
+    /// \ingroup Core_group
     /// <summary>
     /// Structure containing data from the temperature sensors.
     /// </summary>
@@ -995,7 +994,7 @@ namespace sl
         public float onboard_right_temp;
     };
 
-    /// \ingroup Sensors_group
+    /// \ingroup Core_group
     /// <summary>
     /// Structure containing all sensors data (except image sensors) to be used for positional tracking or environment study.
     /// </summary>
@@ -1036,7 +1035,7 @@ namespace sl
         public int image_sync_val;
     };
 
-    /// \ingroup Sensors_group
+    /// \ingroup Core_group
     /// <summary>
     /// Lists available sensor types.
     /// \note Sensors are not available on sl.MODEL.ZED.
@@ -1061,7 +1060,7 @@ namespace sl
         BAROMETER
     };
 
-    /// \ingroup Sensors_group
+    /// \ingroup Core_group
     /// <summary>
     /// Lists available measurement units of onboard sensors.
     /// \note Sensors are not available on sl.MODEL.ZED.
@@ -1094,7 +1093,7 @@ namespace sl
         HERTZ
     };
 
-    /// \ingroup Sensors_group
+    /// \ingroup Core_group
     /// <summary>
     /// Structure containing information about a single sensor available in the current device.
     /// </summary>
@@ -1143,7 +1142,7 @@ namespace sl
         public bool isAvailable;
     };
 
-    /// \ingroup Sensors_group
+    /// \ingroup Core_group
     /// <summary>
     /// Structure containing information about all the sensors available in the current device.
     /// </summary>
@@ -1678,9 +1677,9 @@ namespace sl
         /// \note Small resolutions offer higher framerate and lower computation time.
         /// \note In most situations, sl.RESOLUTION.HD720 at 60 FPS is the best balance between image quality and framerate.
         ///
-        /// Default: <ul>
-        /// <li>ZED X/X Mini: sl.RESOLUTION.HD1200</li>
-        /// <li>other cameras: sl.RESOLUTION.HD720</li></ul>
+        /// Default: sl.RESOLUTION.AUTO <ul>
+        /// <li>Resolves to sl.RESOLUTION.HD1200 for ZED X/X Mini</li>
+        /// <li>Resolves to sl.RESOLUTION.HD720 for other cameras</li></ul>
         /// \note Available resolutions are listed here: sl.RESOLUTION.
         /// </summary>
         public sl.RESOLUTION resolution;
@@ -1739,7 +1738,7 @@ namespace sl
         ///
         /// The ZED SDK offers several sl.DEPTH_MODE, offering various levels of performance and accuracy.
         /// \n This parameter allows you to set the sl.DEPTH_MODE that best matches your needs.
-        /// \n Default: \ref DEPTH_MODE "sl.DEPTH_MODE.PERFORMANCE"
+        /// \n Default: \ref DEPTH_MODE "sl.DEPTH_MODE.NEURAL"
         /// \note Available depth mode are listed here: sl.DEPTH_MODE.
         /// </summary>
         public sl.DEPTH_MODE depthMode;
@@ -1944,7 +1943,7 @@ namespace sl
         /// This will perform additional verification on the image to identify corrupted data.This verification is done in the grab function and requires some computations.
         /// If an issue is found, the grab function will output a warning as sl.ERROR_CODE.CORRUPTED_FRAME.
         /// This version doesn't detect frame tearing currently.
-        ///  \n default: disabled
+        ///  \n default: enabled
         /// </summary>
         public bool enableImageValidityCheck;
         /// <summary>
@@ -2048,7 +2047,7 @@ namespace sl
             this.openTimeoutSec = 5.0f;
             this.asyncGrabCameraRecovery = false;
             this.grabComputeCappingFPS = 0;
-            this.enableImageValidityCheck = false;
+            this.enableImageValidityCheck = true;
             this.maximumWorkingResolution = new Resolution(0, 0);
         }
 
@@ -2617,6 +2616,14 @@ namespace sl
         ///\n Type: sl.MAT_TYPE.MAT_8U_C1.
         /// </summary>
         RIGHT_GREY,
+        /// <summary>
+        /// Left NV12 unrectified image.
+        /// </summary>
+        LEFT_NV12_UNRECTIFIED,
+        /// <summary>
+        /// Right NV12 unrectified image.
+        /// </summary>
+        RIGHT_NV12_UNRECTIFIED,
         /// <summary>
         /// Left BGRA unrectified image. Each pixel contains 4 unsigned char (B, G, R, A).
         ///\n Type: sl.MAT_TYPE.MAT_8U_C4.
@@ -6262,7 +6269,7 @@ namespace sl
 
     /**
      \class GNSS_STATUS
-     \ingroup Sensors_group
+     \ingroup PositionalTracking_group
      \brief Class representing the fix quality of GNSS signal.
      */
     public enum GNSS_STATUS

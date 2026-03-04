@@ -1116,10 +1116,16 @@ namespace sl
         /// <param name="mat">sl.Mat to fill with the new texture.</param>
         /// <param name="view">Image type (left RGB, right depth map, etc.)</param>
         /// <param name="mem">Whether the image should be on CPU or GPU memory.</param>
-        /// <param name="resolution">Resolution of the texture.</param>
+        /// <param name="resolution">Resolution of the texture. If set to (0,0), the camera resolution or InitParameters.maximumWorkingResolution will be taken, whichever is the smallest.</param>
         /// <returns>sl.ERROR_CODE indicating if the retrieval was successful, and why it wasn't otherwise.</returns>
         public sl.ERROR_CODE RetrieveImage(sl.Mat mat, sl.VIEW view, sl.MEM mem = sl.MEM.CPU, sl.Resolution resolution = new sl.Resolution())
         {
+            if (view == VIEW.LEFT_NV12_UNRECTIFIED || view == VIEW.RIGHT_NV12_UNRECTIFIED)
+            {
+                Console.WriteLine("ERROR: NV12 views are not supported in the C# wrapper.");
+                return ERROR_CODE.INVALID_FUNCTION_PARAMETERS;
+            }
+
             return (sl.ERROR_CODE)(dllz_retrieve_image(CameraID, mat.MatPtr, (int)view, (int)mem, (int)resolution.width, (int)resolution.height, IntPtr.Zero));
         }
 
@@ -1633,7 +1639,7 @@ namespace sl
         /// <param name="mat">sl.Mat to fill with the new texture.</param>
         /// <param name="measure">Measure type (depth, confidence, xyz, etc.).</param>
         /// <param name="mem">Whether the image should be on CPU or GPU memory.</param>
-        /// <param name="resolution">Resolution of the texture.</param>
+        /// <param name="resolution">Resolution of the texture. If set to (0,0), the camera resolution or InitParameters.maximumWorkingResolution will be taken, whichever is the smallest.</param>
         /// <returns>sl.ERROR_CODE indicating if the retrieval was successful, and why it wasn't otherwise.</returns>
         public sl.ERROR_CODE RetrieveMeasure(sl.Mat mat, sl.MEASURE measure, sl.MEM mem = sl.MEM.CPU, sl.Resolution resolution = new sl.Resolution())
         {
