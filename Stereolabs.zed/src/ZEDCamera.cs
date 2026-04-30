@@ -203,6 +203,18 @@ namespace sl
         [DllImport(nameDll, EntryPoint = "sl_open_camera")]
         private static extern int dllz_open(int cameraID, ref sl_initParameters parameters, uint serialNumber, System.Text.StringBuilder svoPath, System.Text.StringBuilder ipStream, int portStream, int gmslPort, System.Text.StringBuilder output, System.Text.StringBuilder opt_settings_path, System.Text.StringBuilder opencv_calib_path);
 
+        [DllImport(nameDll, EntryPoint = "sl_open_camera_from_camera_id")]
+        private static extern int dllz_open_from_camera_id(int cameraID, ref sl_initParameters parameters, System.Text.StringBuilder output, System.Text.StringBuilder opt_settings_path, System.Text.StringBuilder opencv_calib_path);
+
+        [DllImport(nameDll, EntryPoint = "sl_open_camera_from_serial_number")]
+        private static extern int dllz_open_from_serial_number(int cameraID, ref sl_initParameters parameters, uint serialNumber, System.Text.StringBuilder output, System.Text.StringBuilder opt_settings_path, System.Text.StringBuilder opencv_calib_path);
+
+        [DllImport(nameDll, EntryPoint = "sl_open_camera_from_svo_file")]
+        private static extern int dllz_open_from_svo_file(int cameraID, ref sl_initParameters parameters, System.Text.StringBuilder svoPath, System.Text.StringBuilder output, System.Text.StringBuilder opt_settings_path, System.Text.StringBuilder opencv_calib_path);
+
+        [DllImport(nameDll, EntryPoint = "sl_open_camera_from_stream")]
+        private static extern int dllz_open_from_stream(int cameraID, ref sl_initParameters parameters, System.Text.StringBuilder ip, int streamPort, System.Text.StringBuilder output, System.Text.StringBuilder opt_settings_path, System.Text.StringBuilder opencv_calib_path);
+
         [DllImport(nameDll, EntryPoint = "sl_start_publishing")]
         private static extern ERROR_CODE dllz_start_publishing(int cameraID, ref CommunicationParameters commParams);
 
@@ -221,6 +233,9 @@ namespace sl
          */
         [DllImport(nameDll, EntryPoint = "sl_grab")]
         private static extern int dllz_grab(int cameraID, ref sl_RuntimeParameters runtimeParameters);
+
+        [DllImport(nameDll, EntryPoint = "sl_read")]
+        private static extern int dllz_read(int cameraID);
 
         /*
          * GetDeviceList function
@@ -241,10 +256,43 @@ namespace sl
         private static extern int dllz_reboot(int serialNumber, bool fullReboot);
 
         /*
+         * Timestamp clock (process-wide).
+         */
+        [DllImport(nameDll, EntryPoint = "sl_set_timestamp_clock")]
+        private static extern void dllz_set_timestamp_clock(int clock);
+
+        [DllImport(nameDll, EntryPoint = "sl_get_timestamp_clock")]
+        private static extern int dllz_get_timestamp_clock();
+
+        [DllImport(nameDll, EntryPoint = "sl_set_max_system_clock_step_ms")]
+        private static extern void dllz_set_max_system_clock_step_ms(float limitMs);
+
+        [DllImport(nameDll, EntryPoint = "sl_get_max_system_clock_step_ms")]
+        private static extern float dllz_get_max_system_clock_step_ms();
+
+        /*
         * Recording functions.
         */
         [DllImport(nameDll, EntryPoint = "sl_enable_recording")]
-        private static extern int dllz_enable_recording(int cameraID, byte[] video_filename, int compresssionMode, uint bitrate, int target_fps, bool transcode);
+        private static extern int dllz_enable_recording(int cameraID, byte[] video_filename, int compressionMode, uint bitrate, int target_fps, bool transcode);
+
+        [DllImport(nameDll, EntryPoint = "sl_enable_recording_from_params")]
+        private static extern int dllz_enable_recording_from_params(int cameraID, ref NativeRecordingParameters parameters);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct NativeRecordingParameters
+        {
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+            public byte[] video_filename;
+            public int compression_mode;
+            public uint bitrate;
+            public uint target_framerate;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool transcode_streaming_input;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+            public byte[] encryption_key;
+            public int encoding_preset;
+        }
 
         [DllImport(nameDll, EntryPoint = "sl_get_recording_status")]
         private static extern IntPtr dllz_get_recording_status(int cameraID);
@@ -351,6 +399,15 @@ namespace sl
         [DllImport(nameDll, EntryPoint = "sl_get_frame_dropped_count")]
         private static extern uint dllz_get_frame_dropped_count(int cameraID);
 
+        [DllImport(nameDll, EntryPoint = "sl_get_health_status")]
+        private static extern IntPtr dllz_get_health_status(int cameraID);
+
+        [DllImport(nameDll, EntryPoint = "sl_get_retrieve_image_resolution")]
+        private static extern IntPtr dllz_get_retrieve_image_resolution(int cameraID, ref sl.Resolution res);
+
+        [DllImport(nameDll, EntryPoint = "sl_get_retrieve_measure_resolution")]
+        private static extern IntPtr dllz_get_retrieve_measure_resolution(int cameraID, ref sl.Resolution res);
+
         [DllImport(nameDll, EntryPoint = "sl_get_init_parameters")]
         private static extern IntPtr dllz_get_init_parameters(int cameraID);
 
@@ -367,6 +424,9 @@ namespace sl
 
         [DllImport(nameDll, EntryPoint = "sl_set_svo_position")]
         private static extern ERROR_CODE dllz_set_svo_position(int cameraID, int position);
+
+        [DllImport(nameDll, EntryPoint = "sl_pause_svo_reading")]
+        private static extern void dllz_pause_svo_reading(int cameraID, bool status);
 
         [DllImport(nameDll, EntryPoint = "sl_get_svo_number_of_frames")]
         private static extern int dllz_get_svo_number_of_frames(int cameraID);
@@ -645,8 +705,23 @@ namespace sl
         [DllImport(nameDll, EntryPoint = "sl_retrieve_measure")]
         private static extern int dllz_retrieve_measure(int cameraID, System.IntPtr ptr, int type, int mem, int width, int height, IntPtr cudaStream);
 
+        [DllImport(nameDll, EntryPoint = "sl_retrieve_voxel_measure")]
+        private static extern int dllz_retrieve_voxel_measure(int cameraID, System.IntPtr ptr, int type, int mem, ref sl.VoxelMeasureParameters parameters, IntPtr cudaStream);
+
         [DllImport(nameDll, EntryPoint = "sl_retrieve_image")]
         private static extern int dllz_retrieve_image(int cameraID, System.IntPtr ptr, int type, int mem, int width, int height, IntPtr cudaStream);
+
+        [DllImport(nameDll, EntryPoint = "sl_is_camera_one")]
+        private static extern bool dllz_is_camera_one(int model);
+
+        [DllImport(nameDll, EntryPoint = "sl_is_resolution_available")]
+        private static extern bool dllz_is_resolution_available(int resolution, int model);
+
+        [DllImport(nameDll, EntryPoint = "sl_is_FPS_available")]
+        private static extern bool dllz_is_fps_available(int fps, int resolution, int model);
+
+        [DllImport(nameDll, EntryPoint = "sl_is_HDR_available")]
+        private static extern bool dllz_is_hdr_available(int resolution, int model);
 
         #endregion
 
@@ -692,6 +767,30 @@ namespace sl
         {
             byte[] array = System.Text.Encoding.ASCII.GetBytes(str);
             return array;
+        }
+
+        private static byte[] StringUtf8ToFixedByteArray(string str, int size)
+        {
+            byte[] fixedArray = new byte[size];
+            if (string.IsNullOrEmpty(str))
+                return fixedArray;
+
+            byte[] encoded = System.Text.Encoding.ASCII.GetBytes(str);
+            int copySize = Math.Min(encoded.Length, size - 1);
+            Array.Copy(encoded, fixedArray, copySize);
+            return fixedArray;
+        }
+
+        private static string ByteArrayToStringUtf8(byte[] data)
+        {
+            if (data == null || data.Length == 0)
+                return "";
+
+            int len = Array.IndexOf(data, (byte)0);
+            if (len < 0)
+                len = data.Length;
+
+            return System.Text.Encoding.ASCII.GetString(data, 0, len);
         }
 
         /// <summary>
@@ -861,6 +960,9 @@ namespace sl
             /// </summary>
             public Resolution maximumWorkingResolution;
 
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+            public byte[] svoDecryptionKey;
+
             /// <summary>
             /// Copy constructor.
             /// </summary>
@@ -890,6 +992,7 @@ namespace sl
                 grabComputeCappingFPS = init.grabComputeCappingFPS;
                 enableImageValidityCheck = init.enableImageValidityCheck;
                 maximumWorkingResolution = init.maximumWorkingResolution;
+                svoDecryptionKey = StringUtf8ToFixedByteArray(init.svoDecryptionKey, 256);
             }
         }
 
@@ -1022,26 +1125,93 @@ namespace sl
                 new System.Text.StringBuilder(initParameters.optionalSettingsPath, initParameters.optionalSettingsPath.Length),
                 new System.Text.StringBuilder(initParameters.optionalOpencvCalibrationFile, initParameters.optionalOpencvCalibrationFile.Length));
 
-            if ((ERROR_CODE)v != ERROR_CODE.SUCCESS)
+            return FinalizeOpen(v);
+        }
+
+        /// <summary>
+        /// Opens the camera identified by its camera index (slot), using the provided init parameters.
+        /// </summary>
+        /// <param name="initParameters">Initialization parameters.</param>
+        /// <returns>sl.ERROR_CODE.SUCCESS if the camera was opened successfully.</returns>
+        public ERROR_CODE OpenFromCameraId(ref InitParameters initParameters)
+        {
+            sl_initParameters initP = new sl_initParameters(initParameters);
+            initP.coordinateSystem = initParameters.coordinateSystem;
+            int v = dllz_open_from_camera_id(CameraID, ref initP,
+                new System.Text.StringBuilder(initParameters.sdkVerboseLogFile, initParameters.sdkVerboseLogFile.Length),
+                new System.Text.StringBuilder(initParameters.optionalSettingsPath, initParameters.optionalSettingsPath.Length),
+                new System.Text.StringBuilder(initParameters.optionalOpencvCalibrationFile, initParameters.optionalOpencvCalibrationFile.Length));
+            return FinalizeOpen(v);
+        }
+
+        /// <summary>
+        /// Opens the camera identified by its serial number, using the provided init parameters.
+        /// </summary>
+        /// <param name="initParameters">Initialization parameters.</param>
+        /// <returns>sl.ERROR_CODE.SUCCESS if the camera was opened successfully.</returns>
+        public ERROR_CODE OpenFromSerialNumber(ref InitParameters initParameters)
+        {
+            sl_initParameters initP = new sl_initParameters(initParameters);
+            initP.coordinateSystem = initParameters.coordinateSystem;
+            int v = dllz_open_from_serial_number(CameraID, ref initP, initParameters.serialNumber,
+                new System.Text.StringBuilder(initParameters.sdkVerboseLogFile, initParameters.sdkVerboseLogFile.Length),
+                new System.Text.StringBuilder(initParameters.optionalSettingsPath, initParameters.optionalSettingsPath.Length),
+                new System.Text.StringBuilder(initParameters.optionalOpencvCalibrationFile, initParameters.optionalOpencvCalibrationFile.Length));
+            return FinalizeOpen(v);
+        }
+
+        /// <summary>
+        /// Opens the camera from an SVO file, using the provided init parameters.
+        /// </summary>
+        /// <param name="initParameters">Initialization parameters. <see cref="InitParameters.pathSVO"/> must be set.</param>
+        /// <returns>sl.ERROR_CODE.SUCCESS if the camera was opened successfully.</returns>
+        public ERROR_CODE OpenFromSVOFile(ref InitParameters initParameters)
+        {
+            sl_initParameters initP = new sl_initParameters(initParameters);
+            initP.coordinateSystem = initParameters.coordinateSystem;
+            int v = dllz_open_from_svo_file(CameraID, ref initP,
+                new System.Text.StringBuilder(initParameters.pathSVO, initParameters.pathSVO.Length),
+                new System.Text.StringBuilder(initParameters.sdkVerboseLogFile, initParameters.sdkVerboseLogFile.Length),
+                new System.Text.StringBuilder(initParameters.optionalSettingsPath, initParameters.optionalSettingsPath.Length),
+                new System.Text.StringBuilder(initParameters.optionalOpencvCalibrationFile, initParameters.optionalOpencvCalibrationFile.Length));
+            return FinalizeOpen(v);
+        }
+
+        /// <summary>
+        /// Opens the camera from a network stream, using the provided init parameters.
+        /// </summary>
+        /// <param name="initParameters">Initialization parameters. <see cref="InitParameters.ipStream"/> and <see cref="InitParameters.portStream"/> must be set.</param>
+        /// <returns>sl.ERROR_CODE.SUCCESS if the camera was opened successfully.</returns>
+        public ERROR_CODE OpenFromStream(ref InitParameters initParameters)
+        {
+            sl_initParameters initP = new sl_initParameters(initParameters);
+            initP.coordinateSystem = initParameters.coordinateSystem;
+            int v = dllz_open_from_stream(CameraID, ref initP,
+                new System.Text.StringBuilder(initParameters.ipStream, initParameters.ipStream.Length),
+                initParameters.portStream,
+                new System.Text.StringBuilder(initParameters.sdkVerboseLogFile, initParameters.sdkVerboseLogFile.Length),
+                new System.Text.StringBuilder(initParameters.optionalSettingsPath, initParameters.optionalSettingsPath.Length),
+                new System.Text.StringBuilder(initParameters.optionalOpencvCalibrationFile, initParameters.optionalOpencvCalibrationFile.Length));
+            return FinalizeOpen(v);
+        }
+
+        private ERROR_CODE FinalizeOpen(int result)
+        {
+            if ((ERROR_CODE)result != ERROR_CODE.SUCCESS)
             {
                 cameraReady = false;
-                return (ERROR_CODE)v;
+                return (ERROR_CODE)result;
             }
-
-            //Set more values if the initialization was successful.
             imageWidth = dllz_get_width(CameraID);
             imageHeight = dllz_get_height(CameraID);
-
             if (imageWidth > 0 && imageHeight > 0)
             {
                 GetCalibrationParameters(false);
                 cameraModel = GetCameraModel();
                 cameraReady = true;
-
-                return (ERROR_CODE)v;
+                return (ERROR_CODE)result;
             }
-            else
-                return sl.ERROR_CODE.CAMERA_NOT_INITIALIZED;
+            return sl.ERROR_CODE.CAMERA_NOT_INITIALIZED;
         }
 
         /// <summary>
@@ -1069,6 +1239,16 @@ namespace sl
         {
             sl_RuntimeParameters rt_params = new sl_RuntimeParameters(runtimeParameters);
             return (sl.ERROR_CODE)dllz_grab(CameraID, ref rt_params);
+        }
+
+        /// <summary>
+        /// Reads the next available frame without running depth or tracking processing.
+        /// Useful when decoding camera frames independently of the full grab pipeline.
+        /// </summary>
+        /// <returns>sl.ERROR_CODE.SUCCESS if a new frame was available.</returns>
+        public sl.ERROR_CODE Read()
+        {
+            return (sl.ERROR_CODE)dllz_read(CameraID);
         }
 
         /// <summary>
@@ -1166,7 +1346,8 @@ namespace sl
                 openTimeoutSec = sl_parameters.openTimeoutSec,
                 asyncGrabCameraRecovery = sl_parameters.asyncGrabCameraRecovery,
                 grabComputeCappingFPS = sl_parameters.grabComputeCappingFPS,
-                enableImageValidityCheck = sl_parameters.enableImageValidityCheck
+                enableImageValidityCheck = sl_parameters.enableImageValidityCheck,
+                svoDecryptionKey = ByteArrayToStringUtf8(sl_parameters.svoDecryptionKey)
             };
             return parameters;
         }
@@ -1413,6 +1594,15 @@ namespace sl
         }
 
         /// <summary>
+        /// Pauses or resumes SVO playback.
+        /// </summary>
+        /// <param name="status">True to pause, false to resume.</param>
+        public void PauseSVOReading(bool status)
+        {
+            dllz_pause_svo_reading(CameraID, status);
+        }
+
+        /// <summary>
         /// Returns the current camera FPS.
         ///
         /// This is limited primarily by resolution but can also be lower due to setting a lower desired resolution in Open() or from USB connection/bandwidth issues.
@@ -1529,6 +1719,40 @@ namespace sl
         }
 
         /// <summary>
+        /// Returns the self-diagnostic health status of the camera (image, depth, sensor quality).
+        /// </summary>
+        /// <returns>sl.HealthStatus filled with the current diagnostic results.</returns>
+        public sl.HealthStatus GetHealthStatus()
+        {
+            IntPtr p = dllz_get_health_status(CameraID);
+            if (p == IntPtr.Zero)
+                return new sl.HealthStatus();
+            return (sl.HealthStatus)Marshal.PtrToStructure(p, typeof(sl.HealthStatus));
+        }
+
+        /// <summary>
+        /// Returns the effective resolution used when retrieving images (after any downscaling applied by the SDK).
+        /// </summary>
+        /// <returns>The actual image retrieval resolution.</returns>
+        public sl.Resolution GetRetrieveImageResolution()
+        {
+            sl.Resolution res = new sl.Resolution();
+            dllz_get_retrieve_image_resolution(CameraID, ref res);
+            return res;
+        }
+
+        /// <summary>
+        /// Returns the effective resolution used when retrieving depth measures (after any downscaling applied by the SDK).
+        /// </summary>
+        /// <returns>The actual measure retrieval resolution.</returns>
+        public sl.Resolution GetRetrieveMeasureResolution()
+        {
+            sl.Resolution res = new sl.Resolution();
+            dllz_get_retrieve_measure_resolution(CameraID, ref res);
+            return res;
+        }
+
+        /// <summary>
         /// Gets the version of the currently installed ZED SDK.
         /// </summary>
         /// <returns>ZED SDK version as a string in the format MAJOR.MINOR.PATCH.</returns>
@@ -1549,6 +1773,39 @@ namespace sl
         {
             return (sl.ERROR_CODE)dllz_convert_coordinate_system(ref rotation, ref translation, coordinateSystemSrc, coordinateSystemDest);
         }
+
+        /// <summary>
+        /// Returns whether the given camera model is a monocular (ZED One) camera.
+        /// </summary>
+        public static bool IsCameraOne(sl.MODEL model)
+        {
+            return dllz_is_camera_one((int)model);
+        }
+
+        /// <summary>
+        /// Returns whether the given resolution is supported by the given camera model.
+        /// </summary>
+        public static bool IsResolutionAvailable(sl.RESOLUTION resolution, sl.MODEL model)
+        {
+            return dllz_is_resolution_available((int)resolution, (int)model);
+        }
+
+        /// <summary>
+        /// Returns whether the given FPS is supported for the given resolution and camera model.
+        /// </summary>
+        public static bool IsFPSAvailable(int fps, sl.RESOLUTION resolution, sl.MODEL model)
+        {
+            return dllz_is_fps_available(fps, (int)resolution, (int)model);
+        }
+
+        /// <summary>
+        /// Returns whether HDR is available for the given resolution and camera model.
+        /// </summary>
+        public static bool IsHDRAvailable(sl.RESOLUTION resolution, sl.MODEL model)
+        {
+            return dllz_is_hdr_available((int)resolution, (int)model);
+        }
+
         /// <summary>
         /// Gets the version of the currently installed ZED SDK.
         /// </summary>
@@ -1608,6 +1865,42 @@ namespace sl
         }
 
         /// <summary>
+        /// Sets the clock source used for all SDK timestamps (images and sensors).
+        /// This is a process-wide setting shared by all camera instances. Call this before opening any camera.
+        /// </summary>
+        /// <param name="clock">The desired <see cref="TIMESTAMP_CLOCK"/>.</param>
+        public static void SetTimestampClock(sl.TIMESTAMP_CLOCK clock)
+        {
+            dllz_set_timestamp_clock((int)clock);
+        }
+
+        /// <summary>
+        /// Returns the clock source currently used for SDK timestamps.
+        /// </summary>
+        public static sl.TIMESTAMP_CLOCK GetTimestampClock()
+        {
+            return (sl.TIMESTAMP_CLOCK)dllz_get_timestamp_clock();
+        }
+
+        /// <summary>
+        /// Sets the maximum system-clock step (ms) the SDK follows per sample when the host
+        /// clock is adjusted backward. Only meaningful in <see cref="TIMESTAMP_CLOCK.SYSTEM_CLOCK"/> mode.
+        /// </summary>
+        /// <param name="limitMs">Clamp threshold. 4 ms by default; negative = disable; 0 = freeze.</param>
+        public static void SetMaxSystemClockStepMs(float limitMs)
+        {
+            dllz_set_max_system_clock_step_ms(limitMs);
+        }
+
+        /// <summary>
+        /// Returns the current system-clock step clamp in milliseconds.
+        /// </summary>
+        public static float GetMaxSystemClockStepMs()
+        {
+            return dllz_get_max_system_clock_step_ms();
+        }
+
+        /// <summary>
         /// Checks if the camera has been initialized and the plugin has been loaded. Throws exceptions otherwise.
         /// </summary>
         private void AssertCameraIsReady()
@@ -1644,6 +1937,25 @@ namespace sl
         public sl.ERROR_CODE RetrieveMeasure(sl.Mat mat, sl.MEASURE measure, sl.MEM mem = sl.MEM.CPU, sl.Resolution resolution = new sl.Resolution())
         {
             return (sl.ERROR_CODE)(dllz_retrieve_measure(CameraID, mat.MatPtr, (int)measure, (int)mem, (int)resolution.width, (int)resolution.height, IntPtr.Zero));
+        }
+
+        /// <summary>
+        /// Retrieves a voxel-decimated point cloud from the last grabbed frame and loads it into a sl.Mat.
+        ///
+        /// The returned mat is an unorganized 1D point cloud where each output element represents one occupied voxel.
+        /// Only point-cloud measures are supported.
+        ///
+        /// \n\note For more info, read about the SDK method it calls:
+        /// <a href="https://www.stereolabs.com/docs/api/classsl_1_1Camera.html">retrieveVoxelMeasure</a>.
+        /// </summary>
+        /// <param name="mat">sl.Mat to fill with the voxel-decimated point cloud.</param>
+        /// <param name="measure">Point-cloud measure type (XYZ, XYZRGBA, XYZBGRA, XYZARGB, XYZABGR, and right variants).</param>
+        /// <param name="mem">Whether the output should be on CPU or GPU memory.</param>
+        /// <param name="parameters">Voxel decimation parameters. See sl.VoxelMeasureParameters.</param>
+        /// <returns>sl.ERROR_CODE indicating if the retrieval was successful, and why it wasn't otherwise.</returns>
+            public sl.ERROR_CODE RetrieveVoxelMeasure(sl.Mat mat, sl.MEASURE measure = sl.MEASURE.XYZRGBA, sl.MEM mem = sl.MEM.CPU, sl.VoxelMeasureParameters parameters = new sl.VoxelMeasureParameters())
+        {
+            return (sl.ERROR_CODE)(dllz_retrieve_voxel_measure(CameraID, mat.MatPtr, (int)measure, (int)mem, ref parameters, IntPtr.Zero));
         }
 
         /// <summary>
@@ -2734,21 +3046,54 @@ namespace sl
         /// <param name="bitrate">Override default bitrate with a custom bitrate (Kbits/s).</param>
         /// <param name="targetFPS">Use another fps than camera FPS. Must respect camera_fps%target_fps == 0.</param>
         /// <param name="transcode">If input is in streaming mode, dump directly into SVO file (transcode=false) or decode/encode (transcode=true).</param>
+        /// <param name="encryptionKey">Key to encrypt the SVO file. If empty, the file will not be encrypted.</param>
+        /// <param name="encodingPreset">Preset for the encoding parameters. Default is the default preset of the encoder, which is a balanced preset between quality and speed.</param>
         /// <returns>An sl.ERROR_CODE that defines if the file was successfully created and can be filled with images.</returns>
-        public ERROR_CODE EnableRecording(string videoFileName, SVO_COMPRESSION_MODE compressionMode = SVO_COMPRESSION_MODE.H264_BASED, uint bitrate = 0, int targetFPS = 0, bool transcode = false)
+        public ERROR_CODE EnableRecording(string videoFileName, SVO_COMPRESSION_MODE compressionMode = SVO_COMPRESSION_MODE.H264_BASED, uint bitrate = 0, int targetFPS = 0,
+         bool transcode = false, string encryptionKey = "", SVO_ENCODING_PRESET encodingPreset = SVO_ENCODING_PRESET.DEFAULT)
         {
-            return (ERROR_CODE)dllz_enable_recording(CameraID, StringUtf8ToByte(videoFileName), (int)compressionMode, bitrate, targetFPS, transcode);
+            if (string.IsNullOrEmpty(encryptionKey) && encodingPreset == SVO_ENCODING_PRESET.DEFAULT)
+                return (ERROR_CODE)dllz_enable_recording(CameraID, StringUtf8ToByte(videoFileName), (int)compressionMode, bitrate, targetFPS, transcode);
+
+            var native = BuildNativeRecordingParameters(videoFileName, compressionMode, bitrate, targetFPS, transcode, encryptionKey, encodingPreset);
+            return (ERROR_CODE)dllz_enable_recording_from_params(CameraID, ref native);
         }
 
         /// <summary>
         /// Creates an SVO file to be filled by EnableRecording() and DisableRecording().
         /// </summary>
-        /// <param name="videoFileName">A structure containing all the specific parameters for the positional tracking. Default: a reset of RecordingParameters.</param>
+        /// <param name="recordingParameters">A structure containing all the recording parameters.</param>
         /// <returns>An sl.ERROR_CODE that defines if the file was successfully created and can be filled with images.</returns>
         public ERROR_CODE EnableRecording(RecordingParameters recordingParameters)
         {
-            return (ERROR_CODE)dllz_enable_recording(CameraID, StringUtf8ToByte(recordingParameters.videoFilename), (int)recordingParameters.compressionMode, recordingParameters.bitrate,
-                    recordingParameters.targetFPS, recordingParameters.transcode);
+            var native = BuildNativeRecordingParameters(recordingParameters.videoFilename, recordingParameters.compressionMode,
+                recordingParameters.bitrate, recordingParameters.targetFPS, recordingParameters.transcode,
+                recordingParameters.encryptionKey, recordingParameters.encodingPreset);
+            return (ERROR_CODE)dllz_enable_recording_from_params(CameraID, ref native);
+        }
+
+        private static NativeRecordingParameters BuildNativeRecordingParameters(string videoFilename, SVO_COMPRESSION_MODE compressionMode,
+            uint bitrate, int targetFPS, bool transcode, string encryptionKey, SVO_ENCODING_PRESET encodingPreset)
+        {
+            var native = new NativeRecordingParameters();
+            native.video_filename = new byte[256];
+            native.encryption_key = new byte[256];
+            if (!string.IsNullOrEmpty(videoFilename))
+            {
+                var fnBytes = System.Text.Encoding.UTF8.GetBytes(videoFilename);
+                Buffer.BlockCopy(fnBytes, 0, native.video_filename, 0, Math.Min(fnBytes.Length, 255));
+            }
+            if (!string.IsNullOrEmpty(encryptionKey))
+            {
+                var keyBytes = System.Text.Encoding.UTF8.GetBytes(encryptionKey);
+                Buffer.BlockCopy(keyBytes, 0, native.encryption_key, 0, Math.Min(keyBytes.Length, 255));
+            }
+            native.compression_mode = (int)compressionMode;
+            native.bitrate = bitrate;
+            native.target_framerate = (uint)targetFPS;
+            native.transcode_streaming_input = transcode;
+            native.encoding_preset = (int)encodingPreset;
+            return native;
         }
 
         /// <summary>
