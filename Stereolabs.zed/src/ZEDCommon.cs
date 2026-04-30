@@ -36,7 +36,7 @@ namespace sl
         /// </summary>
         MAX_BATCH_SIZE = 200,
         /// <summary>
-        /// Maximum number of camera can that be instancied at the same time. Used to initialized arrays of cameras (ex: GetDeviceList())
+        /// Maximum number of cameras that can be instantiated at the same time. Used to initialize arrays of cameras (ex: GetDeviceList()).
         /// </summary>
         MAX_CAMERA_PLUGIN = 20,
         /// <summary>
@@ -323,6 +323,10 @@ namespace sl
         /// restart zed_x_daemon.service
         /// </summary>
         DRIVER_FAILURE,
+        /// <summary>
+        /// The camera configuration exceeds available PHY CSI bandwidth (GMSL). Reduce resolution or FPS, or adjust hardware configuration.
+        /// </summary>
+        CAMERA_EXCEEDS_BANDWIDTH = 35,
         /// @cond SHOWHIDDEN 
         LAST
         /// @endcond
@@ -702,21 +706,41 @@ namespace sl
     public enum SPATIAL_MEMORY_STATUS
     {
         /// <summary>
-        /// The positional tracking module is operating normally.
+        /// \deprecated No longer used for GEN_3.
         /// </summary>
         OK,
         /// <summary>
-        /// The positional tracking module detected a loop and corrected its position.
+        /// Found a loop closure, relocalized within the area map or corrected after a sudden localization loss.
         /// </summary>
         LOOP_CLOSED,
         /// <summary>
-        /// The positional tracking module is searching for recognizable areas in the global map to relocate.
+        /// \deprecated No longer used for GEN_3.
         /// </summary>
         SEARCHING,
         /// <summary>
         /// Spatial memory is disabled.
         /// </summary>
-        OFF
+        OFF,
+        /// <summary>
+        /// Camera has not yet acquired enough memory or found its first loop closure. Keep moving the camera.
+        /// </summary>
+        INITIALIZING = 4,
+        /// <summary>
+        /// Camera is localized within the loaded area map.
+        /// </summary>
+        KNOWN_MAP = 5,
+        /// <summary>
+        /// Camera is mapping or getting out of area map bounds.
+        /// </summary>
+        MAP_UPDATE = 6,
+        /// <summary>
+        /// Localization cannot operate anymore (camera obstructed or sudden jumps).
+        /// </summary>
+        LOST = 7,
+        /// <summary>
+        /// Not enough memory to continue tracking.
+        /// </summary>
+        NOT_ENOUGH_MEMORY_FOR_TRACKING = 8
     }
 
     ///\ingroup PositionalTracking_group
@@ -1617,6 +1641,62 @@ namespace sl
 
     ///\ingroup Depth_group
     /// <summary>
+    /// Controls how voxel size adapts with depth.
+    /// </summary>
+    public enum VOXELIZATION_MODE
+    {
+        /// <summary>
+        /// No adaptation. Voxel size is used uniformly everywhere.
+        /// </summary>
+        FIXED,
+        /// <summary>
+        /// Quadratic growth matching stereo depth noise.
+        /// </summary>
+        STEREO_UNCERTAINTY,
+        /// <summary>
+        /// Linear growth with depth. Suits lidar/ToF sensors.
+        /// </summary>
+        LINEAR
+    };
+
+    ///\ingroup Depth_group
+    /// <summary>
+    /// Parameters controlling voxel decimation in Camera.RetrieveVoxelMeasure.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct VoxelMeasureParameters
+    {
+        /// <summary>
+        /// Voxel grid cell size in coordinate units. Default: -1 (100mm equivalent).
+        /// </summary>
+        public float voxelSize;
+        /// <summary>
+        /// true = centroid, false = voxel grid center. Default: true.
+        /// </summary>
+        [MarshalAs(UnmanagedType.U1)]
+        public bool centroid;
+        /// <summary>
+        /// How voxel size adapts with depth. Default: STEREO_UNCERTAINTY.
+        /// </summary>
+        public VOXELIZATION_MODE resolutionMode;
+        /// <summary>
+        /// Scale factor for depth-adaptive growth. Default: 0.2.
+        /// </summary>
+        public float resolutionScale;
+
+        public VoxelMeasureParameters(float voxelSize = -1.0f, bool centroid = true,
+            VOXELIZATION_MODE resolutionMode = VOXELIZATION_MODE.STEREO_UNCERTAINTY,
+            float resolutionScale = 0.2f)
+        {
+            this.voxelSize = voxelSize;
+            this.centroid = centroid;
+            this.resolutionMode = resolutionMode;
+            this.resolutionScale = resolutionScale;
+        }
+    };
+
+    ///\ingroup Depth_group
+    /// <summary>
     /// Lists the different states of region of interest auto detection.
     /// </summary>
     public enum REGION_OF_INTEREST_AUTO_DETECTION_STATE
@@ -1718,6 +1798,15 @@ namespace sl
         /// \note sl.Camera.Grab() will return an error when trying to play too fast, and frames will be dropped when playing too slowly.
         /// </summary>
         public bool svoRealTimeMode;
+
+        /// <summary>
+        /// Optional passphrase or key to decrypt an encrypted SVO file.
+        ///
+        /// This must match the key used at recording time.
+        ///
+        /// Default: "" (no decryption)
+        /// </summary>
+        public string svoDecryptionKey = "";
 
         /// <summary>
         /// Unit of spatial data (depth, point cloud, tracking, mesh, etc.) for retrieval.
@@ -2026,6 +2115,7 @@ namespace sl
             this.gmslPort = -1;
             this.pathSVO = "";
             this.svoRealTimeMode = false;
+            this.svoDecryptionKey = "";
             this.coordinateUnits = UNIT.METER;
             this.coordinateSystem = COORDINATE_SYSTEM.IMAGE;
             this.depthMode = DEPTH_MODE.NEURAL;
@@ -2171,18 +2261,40 @@ namespace sl
         /// </summary>
         [MarshalAs(UnmanagedType.U1)]
         public bool transcode;
+
+        /// <summary>
+        /// Optional encryption key or passphrase to protect the SVO file (AES-256-CTR).
+        ///
+        /// When set, the SVO file is encrypted on the fly during recording.
+        /// The same value must be provided in sl.InitParameters.svoDecryptionKey for playback.
+        ///
+        /// Default: "" (no encryption)
+        /// </summary>
+        public string encryptionKey;
+
+        /// <summary>
+        /// Encoding preset for the hardware encoder.
+        ///
+        /// Controls the speed/quality tradeoff of the GPU encoder.
+        /// Default: sl.SVO_ENCODING_PRESET.DEFAULT
+        /// \note Only applicable when compressionMode is H264 or H265.
+        /// </summary>
+        public SVO_ENCODING_PRESET encodingPreset;
+
         /// <summary>
         /// Default constructor.
         ///
         /// All the parameters are set to their default values.
         /// </summary>
-        public RecordingParameters(string filename = "", SVO_COMPRESSION_MODE compression = SVO_COMPRESSION_MODE.H264_BASED, uint bitrate = 0, int fps = 0, bool transcode = false)
+        public RecordingParameters(string filename = "", SVO_COMPRESSION_MODE compression = SVO_COMPRESSION_MODE.H264_BASED, uint bitrate = 0, int fps = 0, bool transcode = false, string encryptionKey = "", SVO_ENCODING_PRESET encodingPreset = SVO_ENCODING_PRESET.DEFAULT)
         {
             this.videoFilename = filename;
             this.compressionMode = compression;
             this.bitrate = bitrate;
             this.targetFPS = fps;
             this.transcode = transcode;
+            this.encryptionKey = encryptionKey;
+            this.encodingPreset = encodingPreset;
         }
     }
 
@@ -2417,6 +2529,31 @@ namespace sl
 
     ///\ingroup  Video_group
     /// <summary>
+    /// Structure containing the self-diagnostic results of the camera (image, depth, sensor health).
+    /// Retrieved via <see cref="Camera.GetHealthStatus"/>.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct HealthStatus
+    {
+        /// <summary>Whether the health check is enabled.</summary>
+        [MarshalAs(UnmanagedType.U1)]
+        public bool enabled;
+        /// <summary>Poor image quality detected (hardware issue, occlusion, blurry, incorrect settings, etc.).</summary>
+        [MarshalAs(UnmanagedType.U1)]
+        public bool lowImageQuality;
+        /// <summary>Low-light conditions detected.</summary>
+        [MarshalAs(UnmanagedType.U1)]
+        public bool lowLighting;
+        /// <summary>Low depth map reliability (obstructed optics, heavy fog, etc.).</summary>
+        [MarshalAs(UnmanagedType.U1)]
+        public bool lowDepthReliability;
+        /// <summary>IMU data reliability issue (corrupted stream, saturated sensors, shocks, etc.).</summary>
+        [MarshalAs(UnmanagedType.U1)]
+        public bool lowMotionSensorsReliability;
+    }
+
+    ///\ingroup  Video_group
+    /// <summary>
     /// Structure containing information about the status of the recording.
     /// \note For more info, read about the ZED SDK C++ struct it mirrors:
     /// <a href="https://www.stereolabs.com/docs/api/structsl_1_1RecordingStatus.html">RecordingStatus</a>
@@ -2512,11 +2649,23 @@ namespace sl
         /// </summary>
         VGA,
         /// <summary>
+        /// 960*768 (x2)
+        /// \n Available FPS: 30
+        /// \n Only supported with ZED-X HDR lineup (One/Stereo)
+        /// </summary>
+        XVGA,
+        /// <summary>
+        /// 640*512 (x2)
+        /// \n Available FPS: 30
+        /// \n Only supported with ZED-X HDR lineup (One/Stereo)
+        /// </summary>
+        TXGA,
+        /// <summary>
         /// Select the resolution compatible with the camera:
         /// - ZED X/X Mini: HD1200
         /// - other cameras: HD720
         /// </summary>
-        AUTO
+        AUTO = 11
     };
 
     ///\ingroup  Video_group
@@ -2570,6 +2719,10 @@ namespace sl
         /// ZED X Mini (ZED XM) camera model
         /// </summary>
         ZED_XM,
+        /// <summary>
+        /// ZED X Nano (18mm baseline) camera model with dual global shutter AR0234 sensor
+        /// </summary>
+        ZED_X_NANO = 9,
         /// <summary>
         /// Virtual ZED X generated from 2 ZED X One
         /// </summary>
@@ -2967,7 +3120,15 @@ namespace sl
         ///  Default value is 50. \note Only available for ZED X/X Mini cameras.
         /// </summary>
         SCENE_ILLUMINANCE,
-        ///@cond SHOWHIDDEN 
+        /// <summary>
+        /// AE anti-banding mode.
+        /// Affected value should be between 0 and 3.
+        /// 0: OFF, 1: AUTO, 2: 50Hz, 3: 60Hz.
+        /// Default value is 0 (OFF).
+        /// \note Only available for non-HDR GMSL cameras (e.g. ZED X, ZED X Mini, ZED X One GS, etc.).
+        /// </summary>
+        AE_ANTIBANDING,
+        ///@cond SHOWHIDDEN
         LAST
         ///@endcond
     };
@@ -2986,6 +3147,26 @@ namespace sl
         /// The requested timestamp or data will be at the time of the function call.
         /// </summary>
         CURRENT
+    };
+
+    ///\ingroup  Video_group
+    /// <summary>
+    /// Lists available clock sources for SDK timestamps.
+    ///
+    /// Selects the clock used internally by the SDK to timestamp images and sensor data.
+    /// Both image and IMU timestamps always use the same selected clock, ensuring coherent results.
+    /// <para>Note: this is a process-wide setting. Use <see cref="Camera.SetTimestampClock"/> before opening any camera.</para>
+    /// </summary>
+    public enum TIMESTAMP_CLOCK
+    {
+        /// <summary>
+        /// Timestamps use the system (wall-clock) time. Affected by NTP/PTP adjustments.
+        /// </summary>
+        SYSTEM_CLOCK,
+        /// <summary>
+        /// Timestamps use a monotonic clock. Immune to system clock step adjustments (NTP/PTP).
+        /// </summary>
+        MONOTONIC_CLOCK
     };
 
     ///\ingroup  Video_group
@@ -3027,6 +3208,41 @@ namespace sl
         /// \note Requires a NVIDIA GPU.
         /// </summary>
         H265_LOSSLESS_BASED,
+    }
+
+    ///\ingroup  Video_group
+    /// <summary>
+    /// Lists available encoding presets for SVO recording.
+    /// Controls the speed/quality tradeoff of the GPU hardware encoder.
+    /// \note Only applicable when compression mode is H264 or H265.
+    /// </summary>
+    public enum SVO_ENCODING_PRESET
+    {
+        /// <summary>
+        /// Encoder default.
+        /// Maps to NVENC P4 / V4L2 default.
+        /// </summary>
+        DEFAULT,
+        /// <summary>
+        /// Fastest encoding, lowest quality.
+        /// Maps to NVENC P1 / V4L2 ULTRAFAST.
+        /// </summary>
+        ULTRAFAST,
+        /// <summary>
+        /// Fast encoding.
+        /// Maps to NVENC P2 / V4L2 FAST.
+        /// </summary>
+        FAST,
+        /// <summary>
+        /// Balanced speed/quality.
+        /// Maps to NVENC P3 / V4L2 MEDIUM.
+        /// </summary>
+        MEDIUM,
+        /// <summary>
+        /// Slow encoding, higher quality.
+        /// Maps to NVENC P5 / V4L2 SLOW.
+        /// </summary>
+        SLOW,
     }
 
     ///\ingroup  Video_group

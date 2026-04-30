@@ -433,6 +433,12 @@ namespace sl
         [DllImport(nameDll, EntryPoint = "sl_mat_clone")]
         private static extern void dllz_mat_clone(System.IntPtr ptr, System.IntPtr ptrSource);
 
+        [DllImport(nameDll, EntryPoint = "sl_mat_get_data_type")]
+        private static extern int dllz_mat_get_data_type(System.IntPtr ptr);
+
+        [DllImport(nameDll, EntryPoint = "sl_mat_swap")]
+        private static extern void dllz_mat_swap(System.IntPtr ptr1, System.IntPtr ptr2);
+
         [DllImport(nameDll, EntryPoint = "sl_mat_convert_color")]
         private static extern int dllz_mat_convert_color(System.IntPtr ptr, int mem, bool swapRBChannels, IntPtr cudaStream);
 
@@ -742,6 +748,22 @@ namespace sl
         public void Clone(Mat source)
         {
             dllz_mat_clone(_matInternalPtr, source._matInternalPtr);
+        }
+
+        /// <summary>
+        /// Returns the data type of this Mat (e.g. MAT_32F_C1, MAT_8U_C4, etc.).
+        /// </summary>
+        public sl.MAT_TYPE GetDataType()
+        {
+            return (sl.MAT_TYPE)dllz_mat_get_data_type(_matInternalPtr);
+        }
+
+        /// <summary>
+        /// Swaps the content of two Mat objects (no data copy, only internal pointers are exchanged).
+        /// </summary>
+        public static void Swap(Mat a, Mat b)
+        {
+            dllz_mat_swap(a._matInternalPtr, b._matInternalPtr);
         }
 
         /************ GET VALUES *********************/
