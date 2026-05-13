@@ -343,7 +343,7 @@ namespace sl
         private static extern ERROR_CODE dllz_get_camera_settings_min_max(int id, VIDEO_SETTINGS settingToRetrieve, ref int minvalue, ref int maxvalue);
 
         [DllImport(nameDll, EntryPoint = "sl_set_roi_for_aec_agc")]
-        private static extern ERROR_CODE dllz_set_roi_for_aec_agc(int id, int side, Rect roi,bool reset);
+        private static extern ERROR_CODE dllz_set_roi_for_aec_agc(int id, int side, ref Rect roi, bool reset);
 
         [DllImport(nameDll, EntryPoint = "sl_get_roi_for_aec_agc")]
         private static extern ERROR_CODE dllz_get_roi_for_aec_agc(int id, int side, ref Rect roi);
@@ -501,7 +501,7 @@ namespace sl
         private static extern int dllz_get_sensors_data_batch_count(int cameraID, out int count);
 
         [DllImport(nameDll, EntryPoint = "sl_get_sensors_data_batch")]
-        private static extern int dllz_get_sensors_data_batch(int cameraID, ref SensorsData[] imuData);
+        private static extern int dllz_get_sensors_data_batch(int cameraID, out IntPtr imuData);
 
         [DllImport(nameDll, EntryPoint = "sl_get_area_export_state")]
         private static extern int dllz_get_area_export_state(int cameraID);
@@ -1501,7 +1501,7 @@ namespace sl
         {
             AssertCameraIsReady();
             if (settings == VIDEO_SETTINGS.AEC_AGC_ROI)
-                return dllz_set_roi_for_aec_agc(CameraID, (int)side, roi, reset);
+                return dllz_set_roi_for_aec_agc(CameraID, (int)side, ref roi, reset);
             else
                 return ERROR_CODE.FAILURE;
         }
@@ -2266,12 +2266,15 @@ namespace sl
             data = new List<SensorsData>();
             ERROR_CODE err = (ERROR_CODE)dllz_get_sensors_data_batch_count(CameraID, out int count);
 
-            if (err == ERROR_CODE.SUCCESS)
+            if (err == ERROR_CODE.SUCCESS && count > 0)
             {
-                SensorsData[] sensorsDataArray = new SensorsData[count];
-                err = (ERROR_CODE)dllz_get_sensors_data_batch(CameraID, ref sensorsDataArray); // Get the size of the data
-
-                data.AddRange(sensorsDataArray);
+                err = (ERROR_CODE)dllz_get_sensors_data_batch(CameraID, out IntPtr ptr);
+                if (err == ERROR_CODE.SUCCESS && ptr != IntPtr.Zero)
+                {
+                    int stride = Marshal.SizeOf<SensorsData>();
+                    for (int i = 0; i < count; i++)
+                        data.Add(Marshal.PtrToStructure<SensorsData>(ptr + i * stride));
+                }
             }
             return err;
         }

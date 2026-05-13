@@ -3056,23 +3056,20 @@ namespace sl
         /// </summary>
         LED_STATUS,
         /// <summary>
-        /// Real exposure time control in microseconds.
-        /// \note Only available for ZED X/X Mini cameras.
-        /// \note Replace \ref VIDEO_SETTINGS.EXPOSURE "EXPOSURE" setting.
+        /// Exposure time control in microseconds.
+        /// Only available for GMSL2-based camera (ZED-X, ZED-X Mini, ZED-Xone,...) .
+	/// \note Use this value to get the real exposure time in us
         /// </summary>
         EXPOSURE_TIME,
         /// <summary>
-        /// Real analog gain (sensor) control in mDB.
-        /// \n The range is defined by Jetson DTS and by default [1000-16000].
-        /// \note Only available for ZED X/X Mini cameras.
-        /// \note Replace \ref VIDEO_SETTINGS.GAIN "GAIN" settings.
+        /// Analog gain (sensor) control in mDB.
+        /// Use this value to get the real analog gain in mdB.
+        /// \note Only available for GMSL2-based camera (ZED-X, ZED-X Mini, ZED-Xone,...)
         /// </summary>
         ANALOG_GAIN,
         /// <summary>
-        /// Real digital gain (ISP) as a factor.
-        /// \n The range is defined by Jetson DTS and by default [1-256].
-        /// \note Only available for ZED X/X Mini cameras.
-        /// \note Replace \ref VIDEO_SETTINGS.GAIN "GAIN" settings.
+        /// Digital gain (ISP) as a factor.
+        /// \note Only available for GMSL2-based camera (ZED-X, ZED-X Mini, ZED-Xone,...)
         /// </summary>
         DIGITAL_GAIN,
         /// <summary>
@@ -3115,9 +3112,11 @@ namespace sl
         /// </summary>
         DENOISING,
         /// <summary>
-        ///  Level of denoising applied on both left and right images.
-        ///  Affected value should be between 0 and 100.
-        ///  Default value is 50. \note Only available for ZED X/X Mini cameras.
+	/// Level of illuminance of the scene calculated by the ISP. 
+	/// Can be used to determine the level of light in the scene and adjust settings accordingly. 
+	/// \note Read-only control. 
+        /// Available for ZED-X/X mini and ZED-XOne GS or 4K(UHD) cameras only. 
+        /// Value provided in [0.1x]Lux. 
         /// </summary>
         SCENE_ILLUMINANCE,
         /// <summary>
@@ -4542,7 +4541,7 @@ namespace sl
         /// </summary>
         /// \note Expressed in pixels on the original image resolution, ```[0, 0]``` is the top left corner.
         /// \warning Not available with [sl.OBJECT_DETECTION_MODEL.MULTI_CLASS_BOX_XXX](\ref OBJECT_DETECTION_MODEL).
-		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
         public Vector2[] headBoundingBox2D;// 2D Bounding Box of head
         /// <summary>
         /// Covariance matrix of the 3D position.
