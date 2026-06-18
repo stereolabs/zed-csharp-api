@@ -652,6 +652,9 @@ namespace sl
         [DllImport(nameDll, EntryPoint = "sl_ingest_custom_box_objects")]
         private static extern int dllz_ingest_custom_box_objects(int cameraID, int nb_objects, CustomBoxObjectData[] objects_in);
 
+        [DllImport(nameDll, EntryPoint = "sl_ingest_custom_depth")]
+        private static extern int dllz_ingest_custom_depth(int cameraID, System.IntPtr map_ptr, int format, float scale, System.IntPtr confidence_ptr, int confidence_convention, ulong timestamp_ns);
+
         [DllImport(nameDll, EntryPoint = "sl_retrieve_custom_objects")]
         private static extern int dllz_retrieve_custom_objects(int cameraID, ref CustomObjectDetectionRuntimeParameters od_params, IntPtr objs, uint instanceID);
 
@@ -3487,6 +3490,26 @@ namespace sl
         public sl.ERROR_CODE IngestCustomBoxObjects(List<CustomBoxObjectData> objects_in)
         {
             return (sl.ERROR_CODE)dllz_ingest_custom_box_objects(CameraID, objects_in.Count, objects_in.ToArray());
+        }
+
+        /// <summary>
+        /// Feed the depth pipeline with your own externally computed disparity or depth map (requires sl.DEPTH_MODE.CUSTOM).
+        /// The expected sequence for each frame is: Read(), retrieve the rectified images, compute the map externally,
+        /// IngestCustomDepth(), then Grab(). The map can be provided at any resolution, in CPU or GPU memory; the data
+        /// is consumed during the call.
+        /// </summary>
+        /// <param name="map">sl.Mat (MAT_TYPE.MAT_32F_C1) holding the disparity or depth map.</param>
+        /// <param name="format">Content type of the map.</param>
+        /// <param name="scale">Multiplier applied to each map value before interpretation (sign flip, normalized output, unit mismatch). Use 1 if none.</param>
+        /// <param name="confidence">Optional sl.Mat (MAT_TYPE.MAT_32F_C1) confidence map, same resolution as the map. null if not available.</param>
+        /// <param name="confidenceConvention">Value convention of the confidence map. Ignored when confidence is null.</param>
+        /// <param name="timestampNs">Timestamp (ns) of the frame the map was computed from. 0 disables the frame-mismatch check.</param>
+        /// <returns>sl.ERROR_CODE.SUCCESS if the map was ingested.</returns>
+        public sl.ERROR_CODE IngestCustomDepth(sl.Mat map, CUSTOM_DEPTH_FORMAT format = CUSTOM_DEPTH_FORMAT.DISPARITY, float scale = 1.0f,
+                sl.Mat confidence = null, CUSTOM_CONFIDENCE_CONVENTION confidenceConvention = CUSTOM_CONFIDENCE_CONVENTION.PROBABILITY, ulong timestampNs = 0)
+        {
+            return (sl.ERROR_CODE)dllz_ingest_custom_depth(CameraID, map.MatPtr, (int)format, scale,
+                confidence != null ? confidence.MatPtr : System.IntPtr.Zero, (int)confidenceConvention, timestampNs);
         }
 
         /// <summary>
