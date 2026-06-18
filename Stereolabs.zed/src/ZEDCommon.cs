@@ -1375,6 +1375,11 @@ namespace sl
         /// Real focal length in millimeters.
         /// </summary>
         public float focalLengthMetric;
+        /// <summary>
+        /// Lens distortion model of these parameters.
+        /// Raw/unrectified parameters are RAD_TAN or FISHEYE, rectified parameters are PINHOLE.
+        /// </summary>
+        public LENS_DISTORTION_MODEL lensDistortionModel;
     };
 
     ///\ingroup Depth_group
@@ -1521,7 +1526,46 @@ namespace sl
         /// <summary>
         /// More accurate Neural disparity estimation.\n Requires AI module.
         /// </summary>
-        NEURAL_PLUS
+        NEURAL_PLUS,
+        /// <summary>
+        /// No internal depth computation. The depth (or disparity) is provided for each frame with
+        /// Camera.IngestCustomDepth(), between Camera.Read() and Camera.Grab().
+        /// </summary>
+        CUSTOM
+    };
+
+    ///\ingroup Depth_group
+    /// <summary>
+    /// Lists the content type of the map ingested with Camera.IngestCustomDepth().
+    /// </summary>
+    public enum CUSTOM_DEPTH_FORMAT
+    {
+        /// <summary>
+        /// Disparity in pixels, expressed at the resolution of the provided map. Positive values = closer.
+        /// Values <= 0, NaN and -Inf are treated as invalid; +Inf as too close.
+        /// </summary>
+        DISPARITY,
+        /// <summary>
+        /// Metric depth in the unit set in the init parameters. NaN, 0 and negative values are treated as invalid;
+        /// +Inf as too far; -Inf as too close.
+        /// </summary>
+        DEPTH
+    };
+
+    ///\ingroup Depth_group
+    /// <summary>
+    /// Lists the value convention of the confidence map optionally ingested with Camera.IngestCustomDepth().
+    /// </summary>
+    public enum CUSTOM_CONFIDENCE_CONVENTION
+    {
+        /// <summary>
+        /// Values in [0,1], 1 = confident (typical network output).
+        /// </summary>
+        PROBABILITY,
+        /// <summary>
+        /// MEASURE.CONFIDENCE convention: values in [0,100], ~0 = reliable, 100 = unreliable.
+        /// </summary>
+        ZED
     };
 
     ///\ingroup Depth_group
@@ -2966,7 +3010,17 @@ namespace sl
         /// Grayscale normals right image. Each pixel contains 1 unsigned char.
         ///\n Type: sl.MAT_TYPE.MAT_8U_C1.
         /// </summary>
-        NORMALS_RIGHT_GRAY
+        NORMALS_RIGHT_GRAY,
+        /// <summary>
+        /// Left NV12 rectified image (YUV 4:2:0 semi-planar).
+        ///\n Type: sl.MAT_TYPE.NV12.
+        /// </summary>
+        LEFT_NV12,
+        /// <summary>
+        /// Right NV12 rectified image (YUV 4:2:0 semi-planar).
+        ///\n Type: sl.MAT_TYPE.NV12.
+        /// </summary>
+        RIGHT_NV12
     };
 
     ///\ingroup  Video_group
@@ -3165,7 +3219,13 @@ namespace sl
         /// <summary>
         /// Timestamps use a monotonic clock. Immune to system clock step adjustments (NTP/PTP).
         /// </summary>
-        MONOTONIC_CLOCK
+        MONOTONIC_CLOCK,
+        /// <summary>
+        /// Timestamps use the raw monotonic clock (CLOCK_MONOTONIC_RAW). Driven directly by hardware,
+        /// not subject to NTP/PTP frequency slewing. Useful for correlating SDK timestamps with
+        /// free-running hardware counters or other devices that are not time-disciplined by the host.
+        /// </summary>
+        MONOTONIC_RAW_CLOCK
     };
 
     ///\ingroup  Video_group
@@ -3700,9 +3760,39 @@ namespace sl
         FOOT
     }
 
+    ///\ingroup Core_group
+    /// <summary>
+    /// Lists the lens distortion models used to describe a camera's optics.
+    /// </summary>
+    /// <remarks>
+    /// The value is tied to the rectification state of the sl.CameraParameters it belongs to:
+    /// raw/unrectified parameters are always RAD_TAN or FISHEYE, rectified parameters are always PINHOLE.
+    /// Code working on raw parameters may treat "not FISHEYE" as RAD_TAN, but must not assume that on
+    /// parameters that could be rectified.
+    /// </remarks>
+    public enum LENS_DISTORTION_MODEL
+    {
+        /// <summary>
+        /// Radial-tangential (Brown-Conrady) distortion. Raw/unrectified parameters.
+        /// </summary>
+        RAD_TAN,
+        /// <summary>
+        /// Fisheye distortion. Raw/unrectified parameters.
+        /// </summary>
+        FISHEYE,
+        /// <summary>
+        /// Pinhole model, no distortion. Rectified parameters.
+        /// </summary>
+        PINHOLE,
+        /// <summary>
+        /// Last value, used for iteration purposes.
+        /// </summary>
+        LAST
+    }
+
     ///\ingroup SpatialMapping_group
     /// <summary>
-    /// Lists the available plane types detected based on its orientation and whether detected by 
+    /// Lists the available plane types detected based on its orientation and whether detected by
     /// sl.Camera.FindFloorPlane() or sl.Camera.FindPlaneAtHit().
     /// </summary>
     public enum PLANE_TYPE
