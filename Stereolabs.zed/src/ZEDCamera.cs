@@ -273,9 +273,6 @@ namespace sl
         /*
         * Recording functions.
         */
-        [DllImport(nameDll, EntryPoint = "sl_enable_recording")]
-        private static extern int dllz_enable_recording(int cameraID, byte[] video_filename, int compressionMode, uint bitrate, int target_fps, bool transcode);
-
         [DllImport(nameDll, EntryPoint = "sl_enable_recording_from_params")]
         private static extern int dllz_enable_recording_from_params(int cameraID, ref NativeRecordingParameters parameters);
 
@@ -395,6 +392,9 @@ namespace sl
 
         [DllImport(nameDll, EntryPoint = "sl_get_current_timestamp")]
         private static extern ulong dllz_get_current_timestamp(int cameraID);
+
+        [DllImport(nameDll, EntryPoint = "sl_get_timestamp")]
+        private static extern ulong dllz_get_timestamp(int cameraID, int timeReference);
 
         [DllImport(nameDll, EntryPoint = "sl_get_frame_dropped_count")]
         private static extern uint dllz_get_frame_dropped_count(int cameraID);
@@ -614,6 +614,15 @@ namespace sl
 
         [DllImport(nameDll, EntryPoint = "sl_get_streaming_parameters")]
         private static extern IntPtr dllz_get_streaming_parameters(int cameraID);
+
+        /*
+         * Encoded stream access functions (starting v5.4)
+         */
+        [DllImport(nameDll, EntryPoint = "sl_retrieve_encoded_stream_packet")]
+        private static extern int dllz_retrieve_encoded_stream_packet(int cameraID, ENCODED_STREAM_SOURCE source, ref EncodedStreamPacket outPacket);
+
+        [DllImport(nameDll, EntryPoint = "sl_get_encoded_streams_info")]
+        private static extern void dllz_get_encoded_streams_info(int cameraID, [In, Out] EncodedStreamInfo[] outInfos);
 
         /*
         * Objects Detection functions (starting v3.0)
@@ -967,6 +976,11 @@ namespace sl
             public byte[] svoDecryptionKey;
 
             /// <summary>
+            /// Precision used for the neural depth inference. Only applies to the neural depth modes.
+            /// </summary>
+            public sl.DEPTH_PRECISION depthPrecision;
+
+            /// <summary>
             /// Copy constructor.
             /// </summary>
             /// <param name="init"></param>
@@ -978,6 +992,7 @@ namespace sl
                 svoRealTimeMode = init.svoRealTimeMode;
                 coordinateUnits = init.coordinateUnits;
                 depthMode = init.depthMode;
+                depthPrecision = init.depthPrecision;
                 depthMinimumDistance = init.depthMinimumDistance;
                 depthMaximumDistance = init.depthMaximumDistance;
                 cameraImageFlip = (int)init.cameraImageFlip;
@@ -1067,8 +1082,14 @@ namespace sl
             [MarshalAs(UnmanagedType.U1)]
             public bool enableIMUFusion;
             public float depthMinRange;
+            [MarshalAs(UnmanagedType.U1)]
             public bool setGravityAsOrigin;
             public sl.POSITIONAL_TRACKING_MODE mode;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool enableLocalizationOnly;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool enable2DGroundMode;
+            public sl.COMPUTE_PREFERENCE computePreference;
         };
 
         /// <summary>
@@ -1338,6 +1359,7 @@ namespace sl
                 depthMaximumDistance = sl_parameters.depthMaximumDistance,
                 depthMinimumDistance = sl_parameters.depthMinimumDistance,
                 depthMode = sl_parameters.depthMode,
+                depthPrecision = sl_parameters.depthPrecision,
                 cameraImageFlip = (FLIP_MODE)sl_parameters.cameraImageFlip,
                 enableImageEnhancement = sl_parameters.enableImageEnhancement,
                 enableRightSideMeasure = sl_parameters.enableRightSideMeasure,
@@ -1406,7 +1428,10 @@ namespace sl
                 setFloorAsOrigin = sl_positionalTracking.setFloorAsOrigin,
                 depthMinRange = sl_positionalTracking.depthMinRange,
                 setGravityAsOrigin = sl_positionalTracking.setGravityAsOrigin,
-                mode = sl_positionalTracking.mode
+                mode = sl_positionalTracking.mode,
+                enableLocalizationOnly = sl_positionalTracking.enableLocalizationOnly,
+                enable2DGroundMode = sl_positionalTracking.enable2DGroundMode,
+                computePreference = sl_positionalTracking.computePreference
             };
 
             return trackingParams;
@@ -1556,6 +1581,20 @@ namespace sl
         public ulong GetCurrentTimeStamp()
         {
             return dllz_get_current_timestamp(CameraID);
+        }
+
+        /// <summary>
+        /// Gets a timestamp at the given time reference.
+        ///
+        /// \note Must be called after calling Grab() when using sl.TIME_REFERENCE.IMAGE or sl.TIME_REFERENCE.IMAGE_CENTER_OF_EXPOSURE.
+        /// \note sl.TIME_REFERENCE.IMAGE_CENTER_OF_EXPOSURE returns 0 on inputs that carry no per-frame exposure (USB cameras,
+        /// the HDR camera family, SVO files and network streams without per-frame sensor metadata), so always check for 0 before using it.
+        /// </summary>
+        /// <param name="timeReference">The desired sl.TIME_REFERENCE.</param>
+        /// <returns>The timestamp in nanoseconds, or 0 if the requested reference is not available on this input.</returns>
+        public ulong GetTimeStamp(sl.TIME_REFERENCE timeReference)
+        {
+            return dllz_get_timestamp(CameraID, (int)timeReference);
         }
 
         /// <summary>
@@ -2021,6 +2060,9 @@ namespace sl
             sl_tracking_params.depthMinRange = positionalTrackingParameters.depthMinRange;
             sl_tracking_params.setGravityAsOrigin = positionalTrackingParameters.setGravityAsOrigin;
             sl_tracking_params.mode = positionalTrackingParameters.mode;
+            sl_tracking_params.enableLocalizationOnly = positionalTrackingParameters.enableLocalizationOnly;
+            sl_tracking_params.enable2DGroundMode = positionalTrackingParameters.enable2DGroundMode;
+            sl_tracking_params.computePreference = positionalTrackingParameters.computePreference;
 
             trackingStatus = (sl.ERROR_CODE)dllz_enable_tracking(CameraID, ref sl_tracking_params, new System.Text.StringBuilder(positionalTrackingParameters.areaFilePath, positionalTrackingParameters.areaFilePath.Length));
             return trackingStatus;
@@ -2358,10 +2400,13 @@ namespace sl
             map_params.resolutionMeter = spatialMappingParameters.resolutionMeter;
             map_params.saveTexture = spatialMappingParameters.saveTexture;
             map_params.mapType = spatialMappingParameters.map_type;
-            map_params.maxMemoryUsage = 4096;
+            map_params.maxMemoryUsage = spatialMappingParameters.maxMemoryUsage;
             map_params.useChunkOnly = spatialMappingParameters.useChunkOnly; //spatialMappingParameters.map_type == SPATIAL_MAP_TYPE.MESH ? true : false;
             map_params.reverseVertexOrder = spatialMappingParameters.reverseVertexOrder;
             map_params.stabilityCounter = spatialMappingParameters.stabilityCounter;
+            map_params.disparity_std = spatialMappingParameters.disparityStd;
+            map_params.decay = spatialMappingParameters.decay;
+            map_params.enable_forget_past = spatialMappingParameters.enableForgetPast;
 
             sl.ERROR_CODE spatialMappingStatus = ERROR_CODE.FAILURE;
             spatialMappingStatus = (sl.ERROR_CODE)dllz_enable_spatial_mapping(CameraID, ref map_params);
@@ -2381,8 +2426,11 @@ namespace sl
             map_params.resolutionMeter = ConvertResolutionPreset(mappingResolution);
             map_params.saveTexture = saveTexture;
             map_params.mapType = type;
-            map_params.maxMemoryUsage = 4096;
+            map_params.maxMemoryUsage = 2048;
             map_params.useChunkOnly = type == SPATIAL_MAP_TYPE.MESH ? true : false;
+            map_params.disparity_std = 0.3f;
+            map_params.decay = 1.0f;
+            map_params.enable_forget_past = false;
 
             sl.ERROR_CODE spatialMappingStatus = ERROR_CODE.FAILURE;
             spatialMappingStatus = (sl.ERROR_CODE)dllz_enable_spatial_mapping(CameraID, ref map_params);
@@ -2412,7 +2460,10 @@ namespace sl
                 reverseVertexOrder = sl_parameters.reverseVertexOrder,
                 useChunkOnly = sl_parameters.useChunkOnly,
                 maxMemoryUsage = sl_parameters.maxMemoryUsage,
-                stabilityCounter = sl_parameters.stabilityCounter
+                stabilityCounter = sl_parameters.stabilityCounter,
+                disparityStd = sl_parameters.disparity_std,
+                decay = sl_parameters.decay,
+                enableForgetPast = sl_parameters.enable_forget_past
             };
             return parameters;
         }
@@ -3058,9 +3109,6 @@ namespace sl
         public ERROR_CODE EnableRecording(string videoFileName, SVO_COMPRESSION_MODE compressionMode = SVO_COMPRESSION_MODE.H264_BASED, uint bitrate = 0, int targetFPS = 0,
          bool transcode = false, string encryptionKey = "", SVO_ENCODING_PRESET encodingPreset = SVO_ENCODING_PRESET.DEFAULT)
         {
-            if (string.IsNullOrEmpty(encryptionKey) && encodingPreset == SVO_ENCODING_PRESET.DEFAULT)
-                return (ERROR_CODE)dllz_enable_recording(CameraID, StringUtf8ToByte(videoFileName), (int)compressionMode, bitrate, targetFPS, transcode);
-
             var native = BuildNativeRecordingParameters(videoFileName, compressionMode, bitrate, targetFPS, transcode, encryptionKey, encodingPreset);
             return (ERROR_CODE)dllz_enable_recording_from_params(CameraID, ref native);
         }
@@ -3314,6 +3362,52 @@ namespace sl
             StreamingParameters parameters = (StreamingParameters)Marshal.PtrToStructure(p, typeof(StreamingParameters));
 
             return parameters;
+        }
+
+        ///@}
+
+        ///@{
+        /// @name Encoded Stream Access
+
+        /// <summary>
+        /// Lists every encoded source the camera currently exposes.
+        ///
+        /// Returns one sl.EncodedStreamInfo per source. sl.EncodedStreamInfo.active tells whether packets are
+        /// flowing through that source right now: RECEIVING is active when the camera is opened from a stream,
+        /// SENDING when EnableStreaming() has been called, and RECORDING when EnableRecording() is active with a
+        /// video compression mode (H264 / H265 / H264_LOSSLESS / H265_LOSSLESS). The LOSSLESS recording mode is
+        /// not exposed — it produces PNG/ZSTD frames, not a video bitstream.
+        /// </summary>
+        /// <returns>An array with one sl.EncodedStreamInfo per sl.ENCODED_STREAM_SOURCE.</returns>
+        public EncodedStreamInfo[] GetEncodedStreamsInfo()
+        {
+            EncodedStreamInfo[] infos = new EncodedStreamInfo[(int)Constant.ENCODED_STREAM_SOURCE_COUNT];
+            dllz_get_encoded_streams_info(CameraID, infos);
+            return infos;
+        }
+
+        /// <summary>
+        /// Retrieves the latest encoded packet from the given source.
+        ///
+        /// Call after a successful Grab(). The returned sl.EncodedStreamPacket.data pointer is owned by the SDK and
+        /// remains valid until the next call to RetrieveEncodedStreamPacket() on the same source (or until Close()).
+        /// Use sl.EncodedStreamPacket.GetData() to copy the bytes out if you need them longer.
+        ///
+        /// The tap silently drops every packet until it sees the first natural IDR for that source, so the first
+        /// packet returned is always a key frame and the byte stream from that point on is self-contained (SPS/PPS
+        /// — and VPS for HEVC — are inlined in front of every IDR). For RECEIVING this can mean a wait of up to
+        /// one GOP (~2 s with the SDK default) after the camera is opened, since the SDK does not request a key
+        /// frame from the remote sender.
+        /// </summary>
+        /// <param name="packet">Filled on success.</param>
+        /// <param name="source">Which encoded source to read from.</param>
+        /// <returns>sl.ERROR_CODE.SUCCESS on success.
+        /// sl.ERROR_CODE.INVALID_FUNCTION_CALL if the requested source is not active (e.g. RECEIVING but the camera
+        /// is not opened from a stream, or RECORDING but the recording compression mode is LOSSLESS).
+        /// sl.ERROR_CODE.FAILURE if the source is active but no new packet is available yet (pre-IDR sync, dropped frame).</returns>
+        public ERROR_CODE RetrieveEncodedStreamPacket(ref EncodedStreamPacket packet, ENCODED_STREAM_SOURCE source = ENCODED_STREAM_SOURCE.RECEIVING)
+        {
+            return (ERROR_CODE)dllz_retrieve_encoded_stream_packet(CameraID, source, ref packet);
         }
 
         ///@}
