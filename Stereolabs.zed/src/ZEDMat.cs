@@ -313,11 +313,12 @@ namespace sl
 
 
         [DllImport(nameDll, EntryPoint = "sl_mat_is_init")]
+        [return: MarshalAs(UnmanagedType.U1)]
         private static extern bool dllz_mat_is_init(System.IntPtr ptr);
         [DllImport(nameDll, EntryPoint = "sl_mat_free")]
-        private static extern bool dllz_mat_free(System.IntPtr ptr, int type);
+        private static extern void dllz_mat_free(System.IntPtr ptr, int type);
         [DllImport(nameDll, EntryPoint = "sl_mat_get_infos")]
-        private static extern bool dllz_mat_get_infos(System.IntPtr ptr, byte[] buffer);
+        private static extern void dllz_mat_get_infos(System.IntPtr ptr, byte[] buffer);
 
 
         [DllImport(nameDll, EntryPoint = "sl_mat_get_value_float")]
@@ -416,6 +417,7 @@ namespace sl
         private static extern int dllz_mat_get_width_bytes(System.IntPtr ptr);
 
         [DllImport(nameDll, EntryPoint = "sl_mat_is_memory_owner")]
+        [return: MarshalAs(UnmanagedType.U1)]
         private static extern bool dllz_mat_is_memory_owner(System.IntPtr ptr);
 
         [DllImport(nameDll, EntryPoint = "sl_mat_get_resolution")]
@@ -431,7 +433,7 @@ namespace sl
         private static extern System.IntPtr dllz_mat_get_ptr(System.IntPtr ptr, int mem);
 
         [DllImport(nameDll, EntryPoint = "sl_mat_clone")]
-        private static extern void dllz_mat_clone(System.IntPtr ptr, System.IntPtr ptrSource);
+        private static extern int dllz_mat_clone(System.IntPtr ptr, System.IntPtr ptrSource);
 
         [DllImport(nameDll, EntryPoint = "sl_mat_get_data_type")]
         private static extern int dllz_mat_get_data_type(System.IntPtr ptr);
@@ -591,7 +593,7 @@ namespace sl
         /// <summary>
         /// Reads an image from a file.
         /// </summary>
-        /// Supports .png and .jpeg.
+        /// Supports .png, .jpeg and .exr (OpenEXR, for float data).
         /// <param name="filePath">Path of the file to read (including the name and extension).</param>
         /// <returns>sl.ERROR_CODE indicating if the copy was successful, or why it wasn't.</returns>
         /// \note Only works if sl.Mat has access to sl.MEM.CPU.
@@ -603,8 +605,12 @@ namespace sl
         /// <summary>
         /// Writes the sl.Mat into a file as an image.
         /// </summary>
+        /// Supports .png and .jpeg for 8-bit images, and .exr (OpenEXR) for float images, which keeps
+        /// every value exactly as it is, NaN and infinity included. OpenEXR is a floating-point format:
+        /// an .exr path with an 8- or 16-bit image returns sl.ERROR_CODE.FAILURE, and compressionLevel
+        /// is ignored for .exr.
         /// <param name="filePath">Path of the file to write in (including the name and extension).</param>
-        /// <param name="compression_level"> Compression level used. Highest value means highest compression (smaller size). Range  [0 - 100].</param>
+        /// <param name="compressionLevel"> Compression level used. Highest value means highest compression (smaller size). Range [0 - 100], or -1 for the format default.</param>
         /// <returns>sl.ERROR_CODE indicating if the copy was successful, or why it wasn't.</returns>
         /// \note Only works if sl.Mat has access to sl.MEM.CPU.
         public sl.ERROR_CODE Write(string filePath,int compressionLevel = -1)

@@ -300,7 +300,12 @@ namespace sl
         /// <summary>
         /// Cannot start the camera stream. Make sure your camera is not already used by another process or blocked by firewall or antivirus.
         /// </summary>
-        CAMERA_ALREADY_IN_USE,
+        CANNOT_START_CAMERA_STREAM,
+        /// <summary>
+        /// Deprecated name of sl.ERROR_CODE.CANNOT_START_CAMERA_STREAM, kept so existing code still compiles.
+        /// Use CANNOT_START_CAMERA_STREAM, which is the name the rest of the ZED SDK and its documentation use.
+        /// </summary>
+        CAMERA_ALREADY_IN_USE = CANNOT_START_CAMERA_STREAM,
         /// <summary>
         ///  No GPU found. CUDA is unable to list it. Can be a driver/reboot issue.
         /// </summary>
@@ -1950,6 +1955,21 @@ namespace sl
         /// </summary>
         public sl.DEPTH_PRECISION depthPrecision;
         /// <summary>
+        /// Allows the ZED SDK to use a CUDA Graph to run the depth computation.
+        ///
+        /// When enabled, the depth computation is recorded once and replayed on every \ref Camera.Grab() call, which lowers the CPU cost of launching it
+        /// and shortens the depth runtime itself. The depth output is unchanged. The gain is most visible on embedded platforms, where the launch overhead
+        /// is a larger share of the frame time.
+        /// \n It is disabled by default because it is a trade-off, not a free gain. Replaying the whole computation as a single unit gives the ZED SDK a
+        /// larger share of the GPU, so anything else running on the same GPU, your own code included, tends to get slower. Depth gets faster, the rest of
+        /// the board often does not. Enable it when depth is what matters most on that GPU, and measure your whole application rather than the depth
+        /// runtime alone.
+        /// \n This is a permission, not a guarantee: it only applies to the sl.DEPTH_MODE NEURAL family, and if the recording cannot be performed
+        /// the ZED SDK reverts to the regular computation for the rest of the session. \ref Camera.Grab() keeps working either way.
+        /// \n Default: false (disabled)
+        /// </summary>
+        public bool allowDepthCudaGraph;
+        /// <summary>
         /// Minimum depth distance to be returned, measured in the sl.UNIT defined in \ref coordinateUnits.
         ///
         /// This parameter allows you to specify the minimum depth value (from the camera) that will be computed.
@@ -2150,9 +2170,11 @@ namespace sl
         /// This will perform additional verification on the image to identify corrupted data.This verification is done in the grab function and requires some computations.
         /// If an issue is found, the grab function will output a warning as sl.ERROR_CODE.CORRUPTED_FRAME.
         /// This version doesn't detect frame tearing currently.
-        ///  \n default: enabled
+        /// \n Higher values run more checks: 2 and above compare the left and right images, above 2 adds blur
+        /// detection and above 3 adds edge comparison. Each level costs more computation than the previous one.
+        ///  \n default: 1 (enabled)
         /// </summary>
-        public bool enableImageValidityCheck;
+        public int enableImageValidityCheck;
         /// <summary>
         ///  Set a maximum size for all SDK output, like retrieveImage and retrieveMeasure functions.
         ///  This will override the default (0,0) and instead of outputting native image size sl::Mat, the ZED SDK will take this size as default.
@@ -2208,6 +2230,30 @@ namespace sl
             this.serialNumber = 0;
         }
 
+        /// <summary>
+        /// Set the input as the camera on the specified port of the MIPI capture card.
+        /// </summary>
+        /// <param name="port">Port number of the MIPI capture card the camera is connected to.</param>
+        public void SetFromMIPIPort(int port)
+        {
+            this.gmslPort = port;
+            this.pathSVO = "";
+            this.inputType = sl.INPUT_TYPE.MIPI;
+            this.serialNumber = 0;
+        }
+
+        /// <summary>
+        /// Set the input as the camera on the specified output of the Holoscan sensor bridge.
+        /// </summary>
+        /// <param name="port">Output number of the sensor bridge the camera is connected to.</param>
+        public void SetFromHoloscanPort(int port)
+        {
+            this.gmslPort = port;
+            this.pathSVO = "";
+            this.inputType = sl.INPUT_TYPE.HOLOSCAN;
+            this.serialNumber = 0;
+        }
+
         public void SetFromStream(string ipAddress, ushort port = 30000)
         {
             this.ipStream = ipAddress;
@@ -2238,6 +2284,7 @@ namespace sl
             this.coordinateSystem = COORDINATE_SYSTEM.IMAGE;
             this.depthMode = DEPTH_MODE.NEURAL;
             this.depthPrecision = DEPTH_PRECISION.FP16;
+            this.allowDepthCudaGraph = false;
             this.depthMinimumDistance = -1;
             this.depthMaximumDistance = -1;
             this.cameraImageFlip = FLIP_MODE.OFF;
@@ -2256,7 +2303,7 @@ namespace sl
             this.openTimeoutSec = 5.0f;
             this.asyncGrabCameraRecovery = false;
             this.grabComputeCappingFPS = 0;
-            this.enableImageValidityCheck = true;
+            this.enableImageValidityCheck = 1;
             this.maximumWorkingResolution = new Resolution(0, 0);
         }
 
@@ -2284,7 +2331,17 @@ namespace sl
         /// <summary>
         /// GMSL input mode
         /// </summary>
-        GMSL
+        GMSL,
+        /// <summary>
+        /// MIPI input mode, for a camera connected directly to a MIPI capture card
+        /// \note Only on NVIDIA Jetson.
+        /// </summary>
+        MIPI,
+        /// <summary>
+        /// Holoscan Camera-over-Ethernet input mode, through a Holoscan sensor bridge
+        /// \note Only on NVIDIA Jetson.
+        /// </summary>
+        HOLOSCAN
     };
 
     ///\ingroup Video_group
@@ -2303,9 +2360,19 @@ namespace sl
         /// </summary>
         GMSL,
         /// <summary>
-        /// Automatically select the input type.\n Trying first for available USB cameras, then GMSL.
+        /// Automatically select the input type.\n Trying first for available USB cameras, then the cameras connected to the host.
         /// </summary>
         AUTO,
+        /// <summary>
+        /// MIPI input mode, for a camera connected directly to a MIPI capture card.
+        /// \note Only on NVIDIA Jetson.
+        /// </summary>
+        MIPI,
+        /// <summary>
+        /// Holoscan Camera-over-Ethernet input mode, for a camera behind a Holoscan sensor bridge.
+        /// \note Only on NVIDIA Jetson.
+        /// </summary>
+        HOLOSCAN,
         ///@cond SHOWHIDDEN 
         LAST
         ///@endcond 
@@ -2562,7 +2629,7 @@ namespace sl
         /// <summary>
         ///  GMSL port of the camera.
         /// </summary>
-        int gmslPort;
+        public int gmslPort;
         /// <summary>
         /// [Cam model, eeprom version, white balance param]
         /// </summary>
@@ -2850,6 +2917,18 @@ namespace sl
         /// ZED X Mini (ZED XM) camera model
         /// </summary>
         ZED_XM,
+        /// <summary>
+        /// ZED X HDR camera model
+        /// </summary>
+        ZED_X_HDR,
+        /// <summary>
+        /// ZED X HDR Mini camera model
+        /// </summary>
+        ZED_X_HDR_MINI,
+        /// <summary>
+        /// ZED X HDR Wide camera model
+        /// </summary>
+        ZED_X_HDR_MAX,
         /// <summary>
         /// ZED X Nano (18mm baseline) camera model with dual global shutter AR0234 sensor
         /// </summary>
@@ -3507,7 +3586,7 @@ namespace sl
     /// <summary>
     /// Describes one encoded video source exposed by the camera.
     ///
-    /// Returned by GetEncodedStreamsInfo() — one entry per source, whether currently active or not.
+    /// Returned by GetEncodedStreamsInfo(): one entry per source, whether currently active or not.
     /// Use this to discover which sources are producing data and at what codec/bitrate before calling
     /// RetrieveEncodedStreamPacket().
     /// </summary>
@@ -4741,8 +4820,20 @@ namespace sl
         /// \note This setting allow int8 precision which can speed up by another x2 factor (compared to fp16, or x4 compared to fp32) and half the fp16 memory usage, however some accuracy could be lost.
         /// \note The accuracy loss should not exceed 1-2% on the compatible models.
         /// \note The current compatible models are all [sl.AI_MODELS.HUMAN_BODY_XXXX](\ref AI_MODELS).
+        /// \note This setting applies to sl.BODY_TRACKING_MODEL_GEN.GEN_1 only: GEN_2 always runs in FP16 and ignores it.
         [MarshalAs(UnmanagedType.U1)]
         public bool allowReducedPrecisionInference;
+
+        /// <summary>
+        /// sl.BODY_TRACKING_MODEL_GEN to run for the selected \ref detectionModel.
+        /// </summary>
+        /// Default: sl.BODY_TRACKING_MODEL_GEN.DEFAULT (currently sl.BODY_TRACKING_MODEL_GEN.GEN_2)
+        /// \n Set it to sl.BODY_TRACKING_MODEL_GEN.GEN_1 to keep the network used up to ZED SDK 5.4, for instance to preserve the
+        /// behavior of an integration tuned against it.
+        /// \note The ZED SDK falls back to the most recent generation available when the requested one has no network for the selected
+        /// \ref detectionModel and \ref bodyFormat. sl.BODY_FORMAT.BODY_38 only has sl.BODY_TRACKING_MODEL_GEN.GEN_1.
+        /// \note The `ZED_SDK_BODY_TRACKING_MODEL_GENERATION` environment variable, when set, overrides this parameter.
+        public sl.BODY_TRACKING_MODEL_GEN modelGen;
     };
 
     /// \ingroup Body_group
@@ -5764,6 +5855,32 @@ namespace sl
         /// Keypoints based, specific to human skeleton, state of the art accuracy, requires powerful GPU.
         /// </summary>
         HUMAN_BODY_ACCURATE
+    };
+
+    /// \ingroup Body_group
+    /// <summary>
+    /// Lists the generations of neural network available for the body tracking module.
+    /// </summary>
+    /// A generation is only available for some combinations of sl.BODY_TRACKING_MODEL and sl.BODY_FORMAT: when the requested one has no
+    /// network for it, the ZED SDK falls back to the most recent generation it does have.
+    public enum BODY_TRACKING_MODEL_GEN
+    {
+        /// <summary>
+        /// Use the generation the ZED SDK defaults to.
+        /// </summary>
+        /// Value of a zero-initialized structure, so leaving sl.BodyTrackingParameters.modelGen untouched keeps following the SDK default.
+        DEFAULT = 0,
+        /// <summary>
+        /// Network used up to ZED SDK 5.4. Only generation available for sl.BODY_FORMAT.BODY_38.
+        /// </summary>
+        GEN_1 = 1,
+        /// <summary>
+        /// Bottom-up network introduced in ZED SDK 5.5, more robust in crowded scenes and to unusual poses.
+        /// </summary>
+        /// Available for sl.BODY_TRACKING_MODEL.HUMAN_BODY_MEDIUM and sl.BODY_TRACKING_MODEL.HUMAN_BODY_ACCURATE with
+        /// sl.BODY_FORMAT.BODY_18 or sl.BODY_FORMAT.BODY_34. sl.BODY_TRACKING_MODEL.HUMAN_BODY_FAST and sl.BODY_FORMAT.BODY_38
+        /// have GEN_1 only, and fall back to it. Current sl.BODY_TRACKING_MODEL_GEN.DEFAULT.
+        GEN_2 = 2
     };
 
     /// <summary>
