@@ -42,7 +42,11 @@ namespace sl
         /// <summary>
         /// Maximum number of camera that can be fused by the Fusion API.
         /// </summary>
-        MAX_FUSED_CAMERAS = 20
+        MAX_FUSED_CAMERAS = 20,
+        /// <summary>
+        /// Number of encoded video sources a camera can expose. Used to size the array passed to GetEncodedStreamsInfo().
+        /// </summary>
+        ENCODED_STREAM_SOURCE_COUNT = 3
     };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -270,7 +274,7 @@ namespace sl
         /// </summary>
         INVALID_FUNCTION_CALL,
         /// <summary>
-        ///  The ZED SDK was not able to load its dependencies or some assets are missing. Reinstall the ZED SDK or check for missing dependencies (cuDNN, TensorRT).
+        ///  The ZED SDK was not able to load its dependencies or some assets are missing. Reinstall the ZED SDK or check for missing dependencies (TensorRT).
         /// </summary>
         CORRUPTED_SDK_INSTALLATION,
         /// <summary>
@@ -296,7 +300,12 @@ namespace sl
         /// <summary>
         /// Cannot start the camera stream. Make sure your camera is not already used by another process or blocked by firewall or antivirus.
         /// </summary>
-        CAMERA_ALREADY_IN_USE,
+        CANNOT_START_CAMERA_STREAM,
+        /// <summary>
+        /// Deprecated name of sl.ERROR_CODE.CANNOT_START_CAMERA_STREAM, kept so existing code still compiles.
+        /// Use CANNOT_START_CAMERA_STREAM, which is the name the rest of the ZED SDK and its documentation use.
+        /// </summary>
+        CAMERA_ALREADY_IN_USE = CANNOT_START_CAMERA_STREAM,
         /// <summary>
         ///  No GPU found. CUDA is unable to list it. Can be a driver/reboot issue.
         /// </summary>
@@ -556,6 +565,15 @@ namespace sl
         /// Whether to enable the 2D ground mode.
         /// </summary>
         public bool enable2DGroundMode;
+
+        /// <summary>
+        /// How much GPU positional tracking is allowed to use.
+        /// </summary>
+        /// With sl.POSITIONAL_TRACKING_MODE.GEN_3 tracking runs on the CPU, so it does not compete with your own GPU
+        /// workloads. Set this to sl.COMPUTE_PREFERENCE.PREFER_GPU to make tracking faster, reducing the per-frame time
+        /// of sl.Camera.Grab(), at the cost of using the GPU.
+        /// \note sl.POSITIONAL_TRACKING_MODE.GEN_1 computes depth and therefore uses the GPU whatever this is set to.
+        public sl.COMPUTE_PREFERENCE computePreference = sl.COMPUTE_PREFERENCE.AUTO;
     }
     /// \ingroup PositionalTracking_group
     /// <summary>
@@ -629,7 +647,7 @@ namespace sl
         /// <summary>
         /// Once computed the ROI computed will be automatically applied.
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = (int)MODULE.LAST)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = (int)MODULE.LAST, ArraySubType = UnmanagedType.U1)]
         public bool[] autoApplyModule;
 
         public RegionOfInterestParameters(float depthFarThresholdMeters_ = 2.5f, float imageHeightRatioCutoff_ = 0.5f)
@@ -801,6 +819,31 @@ namespace sl
         GEN_3
     }
 
+    ///\ingroup Core_group
+    /// <summary>
+    /// Lists how much GPU a module is allowed to use.
+    /// </summary>
+    /// \note The selected mode sets a floor that cannot be avoided: for example sl.POSITIONAL_TRACKING_MODE.GEN_1
+    /// computes depth and therefore always uses the GPU. This preference only controls the work that is optional on top of that floor.
+    public enum COMPUTE_PREFERENCE
+    {
+        /// <summary>
+        /// Default. Let the SDK choose. For positional tracking, sl.POSITIONAL_TRACKING_MODE.GEN_3 runs on the CPU
+        /// and sl.POSITIONAL_TRACKING_MODE.GEN_1 uses the GPU, since it computes depth.
+        /// </summary>
+        AUTO,
+        /// <summary>
+        /// Use no more GPU than the selected mode requires, leaving the GPU free for your own workloads.
+        /// Tracking is slower than with GPU acceleration.
+        /// </summary>
+        PREFER_CPU,
+        /// <summary>
+        /// Use GPU acceleration wherever it is available, which makes tracking faster and lowers the per-frame time
+        /// of sl.Camera.Grab(). Falls back to the CPU by itself if the GPU cannot be used.
+        /// </summary>
+        PREFER_GPU
+    }
+
     /// \ingroup PositionalTracking_group
     /// <summary>
     /// Lists possible types of position matrix used to store camera path and pose.
@@ -885,6 +928,10 @@ namespace sl
         /// </summary>
         /// \note Not available in SVO or STREAM mode.
 		public Matrix3x3 linearAccelerationCovariance;
+        /// <summary>
+        /// Realtime data acquisition rate in hertz (Hz).
+        /// </summary>
+        public float effectiveRate;
     };
 
     /// \ingroup Core_group
@@ -911,6 +958,10 @@ namespace sl
         /// Relative altitude from first camera position (at sl.Camera.Open() time).
         /// </summary>
         public float relativeAltitude;
+        /// <summary>
+        /// Realtime data acquisition rate in hertz (Hz).
+        /// </summary>
+        public float effectiveRate;
     };
 
     ///\ingroup  Sensors_group
@@ -1536,6 +1587,25 @@ namespace sl
 
     ///\ingroup Depth_group
     /// <summary>
+    /// Lists the precisions available for neural depth inference.
+    /// </summary>
+    /// \note For more info, read about the ZED SDK C++ enum it mirrors:
+    /// <a href="https://www.stereolabs.com/docs/api/group__Depth__group.html">DEPTH_PRECISION</a>
+    public enum DEPTH_PRECISION
+    {
+        /// <summary>
+        /// Half-precision neural depth (default).
+        /// </summary>
+        FP16,
+        /// <summary>
+        /// Explicit-quantization (Q/DQ) INT8 neural depth.
+        /// \n Best-effort: falls back to FP16 if the selected sl.DEPTH_MODE ships no INT8 model or the platform lacks fast INT8.
+        /// </summary>
+        INT8
+    };
+
+    ///\ingroup Depth_group
+    /// <summary>
     /// Lists the content type of the map ingested with Camera.IngestCustomDepth().
     /// </summary>
     public enum CUSTOM_DEPTH_FORMAT
@@ -1876,6 +1946,30 @@ namespace sl
         /// </summary>
         public sl.DEPTH_MODE depthMode;
         /// <summary>
+        /// sl.DEPTH_PRECISION used for neural depth inference.
+        ///
+        /// Only applies to the neural depth modes (sl.DEPTH_MODE.NEURAL_LIGHT, sl.DEPTH_MODE.NEURAL and sl.DEPTH_MODE.NEURAL_PLUS).
+        /// \n Set it to \ref DEPTH_PRECISION "sl.DEPTH_PRECISION.INT8" to request explicit-quantization (Q/DQ) INT8 inference.
+        /// \n Default: \ref DEPTH_PRECISION "sl.DEPTH_PRECISION.FP16"
+        /// \note Best-effort: the SDK silently falls back to FP16 if the selected depth mode ships no INT8 model or if the platform lacks fast INT8.
+        /// </summary>
+        public sl.DEPTH_PRECISION depthPrecision;
+        /// <summary>
+        /// Allows the ZED SDK to use a CUDA Graph to run the depth computation.
+        ///
+        /// When enabled, the depth computation is recorded once and replayed on every \ref Camera.Grab() call, which lowers the CPU cost of launching it
+        /// and shortens the depth runtime itself. The depth output is unchanged. The gain is most visible on embedded platforms, where the launch overhead
+        /// is a larger share of the frame time.
+        /// \n It is disabled by default because it is a trade-off, not a free gain. Replaying the whole computation as a single unit gives the ZED SDK a
+        /// larger share of the GPU, so anything else running on the same GPU, your own code included, tends to get slower. Depth gets faster, the rest of
+        /// the board often does not. Enable it when depth is what matters most on that GPU, and measure your whole application rather than the depth
+        /// runtime alone.
+        /// \n This is a permission, not a guarantee: it only applies to the sl.DEPTH_MODE NEURAL family, and if the recording cannot be performed
+        /// the ZED SDK reverts to the regular computation for the rest of the session. \ref Camera.Grab() keeps working either way.
+        /// \n Default: false (disabled)
+        /// </summary>
+        public bool allowDepthCudaGraph;
+        /// <summary>
         /// Minimum depth distance to be returned, measured in the sl.UNIT defined in \ref coordinateUnits.
         ///
         /// This parameter allows you to specify the minimum depth value (from the camera) that will be computed.
@@ -2076,9 +2170,11 @@ namespace sl
         /// This will perform additional verification on the image to identify corrupted data.This verification is done in the grab function and requires some computations.
         /// If an issue is found, the grab function will output a warning as sl.ERROR_CODE.CORRUPTED_FRAME.
         /// This version doesn't detect frame tearing currently.
-        ///  \n default: enabled
+        /// \n Higher values run more checks: 2 and above compare the left and right images, above 2 adds blur
+        /// detection and above 3 adds edge comparison. Each level costs more computation than the previous one.
+        ///  \n default: 1 (enabled)
         /// </summary>
-        public bool enableImageValidityCheck;
+        public int enableImageValidityCheck;
         /// <summary>
         ///  Set a maximum size for all SDK output, like retrieveImage and retrieveMeasure functions.
         ///  This will override the default (0,0) and instead of outputting native image size sl::Mat, the ZED SDK will take this size as default.
@@ -2134,6 +2230,30 @@ namespace sl
             this.serialNumber = 0;
         }
 
+        /// <summary>
+        /// Set the input as the camera on the specified port of the MIPI capture card.
+        /// </summary>
+        /// <param name="port">Port number of the MIPI capture card the camera is connected to.</param>
+        public void SetFromMIPIPort(int port)
+        {
+            this.gmslPort = port;
+            this.pathSVO = "";
+            this.inputType = sl.INPUT_TYPE.MIPI;
+            this.serialNumber = 0;
+        }
+
+        /// <summary>
+        /// Set the input as the camera on the specified output of the Holoscan sensor bridge.
+        /// </summary>
+        /// <param name="port">Output number of the sensor bridge the camera is connected to.</param>
+        public void SetFromHoloscanPort(int port)
+        {
+            this.gmslPort = port;
+            this.pathSVO = "";
+            this.inputType = sl.INPUT_TYPE.HOLOSCAN;
+            this.serialNumber = 0;
+        }
+
         public void SetFromStream(string ipAddress, ushort port = 30000)
         {
             this.ipStream = ipAddress;
@@ -2163,6 +2283,8 @@ namespace sl
             this.coordinateUnits = UNIT.METER;
             this.coordinateSystem = COORDINATE_SYSTEM.IMAGE;
             this.depthMode = DEPTH_MODE.NEURAL;
+            this.depthPrecision = DEPTH_PRECISION.FP16;
+            this.allowDepthCudaGraph = false;
             this.depthMinimumDistance = -1;
             this.depthMaximumDistance = -1;
             this.cameraImageFlip = FLIP_MODE.OFF;
@@ -2181,7 +2303,7 @@ namespace sl
             this.openTimeoutSec = 5.0f;
             this.asyncGrabCameraRecovery = false;
             this.grabComputeCappingFPS = 0;
-            this.enableImageValidityCheck = true;
+            this.enableImageValidityCheck = 1;
             this.maximumWorkingResolution = new Resolution(0, 0);
         }
 
@@ -2209,7 +2331,17 @@ namespace sl
         /// <summary>
         /// GMSL input mode
         /// </summary>
-        GMSL
+        GMSL,
+        /// <summary>
+        /// MIPI input mode, for a camera connected directly to a MIPI capture card
+        /// \note Only on NVIDIA Jetson.
+        /// </summary>
+        MIPI,
+        /// <summary>
+        /// Holoscan Camera-over-Ethernet input mode, through a Holoscan sensor bridge
+        /// \note Only on NVIDIA Jetson.
+        /// </summary>
+        HOLOSCAN
     };
 
     ///\ingroup Video_group
@@ -2228,9 +2360,19 @@ namespace sl
         /// </summary>
         GMSL,
         /// <summary>
-        /// Automatically select the input type.\n Trying first for available USB cameras, then GMSL.
+        /// Automatically select the input type.\n Trying first for available USB cameras, then the cameras connected to the host.
         /// </summary>
         AUTO,
+        /// <summary>
+        /// MIPI input mode, for a camera connected directly to a MIPI capture card.
+        /// \note Only on NVIDIA Jetson.
+        /// </summary>
+        MIPI,
+        /// <summary>
+        /// Holoscan Camera-over-Ethernet input mode, for a camera behind a Holoscan sensor bridge.
+        /// \note Only on NVIDIA Jetson.
+        /// </summary>
+        HOLOSCAN,
         ///@cond SHOWHIDDEN 
         LAST
         ///@endcond 
@@ -2487,7 +2629,7 @@ namespace sl
         /// <summary>
         ///  GMSL port of the camera.
         /// </summary>
-        int gmslPort;
+        public int gmslPort;
         /// <summary>
         /// [Cam model, eeprom version, white balance param]
         /// </summary>
@@ -2557,18 +2699,18 @@ namespace sl
         public int currentBitrate;
 
         /// <summary>
-        /// Model of the streaming device.
-        ///
-        /// Default: sl.MODEL.LAST
-        /// </summary>
-        public sl.MODEL cameraModel;
-
-        /// <summary>
         /// Current codec used for compression in streaming device.
         ///
         /// Default: sl.STREAMING_CODEC.H265_BASED
         /// </summary>
         public sl.STREAMING_CODEC codec;
+
+        /// <summary>
+        /// Model of the streaming device.
+        ///
+        /// Default: sl.MODEL.LAST
+        /// </summary>
+        public sl.MODEL cameraModel;
     };
 
     ///\ingroup  Video_group
@@ -2594,6 +2736,9 @@ namespace sl
         /// <summary>IMU data reliability issue (corrupted stream, saturated sensors, shocks, etc.).</summary>
         [MarshalAs(UnmanagedType.U1)]
         public bool lowMotionSensorsReliability;
+        /// <summary>Current image is a duplicate: not a new frame even if the timestamp says so.</summary>
+        [MarshalAs(UnmanagedType.U1)]
+        public bool duplicatedImage;
     }
 
     ///\ingroup  Video_group
@@ -2638,6 +2783,15 @@ namespace sl
         /// Average compression ratio (% of raw size) since beginning of recording.
         /// </summary>
         public double average_compression_ratio;
+        /// <summary>
+        /// Number of frames handed to the recorder since the beginning of the recording.
+        /// </summary>
+        public int number_frames_ingested;
+        /// <summary>
+        /// Number of frames actually written to the file since the beginning of the recording.
+        /// A value below \ref number_frames_ingested means frames were dropped because the encoder could not keep up.
+        /// </summary>
+        public int number_frames_encoded;
     }
 
     ///\ingroup  Video_group
@@ -2764,6 +2918,18 @@ namespace sl
         /// </summary>
         ZED_XM,
         /// <summary>
+        /// ZED X HDR camera model
+        /// </summary>
+        ZED_X_HDR,
+        /// <summary>
+        /// ZED X HDR Mini camera model
+        /// </summary>
+        ZED_X_HDR_MINI,
+        /// <summary>
+        /// ZED X HDR Wide camera model
+        /// </summary>
+        ZED_X_HDR_MAX,
+        /// <summary>
         /// ZED X Nano (18mm baseline) camera model with dual global shutter AR0234 sensor
         /// </summary>
         ZED_X_NANO = 9,
@@ -2782,7 +2948,11 @@ namespace sl
         /// <summary>
         /// ZED X One HDR.
         /// </summary>
-        ZED_XONE_HDR = 32
+        ZED_XONE_HDR = 32,
+        /// <summary>
+        /// ZED X One Core with global shutter AR0234 sensor, direct MIPI connection.
+        /// </summary>
+        ZED_XONE_CORE = 33
     };
 
     ///\ingroup  Video_group
@@ -3199,7 +3369,17 @@ namespace sl
         /// <summary>
         /// The requested timestamp or data will be at the time of the function call.
         /// </summary>
-        CURRENT
+        CURRENT,
+        /// <summary>
+        /// The middle of the frame's exposure, instead of the start of the sensor readout returned by sl.TIME_REFERENCE.IMAGE.
+        /// </summary>
+        /// Use it to align frames with other sensors (LiDAR, IMU, robot joints) that are timestamped at the instant they measure.
+        /// \note Only meaningful for sl.Camera.GetTimeStamp(). It is rejected by sl.Camera.GetSensorsData() and sl.Camera.GetIMUOrientation().
+        /// \note Requires a per-frame exposure, so it is available on ZED X, ZED X Mini, ZED X One GS and ZED X One 4K. It returns 0 on every
+        /// other input: USB cameras, the HDR camera family (ZED X HDR / HDR Mini / HDR Max, ZED X One HDR), and any SVO or network stream
+        /// carrying no per-frame sensor metadata. Always check for 0 before using the value.
+        /// \note On the rolling-shutter ZED X One 4K it refers to the frame's first row.
+        IMAGE_CENTER_OF_EXPOSURE
     };
 
     ///\ingroup  Video_group
@@ -3319,6 +3499,124 @@ namespace sl
         /// </summary>
         H265_BASED
     }
+
+    ///\ingroup  Video_group
+    /// <summary>
+    /// Identifies which of the camera's encoded video paths to read from.
+    ///
+    /// A single camera can produce up to three concurrent encoded H264/H265 bitstreams: the incoming
+    /// stream when the camera is opened from a network sender (RECEIVING), the outgoing stream when
+    /// EnableStreaming() is active (SENDING), and the SVO encoder output when EnableRecording() is
+    /// active with a video compression mode (RECORDING). Each source has its own codec, bitrate and
+    /// key-frame schedule.
+    /// </summary>
+    public enum ENCODED_STREAM_SOURCE
+    {
+        /// <summary>
+        /// Incoming stream packets (camera opened from a network sender).
+        /// </summary>
+        RECEIVING = 0,
+        /// <summary>
+        /// Outgoing stream packets (EnableStreaming() is active).
+        /// </summary>
+        SENDING = 1,
+        /// <summary>
+        /// SVO encoder output (EnableRecording() is active with an H264/H265 compression mode).
+        /// </summary>
+        RECORDING = 2
+    }
+
+    ///\ingroup  Video_group
+    /// <summary>
+    /// Single encoded video packet retrieved from a camera source.
+    ///
+    /// The payload is laid out as Annex-B NAL units. The first packet handed back on a given source is
+    /// always an IDR, with SPS/PPS (and VPS for HEVC) inlined in front, so writing successive packets
+    /// to a .h264 / .hevc file produces a stream playable by any standard player.
+    ///
+    /// \note data is owned by the SDK and remains valid until the next call to
+    /// RetrieveEncodedStreamPacket() on the same source, or until the camera is closed. Other calls do
+    /// not invalidate the buffer. Use GetData() to copy the bytes out if you need them longer.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct EncodedStreamPacket
+    {
+        /// <summary>
+        /// Annex-B NAL units. SDK-owned, see GetData().
+        /// </summary>
+        public IntPtr data;
+        /// <summary>
+        /// Length of data in bytes.
+        /// </summary>
+        public ulong size;
+        /// <summary>
+        /// Capture timestamp, in nanoseconds.
+        /// </summary>
+        public ulong timestampNS;
+        /// <summary>
+        /// H264 or H265.
+        /// </summary>
+        public STREAMING_CODEC codec;
+        /// <summary>
+        /// True if this packet is an IDR (key frame).
+        /// </summary>
+        [MarshalAs(UnmanagedType.Bool)]
+        public bool isKeyframe;
+        /// <summary>
+        /// Which path produced this packet.
+        /// </summary>
+        public ENCODED_STREAM_SOURCE source;
+
+        /// <summary>
+        /// Copies the encoded payload into a managed byte array.
+        /// </summary>
+        /// <returns>The Annex-B payload, or an empty array if the packet holds no data.</returns>
+        public byte[] GetData()
+        {
+            if (data == IntPtr.Zero || size == 0)
+                return new byte[0];
+
+            byte[] managedData = new byte[size];
+            Marshal.Copy(data, managedData, 0, (int)size);
+            return managedData;
+        }
+    }
+
+    ///\ingroup  Video_group
+    /// <summary>
+    /// Describes one encoded video source exposed by the camera.
+    ///
+    /// Returned by GetEncodedStreamsInfo(): one entry per source, whether currently active or not.
+    /// Use this to discover which sources are producing data and at what codec/bitrate before calling
+    /// RetrieveEncodedStreamPacket().
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct EncodedStreamInfo
+    {
+        /// <summary>
+        /// Encoded source this entry describes.
+        /// </summary>
+        public ENCODED_STREAM_SOURCE source;
+        /// <summary>
+        /// True if this source is producing packets right now.
+        /// </summary>
+        [MarshalAs(UnmanagedType.Bool)]
+        public bool active;
+        /// <summary>
+        /// H264 or H265.
+        /// </summary>
+        public STREAMING_CODEC codec;
+        /// <summary>
+        /// Configured bitrate, in kbps. 0 for lossless / unknown.
+        /// </summary>
+        public uint bitrateKbps;
+        /// <summary>
+        /// True for the H264_LOSSLESS / H265_LOSSLESS recording modes.
+        /// </summary>
+        [MarshalAs(UnmanagedType.Bool)]
+        public bool isLossless;
+    }
+
     /// <summary>
     /// Lists possible sides on which to get data from.
     /// </summary>
@@ -3470,6 +3768,23 @@ namespace sl
         /// This parameter controls how many times a stable 3D points should be seen before it is integrated into the spatial mapping.
         /// \n Default: 0 (this will define the stability counter based on the mesh resolution, the higher the resolution, the higher the stability counter)
         public int stabilityCounter = 0;
+        /// <summary>
+        /// Maximum disparity deviation accepted for a point to be integrated into the map.
+        /// </summary>
+        /// Lower it to keep only the most confident points, at the cost of a sparser map.
+        /// \n Default: 0.3
+        public float disparityStd = 0.3f;
+        /// <summary>
+        /// Rate at which the map forgets points that are no longer observed, between 0 and 1.
+        /// </summary>
+        /// 1 keeps every integrated point; lower values let the map adapt faster to a changing scene.
+        /// \n Default: 1
+        public float decay = 1.0f;
+        /// <summary>
+        /// Whether to discard the parts of the map that are no longer observed.
+        /// </summary>
+        /// Default: false
+        public bool enableForgetPast = false;
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -4100,6 +4415,28 @@ namespace sl
         public sl.OBJECT_DETECTION_MODEL detectionModel;
 
         /// <summary>
+        /// Name of the group this module's objects belong to when fused, or null for none.
+        /// </summary>
+        /// Only used when the detected objects are sent to the Fusion module.
+        [MarshalAs(UnmanagedType.LPStr)]
+        public string fusedObjectsGroupName;
+
+        /// <summary>
+        /// Path to the ONNX file to run, for the custom detection models.
+        /// </summary>
+        /// Required by sl.OBJECT_DETECTION_MODEL.CUSTOM_YOLOLIKE_BOX_OBJECTS,
+        /// sl.OBJECT_DETECTION_MODEL.CUSTOM_RFDETRLIKE_BOX_OBJECTS and
+        /// sl.OBJECT_DETECTION_MODEL.CUSTOM_BOX_OBJECTS_AUTODETECT. Ignored by the built-in models.
+        [MarshalAs(UnmanagedType.LPStr)]
+        public string customOnnxFile;
+
+        /// <summary>
+        /// Input resolution the custom ONNX model runs at.
+        /// </summary>
+        /// Only used together with \ref customOnnxFile, for a model with a dynamic input shape.
+        public sl.Resolution customOnnxDynamicInputShape;
+
+        /// <summary>
         /// Upper depth range for detections.
         /// </summary>
         /// Default: -1 (value set in sl.InitParameters.depthMaximumDistance)
@@ -4483,8 +4820,20 @@ namespace sl
         /// \note This setting allow int8 precision which can speed up by another x2 factor (compared to fp16, or x4 compared to fp32) and half the fp16 memory usage, however some accuracy could be lost.
         /// \note The accuracy loss should not exceed 1-2% on the compatible models.
         /// \note The current compatible models are all [sl.AI_MODELS.HUMAN_BODY_XXXX](\ref AI_MODELS).
+        /// \note This setting applies to sl.BODY_TRACKING_MODEL_GEN.GEN_1 only: GEN_2 always runs in FP16 and ignores it.
         [MarshalAs(UnmanagedType.U1)]
         public bool allowReducedPrecisionInference;
+
+        /// <summary>
+        /// sl.BODY_TRACKING_MODEL_GEN to run for the selected \ref detectionModel.
+        /// </summary>
+        /// Default: sl.BODY_TRACKING_MODEL_GEN.DEFAULT (currently sl.BODY_TRACKING_MODEL_GEN.GEN_2)
+        /// \n Set it to sl.BODY_TRACKING_MODEL_GEN.GEN_1 to keep the network used up to ZED SDK 5.4, for instance to preserve the
+        /// behavior of an integration tuned against it.
+        /// \note The ZED SDK falls back to the most recent generation available when the requested one has no network for the selected
+        /// \ref detectionModel and \ref bodyFormat. sl.BODY_FORMAT.BODY_38 only has sl.BODY_TRACKING_MODEL_GEN.GEN_1.
+        /// \note The `ZED_SDK_BODY_TRACKING_MODEL_GENERATION` environment variable, when set, overrides this parameter.
+        public sl.BODY_TRACKING_MODEL_GEN modelGen;
     };
 
     /// \ingroup Body_group
@@ -4743,6 +5092,26 @@ namespace sl
         /// Unit is m/s^2.
         /// </summary>
         public float maxAllowedAcceleration;
+        /// <summary>
+        /// Smoothing factor applied to the estimated velocity, between 0 and 1.
+        /// Default: -1 (use the module default)
+        /// </summary>
+        public float velocitySmoothingFactor;
+        /// <summary>
+        /// Velocity below which the object is considered still, in meters per second.
+        /// Default: -1 (use the module default)
+        /// </summary>
+        public float minVelocityThreshold;
+        /// <summary>
+        /// How long a lost object keeps being predicted before it is discarded, in seconds.
+        /// Default: -1 (use the module default)
+        /// </summary>
+        public float predictionTimeout_s;
+        /// <summary>
+        /// How long an object must be seen before it is confirmed as tracked, in seconds.
+        /// Default: -1 (use the module default)
+        /// </summary>
+        public float minConfirmationTime_s;
     }
 
     /// <summary>
@@ -4811,6 +5180,12 @@ namespace sl
         /// </summary>
         public float trackingMaxDist;
         /// <summary>
+        /// Pointer to the 1-channel 8-bit mask of the object, sized to \ref boundingBox2D.
+        /// </summary>
+        /// The buffer is read during the ingest call and not retained, so it only has to stay alive for the duration of
+        /// sl.Camera.IngestCustomMaskObjects(). Use sl.Mat.GetPtr() to obtain it from a CPU sl.Mat.
+        public System.IntPtr boxMask;
+        /// <summary>
         /// Maximum allowed 3D width.
         /// Any prediction bigger than that will be either discarded (if object is tracked and in SEARCHING state) or clamped.
         /// Default: -1 (no filtering)
@@ -4840,6 +5215,26 @@ namespace sl
         /// Unit is m/s^2.
         /// </summary>
         public float maxAllowedAcceleration;
+        /// <summary>
+        /// Smoothing factor applied to the estimated velocity, between 0 and 1.
+        /// Default: -1 (use the module default)
+        /// </summary>
+        public float velocitySmoothingFactor;
+        /// <summary>
+        /// Velocity below which the object is considered still, in meters per second.
+        /// Default: -1 (use the module default)
+        /// </summary>
+        public float minVelocityThreshold;
+        /// <summary>
+        /// How long a lost object keeps being predicted before it is discarded, in seconds.
+        /// Default: -1 (use the module default)
+        /// </summary>
+        public float predictionTimeout_s;
+        /// <summary>
+        /// How long an object must be seen before it is confirmed as tracked, in seconds.
+        /// Default: -1 (use the module default)
+        /// </summary>
+        public float minConfirmationTime_s;
     };
 
     ///\ingroup Object_group
@@ -4881,6 +5276,13 @@ namespace sl
         /// \note Therefore, there is a limitation of 75 (sl.Constant.MAX_OBJECTS) objects in the image.
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = (int)(Constant.MAX_OBJECTS))]
         public ObjectData[] objectData;
+
+        /// <summary>
+        /// Name of the group these objects belong to when fused, as set in sl.ObjectDetectionParameters.fusedObjectsGroupName.
+        /// </summary>
+        /// Empty when the detector was not given a group name.
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+        public string fusedObjectsGroupName;
 
         /// <summary>
         /// Function that looks for a given object id in the current objects list.
@@ -5420,7 +5822,19 @@ namespace sl
         /// For external inference, using your own custom model and/or frameworks.
         /// This mode disables the internal inference engine, the 2D bounding box detection must be provided.
         /// </summary>
-        CUSTOM_BOX_OBJECTS
+        CUSTOM_BOX_OBJECTS,
+        /// <summary>
+        /// For internal inference using your own custom YOLO-like model. Requires an ONNX file in the detection parameters.
+        /// </summary>
+        CUSTOM_YOLOLIKE_BOX_OBJECTS,
+        /// <summary>
+        /// For internal inference using your own custom RF-DETR / DETR-like model (two outputs: boxes + class logits, NMS-free). Requires an ONNX file.
+        /// </summary>
+        CUSTOM_RFDETRLIKE_BOX_OBJECTS,
+        /// <summary>
+        /// For internal inference using your own custom ONNX model, auto-detecting YOLO-like vs RF-DETR/DETR-like from the model outputs. Requires an ONNX file.
+        /// </summary>
+        CUSTOM_BOX_OBJECTS_AUTODETECT
     };
 
     ///\ingroup Body_group
@@ -5441,6 +5855,32 @@ namespace sl
         /// Keypoints based, specific to human skeleton, state of the art accuracy, requires powerful GPU.
         /// </summary>
         HUMAN_BODY_ACCURATE
+    };
+
+    /// \ingroup Body_group
+    /// <summary>
+    /// Lists the generations of neural network available for the body tracking module.
+    /// </summary>
+    /// A generation is only available for some combinations of sl.BODY_TRACKING_MODEL and sl.BODY_FORMAT: when the requested one has no
+    /// network for it, the ZED SDK falls back to the most recent generation it does have.
+    public enum BODY_TRACKING_MODEL_GEN
+    {
+        /// <summary>
+        /// Use the generation the ZED SDK defaults to.
+        /// </summary>
+        /// Value of a zero-initialized structure, so leaving sl.BodyTrackingParameters.modelGen untouched keeps following the SDK default.
+        DEFAULT = 0,
+        /// <summary>
+        /// Network used up to ZED SDK 5.4. Only generation available for sl.BODY_FORMAT.BODY_38.
+        /// </summary>
+        GEN_1 = 1,
+        /// <summary>
+        /// Bottom-up network introduced in ZED SDK 5.5, more robust in crowded scenes and to unusual poses.
+        /// </summary>
+        /// Available for sl.BODY_TRACKING_MODEL.HUMAN_BODY_MEDIUM and sl.BODY_TRACKING_MODEL.HUMAN_BODY_ACCURATE with
+        /// sl.BODY_FORMAT.BODY_18 or sl.BODY_FORMAT.BODY_34. sl.BODY_TRACKING_MODEL.HUMAN_BODY_FAST and sl.BODY_FORMAT.BODY_38
+        /// have GEN_1 only, and fall back to it. Current sl.BODY_TRACKING_MODEL_GEN.DEFAULT.
+        GEN_2 = 2
     };
 
     /// <summary>
@@ -5508,6 +5948,11 @@ namespace sl
         /// Related to sl.DEPTH_MODE.NEURAL_PLUS
         /// </summary>
         NEURAL_PLUS_DEPTH,
+        /// <summary>
+        /// Related to sl.DEPTH_MODE.NEURAL with sl.DEPTH_PRECISION.INT8.
+        /// Separate artifact and engine from NEURAL_DEPTH: optimizing one does not optimize the other.
+        /// </summary>
+        NEURAL_DEPTH_INT8,
         ///@cond SHOWHIDDEN
         LAST
         ///@endcond

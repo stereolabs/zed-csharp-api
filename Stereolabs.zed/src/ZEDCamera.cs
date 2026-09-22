@@ -180,6 +180,51 @@ namespace sl
         */
         [DllImport(nameDll, EntryPoint = "sl_free")]
         public static extern void dllz_free(IntPtr ptr);
+        [DllImport(nameDll, EntryPoint = "sl_mat_free")]
+        private static extern void dllz_mat_free_mask(IntPtr ptr, int mem);
+
+        /// <summary>
+        /// Releases the per-detection segmentation masks the C API allocated for this frame.
+        /// </summary>
+        /// <remarks>
+        /// One sl::Mat is allocated per masked detection on every retrieve and the caller owns it.
+        /// Without this, a full mask image leaks per object per frame whenever segmentation is on.
+        /// </remarks>
+        private static void FreeObjectMasks(ref Objects objs)
+        {
+            if (objs.objectData == null)
+                return;
+
+            int count = Math.Min(objs.numObject, objs.objectData.Length);
+            for (int i = 0; i < count; i++)
+            {
+                if (objs.objectData[i].mask != IntPtr.Zero)
+                {
+                    dllz_mat_free_mask(objs.objectData[i].mask, (int)sl.MEM.CPU);
+                    objs.objectData[i].mask = IntPtr.Zero;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Body-tracking counterpart of FreeObjectMasks.
+        /// </summary>
+        private static void FreeBodyMasks(ref Bodies bodies)
+        {
+            if (bodies.bodiesList == null)
+                return;
+
+            int count = Math.Min(bodies.nbBodies, bodies.bodiesList.Length);
+            for (int i = 0; i < count; i++)
+            {
+                if (bodies.bodiesList[i].mask != IntPtr.Zero)
+                {
+                    dllz_mat_free_mask(bodies.bodiesList[i].mask, (int)sl.MEM.CPU);
+                    bodies.bodiesList[i].mask = IntPtr.Zero;
+                }
+            }
+        }
+
 
         [DllImport(nameDll, EntryPoint = "sl_unload_all_instances")]
         private static extern void dllz_unload_all_instances();
@@ -194,6 +239,7 @@ namespace sl
           * Create functions
           */
         [DllImport(nameDll, EntryPoint = "sl_create_camera")]
+        [return: MarshalAs(UnmanagedType.U1)]
         private static extern bool dllz_create_camera(int cameraID);
 
 
@@ -273,9 +319,6 @@ namespace sl
         /*
         * Recording functions.
         */
-        [DllImport(nameDll, EntryPoint = "sl_enable_recording")]
-        private static extern int dllz_enable_recording(int cameraID, byte[] video_filename, int compressionMode, uint bitrate, int target_fps, bool transcode);
-
         [DllImport(nameDll, EntryPoint = "sl_enable_recording_from_params")]
         private static extern int dllz_enable_recording_from_params(int cameraID, ref NativeRecordingParameters parameters);
 
@@ -328,6 +371,7 @@ namespace sl
          */
 
         [DllImport(nameDll, EntryPoint = "sl_is_camera_setting_supported")]
+        [return: MarshalAs(UnmanagedType.U1)]
         private static extern bool dllz_is_camera_setting_supported(int id, VIDEO_SETTINGS setting);
 
         [DllImport(nameDll, EntryPoint = "sl_set_camera_settings")]
@@ -355,6 +399,7 @@ namespace sl
         private static extern float dllz_get_camera_fps(int cameraID);
 
         [DllImport(nameDll, EntryPoint = "sl_is_opened")]
+        [return: MarshalAs(UnmanagedType.U1)]
         private static extern bool dllz_is_opened(int cameraID);
 
         [DllImport(nameDll, EntryPoint = "sl_get_width")]
@@ -395,6 +440,9 @@ namespace sl
 
         [DllImport(nameDll, EntryPoint = "sl_get_current_timestamp")]
         private static extern ulong dllz_get_current_timestamp(int cameraID);
+
+        [DllImport(nameDll, EntryPoint = "sl_get_timestamp")]
+        private static extern ulong dllz_get_timestamp(int cameraID, int timeReference);
 
         [DllImport(nameDll, EntryPoint = "sl_get_frame_dropped_count")]
         private static extern uint dllz_get_frame_dropped_count(int cameraID);
@@ -447,7 +495,7 @@ namespace sl
         private static extern float dllz_get_depth_min_range_value(int cameraID);
 
         [DllImport(nameDll, EntryPoint = "sl_get_current_min_max_depth")]
-        private static extern float dllz_get_current_min_max_depth(int cameraID, ref float min, ref float max);
+        private static extern int dllz_get_current_min_max_depth(int cameraID, ref float min, ref float max);
 
         /*
          * Motion Tracking functions.
@@ -459,6 +507,7 @@ namespace sl
         private static extern void dllz_disable_tracking(int cameraID, System.Text.StringBuilder path);
 
         [DllImport(nameDll, EntryPoint = "sl_is_positional_tracking_enabled")]
+        [return: MarshalAs(UnmanagedType.U1)]
         private static extern bool dllz_is_positional_tracking_enabled(int cameraID);
 
         [DllImport(nameDll, EntryPoint = "sl_save_area_map")]
@@ -561,18 +610,23 @@ namespace sl
         private static extern int dllz_retrieve_fused_point_cloud(int cameraID, [In, Out] Vector4[] points);
 
         [DllImport(nameDll, EntryPoint = "sl_save_mesh")]
+        [return: MarshalAs(UnmanagedType.U1)]
         private static extern bool dllz_save_mesh(int cameraID, string filename, MESH_FILE_FORMAT format);
 
         [DllImport(nameDll, EntryPoint = "sl_save_point_cloud")]
+        [return: MarshalAs(UnmanagedType.U1)]
         private static extern bool dllz_save_point_cloud(int cameraID, string filename, MESH_FILE_FORMAT format);
 
         [DllImport(nameDll, EntryPoint = "sl_load_mesh")]
+        [return: MarshalAs(UnmanagedType.U1)]
         private static extern bool dllz_load_mesh(int cameraID, string filename, int[] nbVerticesInSubemeshes, int[] nbTrianglesInSubemeshes, ref int nbSubmeshes, int[] updatedIndices, ref int nbVertices, ref int nbTriangles, int[] textureSize = null, int nbMaxSubmesh = 1000);
 
         [DllImport(nameDll, EntryPoint = "sl_apply_texture")]
+        [return: MarshalAs(UnmanagedType.U1)]
         private static extern bool dllz_apply_texture(int cameraID, int[] nbVerticesInSubemeshes, int[] nbTrianglesInSubemeshes, ref int nbSubmeshes, int[] updatedIndices, ref int nbVertices, ref int nbTriangles, int[] textureSize, int nbSubmesh);
 
         [DllImport(nameDll, EntryPoint = "sl_filter_mesh")]
+        [return: MarshalAs(UnmanagedType.U1)]
         private static extern bool dllz_filter_mesh(int cameraID, MESH_FILTER meshFilter, int[] nbVerticesInSubemeshes, int[] nbTrianglesInSubemeshes, ref int nbSubmeshes, int[] updatedIndices, ref int nbVertices, ref int nbTriangles, int nbSubmesh);
 
         [DllImport(nameDll, EntryPoint = "sl_get_spatial_mapping_state")]
@@ -616,6 +670,15 @@ namespace sl
         private static extern IntPtr dllz_get_streaming_parameters(int cameraID);
 
         /*
+         * Encoded stream access functions (starting v5.4)
+         */
+        [DllImport(nameDll, EntryPoint = "sl_retrieve_encoded_stream_packet")]
+        private static extern int dllz_retrieve_encoded_stream_packet(int cameraID, ENCODED_STREAM_SOURCE source, ref EncodedStreamPacket outPacket);
+
+        [DllImport(nameDll, EntryPoint = "sl_get_encoded_streams_info")]
+        private static extern void dllz_get_encoded_streams_info(int cameraID, [In, Out] EncodedStreamInfo[] outInfos);
+
+        /*
         * Objects Detection functions (starting v3.0)
         */
 
@@ -633,6 +696,9 @@ namespace sl
 
         [DllImport(nameDll, EntryPoint = "sl_optimize_AI_model")]
         private static extern int dllz_optimize_AI_model(AI_MODELS model, int gpu_id);
+
+        [DllImport(nameDll, EntryPoint = "sl_optimize_custom_AI_model")]
+        private static extern int dllz_optimize_custom_AI_model([MarshalAs(UnmanagedType.LPStr)] string custom_onnx_file, sl.Resolution custom_onnx_dynamic_input_shape, int gpu_id);
 
         [DllImport(nameDll, EntryPoint = "sl_enable_object_detection")]
         private static extern int dllz_enable_object_detection(int cameraID, ref ObjectDetectionParameters od_params); 
@@ -715,15 +781,19 @@ namespace sl
         private static extern int dllz_retrieve_image(int cameraID, System.IntPtr ptr, int type, int mem, int width, int height, IntPtr cudaStream);
 
         [DllImport(nameDll, EntryPoint = "sl_is_camera_one")]
+        [return: MarshalAs(UnmanagedType.U1)]
         private static extern bool dllz_is_camera_one(int model);
 
         [DllImport(nameDll, EntryPoint = "sl_is_resolution_available")]
+        [return: MarshalAs(UnmanagedType.U1)]
         private static extern bool dllz_is_resolution_available(int resolution, int model);
 
         [DllImport(nameDll, EntryPoint = "sl_is_FPS_available")]
+        [return: MarshalAs(UnmanagedType.U1)]
         private static extern bool dllz_is_fps_available(int fps, int resolution, int model);
 
         [DllImport(nameDll, EntryPoint = "sl_is_HDR_available")]
+        [return: MarshalAs(UnmanagedType.U1)]
         private static extern bool dllz_is_hdr_available(int resolution, int model);
 
         #endregion
@@ -947,10 +1017,10 @@ namespace sl
             /// This will perform additional verification on the image to identify corrupted data.This verification is done in the grab function and requires some computations.
             /// If an issue is found, the grab function will output a warning as sl.ERROR_CODE.CORRUPTED_FRAME.
             /// This version doesn't detect frame tearing currently.
-            ///  \n default: disabled
+            ///  \n default: 1 (enabled)
             /// </summary>
-            [MarshalAs(UnmanagedType.U1)]
-            public bool enableImageValidityCheck;
+            [MarshalAs(UnmanagedType.I4)]
+            public int enableImageValidityCheck;
             /// <summary>
             ///  Set a maximum size for all SDK output, like retrieveImage and retrieveMeasure functions.
             ///  This will override the default (0,0) and instead of outputting native image size sl::Mat, the ZED SDK will take this size as default.
@@ -967,6 +1037,17 @@ namespace sl
             public byte[] svoDecryptionKey;
 
             /// <summary>
+            /// Precision used for the neural depth inference. Only applies to the neural depth modes.
+            /// </summary>
+            public sl.DEPTH_PRECISION depthPrecision;
+
+            /// <summary>
+            /// Allows the ZED SDK to use a CUDA Graph to run the depth computation.
+            /// </summary>
+            [MarshalAs(UnmanagedType.U1)]
+            public bool allowDepthCudaGraph;
+
+            /// <summary>
             /// Copy constructor.
             /// </summary>
             /// <param name="init"></param>
@@ -978,6 +1059,8 @@ namespace sl
                 svoRealTimeMode = init.svoRealTimeMode;
                 coordinateUnits = init.coordinateUnits;
                 depthMode = init.depthMode;
+                depthPrecision = init.depthPrecision;
+                allowDepthCudaGraph = init.allowDepthCudaGraph;
                 depthMinimumDistance = init.depthMinimumDistance;
                 depthMaximumDistance = init.depthMaximumDistance;
                 cameraImageFlip = (int)init.cameraImageFlip;
@@ -1067,8 +1150,14 @@ namespace sl
             [MarshalAs(UnmanagedType.U1)]
             public bool enableIMUFusion;
             public float depthMinRange;
+            [MarshalAs(UnmanagedType.U1)]
             public bool setGravityAsOrigin;
             public sl.POSITIONAL_TRACKING_MODE mode;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool enableLocalizationOnly;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool enable2DGroundMode;
+            public sl.COMPUTE_PREFERENCE computePreference;
         };
 
         /// <summary>
@@ -1326,6 +1415,7 @@ namespace sl
                 return new InitParameters();
             }
             sl_initParameters sl_parameters = (sl_initParameters)Marshal.PtrToStructure(p, typeof(sl_initParameters));
+            dllz_free(p);
             InitParameters parameters = new InitParameters()
             {
                 cameraDeviceID = sl_parameters.cameraDeviceID,
@@ -1338,6 +1428,8 @@ namespace sl
                 depthMaximumDistance = sl_parameters.depthMaximumDistance,
                 depthMinimumDistance = sl_parameters.depthMinimumDistance,
                 depthMode = sl_parameters.depthMode,
+                depthPrecision = sl_parameters.depthPrecision,
+                allowDepthCudaGraph = sl_parameters.allowDepthCudaGraph,
                 cameraImageFlip = (FLIP_MODE)sl_parameters.cameraImageFlip,
                 enableImageEnhancement = sl_parameters.enableImageEnhancement,
                 enableRightSideMeasure = sl_parameters.enableRightSideMeasure,
@@ -1369,6 +1461,7 @@ namespace sl
             }
 
             sl_RuntimeParameters sl_parameters = (sl_RuntimeParameters)Marshal.PtrToStructure(p, typeof(sl_RuntimeParameters));
+            dllz_free(p);
             RuntimeParameters parameters = new RuntimeParameters()
             {
                 textureConfidenceThreshold = sl_parameters.textureConfidenceThreshold,
@@ -1395,6 +1488,7 @@ namespace sl
                 return new PositionalTrackingParameters();
             }
             sl_PositionalTrackingParameters sl_positionalTracking = (sl_PositionalTrackingParameters)Marshal.PtrToStructure(p, typeof(sl_PositionalTrackingParameters));
+            dllz_free(p);
             PositionalTrackingParameters trackingParams = new PositionalTrackingParameters()
             {
                 initialWorldPosition = sl_positionalTracking.initialWorldPosition,
@@ -1406,7 +1500,10 @@ namespace sl
                 setFloorAsOrigin = sl_positionalTracking.setFloorAsOrigin,
                 depthMinRange = sl_positionalTracking.depthMinRange,
                 setGravityAsOrigin = sl_positionalTracking.setGravityAsOrigin,
-                mode = sl_positionalTracking.mode
+                mode = sl_positionalTracking.mode,
+                enableLocalizationOnly = sl_positionalTracking.enableLocalizationOnly,
+                enable2DGroundMode = sl_positionalTracking.enable2DGroundMode,
+                computePreference = sl_positionalTracking.computePreference
             };
 
             return trackingParams;
@@ -1500,6 +1597,11 @@ namespace sl
         /// <param name="roi">Rect that defines the target to be applied for AEC/AGC computation. Must be given according to camera resolution.</param>
         /// <param name="reset">Cancel the manual ROI and reset it to the full image.</param>
         /// <returns>An sl.ERROR_CODE to indicate if the method was successful.</returns>
+        /// <remarks>
+        /// A ROI larger than the image, or smaller than the minimum size the camera accepts, is rejected and the previously set ROI stays in use.
+        /// Check this method's return code to know whether the ROI was applied: GetCameraSettings() reports the still-active ROI with
+        /// sl.ERROR_CODE.SUCCESS and so cannot confirm it.
+        /// </remarks>
         public ERROR_CODE SetCameraSettings(VIDEO_SETTINGS settings, SIDE side, Rect roi, bool reset = false)
         {
             AssertCameraIsReady();
@@ -1516,6 +1618,10 @@ namespace sl
         /// <param name="side">sl.SIDE on which to get the ROI from.</param>
         /// <param name="roi"> Roi that will be filled.</param>
         /// <returns>An sl.ERROR_CODE to indicate if the method was successful.</returns>
+        /// <remarks>
+        /// The ROI reported is the one currently used by AEC/AGC, which is the last one accepted, not necessarily the last one requested.
+        /// A rejected SetCameraSettings() leaves the previous ROI in use, and this method then returns that ROI with sl.ERROR_CODE.SUCCESS.
+        /// </remarks>
         public ERROR_CODE GetCameraSettings(VIDEO_SETTINGS settings, SIDE side, ref Rect roi)
         {
             AssertCameraIsReady();
@@ -1559,6 +1665,20 @@ namespace sl
         }
 
         /// <summary>
+        /// Gets a timestamp at the given time reference.
+        ///
+        /// \note Must be called after calling Grab() when using sl.TIME_REFERENCE.IMAGE or sl.TIME_REFERENCE.IMAGE_CENTER_OF_EXPOSURE.
+        /// \note sl.TIME_REFERENCE.IMAGE_CENTER_OF_EXPOSURE returns 0 on inputs that carry no per-frame exposure (USB cameras,
+        /// the HDR camera family, SVO files and network streams without per-frame sensor metadata), so always check for 0 before using it.
+        /// </summary>
+        /// <param name="timeReference">The desired sl.TIME_REFERENCE.</param>
+        /// <returns>The timestamp in nanoseconds, or 0 if the requested reference is not available on this input.</returns>
+        public ulong GetTimeStamp(sl.TIME_REFERENCE timeReference)
+        {
+            return dllz_get_timestamp(CameraID, (int)timeReference);
+        }
+
+        /// <summary>
         /// Returns the current playback position in the SVO file.
         /// </summary>
         /// <returns>The current frame position in the SVO file. -1 if the SDK is not reading an SVO.</returns>
@@ -1571,7 +1691,7 @@ namespace sl
         /// Retrieves the frame index within the SVO file corresponding to the provided timestamp.
         /// </summary>
         /// <param name="timestamp">The target timestamp for which the frame index is to be determined.</param>
-        /// <returns>The frame index within the SVO file that aligns with the given timestamp. Returns -1 if the timestamp falls outside the bounds of the SVO file.</returns>
+        /// <returns>The frame index within the SVO file that aligns with the given timestamp. When no frame carries the timestamp exactly, the closest frame at or before it is returned, never the frame after it. A timestamp outside the range the SVO covers gives its first or its last frame rather than an error. Returns -1 only when the input is not an SVO file or none of its frames can be read.</returns>
         public int GetSVOPositionAtTimestamp(ulong timestamp)
         {
             return dllz_get_svo_position_at_timestamp(CameraID, timestamp);
@@ -1641,6 +1761,7 @@ namespace sl
                 return new CalibrationParameters();
             }
             CalibrationParameters parameters = (CalibrationParameters)Marshal.PtrToStructure(p, typeof(CalibrationParameters));
+            dllz_free(p);
 
             if (raw)
                 calibrationParametersRaw = parameters;
@@ -1730,7 +1851,9 @@ namespace sl
             IntPtr p = dllz_get_health_status(CameraID);
             if (p == IntPtr.Zero)
                 return new sl.HealthStatus();
-            return (sl.HealthStatus)Marshal.PtrToStructure(p, typeof(sl.HealthStatus));
+            sl.HealthStatus healthStatus = (sl.HealthStatus)Marshal.PtrToStructure(p, typeof(sl.HealthStatus));
+            dllz_free(p);
+            return healthStatus;
         }
 
         /// <summary>
@@ -1739,9 +1862,15 @@ namespace sl
         /// <returns>The actual image retrieval resolution.</returns>
         public sl.Resolution GetRetrieveImageResolution()
         {
-            sl.Resolution res = new sl.Resolution();
-            dllz_get_retrieve_image_resolution(CameraID, ref res);
-            return res;
+            sl.Resolution requested = new sl.Resolution();
+            IntPtr p = dllz_get_retrieve_image_resolution(CameraID, ref requested);
+            if (p == IntPtr.Zero)
+            {
+                return requested;
+            }
+            sl.Resolution effective = (sl.Resolution)Marshal.PtrToStructure(p, typeof(sl.Resolution));
+            dllz_free(p);
+            return effective;
         }
 
         /// <summary>
@@ -1750,9 +1879,15 @@ namespace sl
         /// <returns>The actual measure retrieval resolution.</returns>
         public sl.Resolution GetRetrieveMeasureResolution()
         {
-            sl.Resolution res = new sl.Resolution();
-            dllz_get_retrieve_measure_resolution(CameraID, ref res);
-            return res;
+            sl.Resolution requested = new sl.Resolution();
+            IntPtr p = dllz_get_retrieve_measure_resolution(CameraID, ref requested);
+            if (p == IntPtr.Zero)
+            {
+                return requested;
+            }
+            sl.Resolution effective = (sl.Resolution)Marshal.PtrToStructure(p, typeof(sl.Resolution));
+            dllz_free(p);
+            return effective;
         }
 
         /// <summary>
@@ -1761,7 +1896,11 @@ namespace sl
         /// <returns>ZED SDK version as a string in the format MAJOR.MINOR.PATCH.</returns>
         public static string GetSDKVersion()
         {
-            return PtrToStringUtf8(dllz_get_sdk_version());
+            // The version string is a caller-owned allocation.
+            IntPtr versionPtr = dllz_get_sdk_version();
+            string version = PtrToStringUtf8(versionPtr);
+            dllz_free(versionPtr);
+            return version;
         }
 
         /// <summary>
@@ -1815,7 +1954,9 @@ namespace sl
         /// <returns>ZED SDK version as a string in the format MAJOR.MINOR.PATCH.</returns>
         public static void GetSDKVersion(ref int major, ref int minor, ref int patch)
         {
-            string sdkVersion = PtrToStringUtf8(dllz_get_sdk_version());
+            IntPtr sdkVersionPtr = dllz_get_sdk_version();
+            string sdkVersion = PtrToStringUtf8(sdkVersionPtr);
+            dllz_free(sdkVersionPtr);
 
             string[] version = sdkVersion.Split('.');
 
@@ -2021,6 +2162,9 @@ namespace sl
             sl_tracking_params.depthMinRange = positionalTrackingParameters.depthMinRange;
             sl_tracking_params.setGravityAsOrigin = positionalTrackingParameters.setGravityAsOrigin;
             sl_tracking_params.mode = positionalTrackingParameters.mode;
+            sl_tracking_params.enableLocalizationOnly = positionalTrackingParameters.enableLocalizationOnly;
+            sl_tracking_params.enable2DGroundMode = positionalTrackingParameters.enable2DGroundMode;
+            sl_tracking_params.computePreference = positionalTrackingParameters.computePreference;
 
             trackingStatus = (sl.ERROR_CODE)dllz_enable_tracking(CameraID, ref sl_tracking_params, new System.Text.StringBuilder(positionalTrackingParameters.areaFilePath, positionalTrackingParameters.areaFilePath.Length));
             return trackingStatus;
@@ -2093,6 +2237,7 @@ namespace sl
                 return new SensorsConfiguration();
             }
             SensorsConfiguration configuration = (SensorsConfiguration)Marshal.PtrToStructure(p, typeof(SensorsConfiguration));
+            dllz_free(p);
 
             return configuration;
         }
@@ -2113,6 +2258,7 @@ namespace sl
                 return new CameraInformation();
             }
             CameraInformation cameraInformation = (CameraInformation)Marshal.PtrToStructure(p, typeof(CameraInformation));
+            dllz_free(p);
 
             return cameraInformation;
         }
@@ -2143,6 +2289,7 @@ namespace sl
             }
 
             PositionalTrackingStatus positionalTrackingStatus = (PositionalTrackingStatus)Marshal.PtrToStructure(p, typeof(PositionalTrackingStatus));
+            dllz_free(p);
             return positionalTrackingStatus;
         }
 
@@ -2162,18 +2309,25 @@ namespace sl
                 return sl.ERROR_CODE.FAILURE;
             }
 
-            int structSize = Marshal.SizeOf(typeof(Landmark));
-            // Read the array of Landmark* (individual struct pointers)
-            for (int i = 0; i < count; i++)
+            try
             {
-                IntPtr landmarkPtr = IntPtr.Add(landmarkArrayPtr, i * structSize);
-                if (landmarkPtr == IntPtr.Zero)
+                int structSize = Marshal.SizeOf(typeof(Landmark));
+                // Read the array of Landmark* (individual struct pointers)
+                for (int i = 0; i < count; i++)
                 {
-                    return sl.ERROR_CODE.FAILURE;
+                    IntPtr landmarkPtr = IntPtr.Add(landmarkArrayPtr, i * structSize);
+                    if (landmarkPtr == IntPtr.Zero)
+                    {
+                        return sl.ERROR_CODE.FAILURE;
+                    }
+                    landmarks.Add(Marshal.PtrToStructure<Landmark>(landmarkPtr));
                 }
-                landmarks.Add(Marshal.PtrToStructure<Landmark>(landmarkPtr));
+                return err;
             }
-            return err;
+            finally
+            {
+                dllz_free(landmarkArrayPtr);
+            }
         }
 
         /// <summary>
@@ -2186,14 +2340,27 @@ namespace sl
             IntPtr landmarkArrayPtr = IntPtr.Zero;
             int count = 0;
             sl.ERROR_CODE err = (sl.ERROR_CODE)dllz_get_positional_tracking_landmarks_2d(CameraID, ref landmarkArrayPtr, ref count);
-            int structSize = Marshal.SizeOf(typeof(Landmark2D));
-            // Read the array of Landmark* (individual struct pointers)
-            for (int i = 0; i < count; i++)
+            if (landmarkArrayPtr == IntPtr.Zero)
             {
-                IntPtr landmarkPtr = IntPtr.Add(landmarkArrayPtr, i * structSize);
-                landmarks.Add(Marshal.PtrToStructure<Landmark2D>(landmarkPtr));
+                return sl.ERROR_CODE.FAILURE;
             }
-            return err;
+
+            // The SDK allocates, we free.
+            try
+            {
+                int structSize = Marshal.SizeOf(typeof(Landmark2D));
+                // Read the array of Landmark* (individual struct pointers)
+                for (int i = 0; i < count; i++)
+                {
+                    IntPtr landmarkPtr = IntPtr.Add(landmarkArrayPtr, i * structSize);
+                    landmarks.Add(Marshal.PtrToStructure<Landmark2D>(landmarkPtr));
+                }
+                return err;
+            }
+            finally
+            {
+                dllz_free(landmarkArrayPtr);
+            }
         }
 
         /// <summary>
@@ -2277,6 +2444,9 @@ namespace sl
                     int stride = Marshal.SizeOf<SensorsData>();
                     for (int i = 0; i < count; i++)
                         data.Add(Marshal.PtrToStructure<SensorsData>(ptr + i * stride));
+
+                    // The array is allocated for us by the C API.
+                    dllz_free(ptr);
                 }
             }
             return err;
@@ -2358,10 +2528,13 @@ namespace sl
             map_params.resolutionMeter = spatialMappingParameters.resolutionMeter;
             map_params.saveTexture = spatialMappingParameters.saveTexture;
             map_params.mapType = spatialMappingParameters.map_type;
-            map_params.maxMemoryUsage = 4096;
+            map_params.maxMemoryUsage = spatialMappingParameters.maxMemoryUsage;
             map_params.useChunkOnly = spatialMappingParameters.useChunkOnly; //spatialMappingParameters.map_type == SPATIAL_MAP_TYPE.MESH ? true : false;
             map_params.reverseVertexOrder = spatialMappingParameters.reverseVertexOrder;
             map_params.stabilityCounter = spatialMappingParameters.stabilityCounter;
+            map_params.disparity_std = spatialMappingParameters.disparityStd;
+            map_params.decay = spatialMappingParameters.decay;
+            map_params.enable_forget_past = spatialMappingParameters.enableForgetPast;
 
             sl.ERROR_CODE spatialMappingStatus = ERROR_CODE.FAILURE;
             spatialMappingStatus = (sl.ERROR_CODE)dllz_enable_spatial_mapping(CameraID, ref map_params);
@@ -2381,8 +2554,11 @@ namespace sl
             map_params.resolutionMeter = ConvertResolutionPreset(mappingResolution);
             map_params.saveTexture = saveTexture;
             map_params.mapType = type;
-            map_params.maxMemoryUsage = 4096;
+            map_params.maxMemoryUsage = 2048;
             map_params.useChunkOnly = type == SPATIAL_MAP_TYPE.MESH ? true : false;
+            map_params.disparity_std = 0.3f;
+            map_params.decay = 1.0f;
+            map_params.enable_forget_past = false;
 
             sl.ERROR_CODE spatialMappingStatus = ERROR_CODE.FAILURE;
             spatialMappingStatus = (sl.ERROR_CODE)dllz_enable_spatial_mapping(CameraID, ref map_params);
@@ -2403,6 +2579,7 @@ namespace sl
                 return new SpatialMappingParameters();
             }
             sl_SpatialMappingParameters sl_parameters = (sl_SpatialMappingParameters)Marshal.PtrToStructure(p, typeof(sl_SpatialMappingParameters));
+            dllz_free(p);
             SpatialMappingParameters parameters = new SpatialMappingParameters()
             {
                 resolutionMeter = sl_parameters.resolutionMeter,
@@ -2412,7 +2589,10 @@ namespace sl
                 reverseVertexOrder = sl_parameters.reverseVertexOrder,
                 useChunkOnly = sl_parameters.useChunkOnly,
                 maxMemoryUsage = sl_parameters.maxMemoryUsage,
-                stabilityCounter = sl_parameters.stabilityCounter
+                stabilityCounter = sl_parameters.stabilityCounter,
+                disparityStd = sl_parameters.disparity_std,
+                decay = sl_parameters.decay,
+                enableForgetPast = sl_parameters.enable_forget_past
             };
             return parameters;
         }
@@ -3058,9 +3238,6 @@ namespace sl
         public ERROR_CODE EnableRecording(string videoFileName, SVO_COMPRESSION_MODE compressionMode = SVO_COMPRESSION_MODE.H264_BASED, uint bitrate = 0, int targetFPS = 0,
          bool transcode = false, string encryptionKey = "", SVO_ENCODING_PRESET encodingPreset = SVO_ENCODING_PRESET.DEFAULT)
         {
-            if (string.IsNullOrEmpty(encryptionKey) && encodingPreset == SVO_ENCODING_PRESET.DEFAULT)
-                return (ERROR_CODE)dllz_enable_recording(CameraID, StringUtf8ToByte(videoFileName), (int)compressionMode, bitrate, targetFPS, transcode);
-
             var native = BuildNativeRecordingParameters(videoFileName, compressionMode, bitrate, targetFPS, transcode, encryptionKey, encodingPreset);
             return (ERROR_CODE)dllz_enable_recording_from_params(CameraID, ref native);
         }
@@ -3115,6 +3292,7 @@ namespace sl
                 return new RecordingStatus();
             }
             RecordingStatus parameters = (RecordingStatus)Marshal.PtrToStructure(p, typeof(RecordingStatus));
+            dllz_free(p);
 
             return parameters;
         }
@@ -3134,6 +3312,7 @@ namespace sl
                 return new RecordingParameters();
             }
             RecordingParameters parameters = (RecordingParameters)Marshal.PtrToStructure(p, typeof(RecordingParameters));
+            dllz_free(p);
 
             return parameters;
         }
@@ -3191,8 +3370,8 @@ namespace sl
                     if (dataPtr[i] != IntPtr.Zero)
                     {
                         data_array[i] = (SVOData)Marshal.PtrToStructure(dataPtr[i], typeof(SVOData));
-                        // Free memory allocated by C (only if allocated in C)
-                        Marshal.FreeHGlobal(dataPtr[i]);
+                        // Allocated by the C API, so release it through the C API.
+                        dllz_free(dataPtr[i]);
                     }
                     else
                     {
@@ -3227,8 +3406,8 @@ namespace sl
                 {
                     keys[i] = Marshal.PtrToStringAnsi(keysPtr[i]);
 
-                    // Free memory allocated by C (only if allocated in C)
-                    Marshal.FreeHGlobal(keysPtr[i]);
+                    // Allocated by the C API, so release it through the C API. 
+                    dllz_free(keysPtr[i]);
                 }
 
                 List<string> list = new List<string>(keys);
@@ -3312,8 +3491,55 @@ namespace sl
                 return new StreamingParameters();
             }
             StreamingParameters parameters = (StreamingParameters)Marshal.PtrToStructure(p, typeof(StreamingParameters));
+            dllz_free(p);
 
             return parameters;
+        }
+
+        ///@}
+
+        ///@{
+        /// @name Encoded Stream Access
+
+        /// <summary>
+        /// Lists every encoded source the camera currently exposes.
+        ///
+        /// Returns one sl.EncodedStreamInfo per source. sl.EncodedStreamInfo.active tells whether packets are
+        /// flowing through that source right now: RECEIVING is active when the camera is opened from a stream,
+        /// SENDING when EnableStreaming() has been called, and RECORDING when EnableRecording() is active with a
+        /// video compression mode (H264 / H265 / H264_LOSSLESS / H265_LOSSLESS). The LOSSLESS recording mode is
+        /// not exposed: it produces PNG/ZSTD frames, not a video bitstream.
+        /// </summary>
+        /// <returns>An array with one sl.EncodedStreamInfo per sl.ENCODED_STREAM_SOURCE.</returns>
+        public EncodedStreamInfo[] GetEncodedStreamsInfo()
+        {
+            EncodedStreamInfo[] infos = new EncodedStreamInfo[(int)Constant.ENCODED_STREAM_SOURCE_COUNT];
+            dllz_get_encoded_streams_info(CameraID, infos);
+            return infos;
+        }
+
+        /// <summary>
+        /// Retrieves the latest encoded packet from the given source.
+        ///
+        /// Call after a successful Grab(). The returned sl.EncodedStreamPacket.data pointer is owned by the SDK and
+        /// remains valid until the next call to RetrieveEncodedStreamPacket() on the same source (or until Close()).
+        /// Use sl.EncodedStreamPacket.GetData() to copy the bytes out if you need them longer.
+        ///
+        /// The tap silently drops every packet until it sees the first natural IDR for that source, so the first
+        /// packet returned is always a key frame and the byte stream from that point on is self-contained (SPS/PPS
+        /// and VPS for HEVC, are inlined in front of every IDR). For RECEIVING this can mean a wait of up to
+        /// one GOP (~2 s with the SDK default) after the camera is opened, since the SDK does not request a key
+        /// frame from the remote sender.
+        /// </summary>
+        /// <param name="packet">Filled on success.</param>
+        /// <param name="source">Which encoded source to read from.</param>
+        /// <returns>sl.ERROR_CODE.SUCCESS on success.
+        /// sl.ERROR_CODE.INVALID_FUNCTION_CALL if the requested source is not active (e.g. RECEIVING but the camera
+        /// is not opened from a stream, or RECORDING but the recording compression mode is LOSSLESS).
+        /// sl.ERROR_CODE.FAILURE if the source is active but no new packet is available yet (pre-IDR sync, dropped frame).</returns>
+        public ERROR_CODE RetrieveEncodedStreamPacket(ref EncodedStreamPacket packet, ENCODED_STREAM_SOURCE source = ENCODED_STREAM_SOURCE.RECEIVING)
+        {
+            return (ERROR_CODE)dllz_retrieve_encoded_stream_packet(CameraID, source, ref packet);
         }
 
         ///@}
@@ -3337,10 +3563,10 @@ namespace sl
         /// <summary>
         /// Save the current depth in a file defined by filename.
         ///
-        /// Supported formats are PNG, PFM and PGM.
+        /// Supported formats are PNG, PFM, PGM and EXR.
         /// </summary>
         /// <param name="side">sl.SIDE on which to save the depth.</param>
-        /// <param name="filename"> Filename must end with .png, .pfm or .pgm.</param>
+        /// <param name="filename"> Filename must end with .png, .pfm, .pgm or .exr.</param>
         /// <returns> An sl.ERROR_CODE that indicates the type of error.</returns>
         public sl.ERROR_CODE SaveCurrentDepthInFile(SIDE side, String filename)
         {
@@ -3382,6 +3608,7 @@ namespace sl
                 return new AI_Model_status();
             }
             AI_Model_status status = (AI_Model_status)Marshal.PtrToStructure(p, typeof(AI_Model_status));
+            dllz_free(p);
 
             return status;
         }
@@ -3395,6 +3622,33 @@ namespace sl
         public static sl.ERROR_CODE OptimizeAIModel(AI_MODELS model, int gpu_id = 0)
         {
             return (sl.ERROR_CODE)dllz_optimize_AI_model(model, gpu_id);
+        }
+
+        /// <summary>
+        /// Optimize a custom object detection ONNX model ahead of time, so that EnableObjectDetection() can start using it right away.
+        /// </summary>
+        /// This optimizes the given ONNX file exactly as \ref EnableObjectDetection() does when ObjectDetectionParameters.detectionModel is set to
+        /// sl.OBJECT_DETECTION_MODEL.CUSTOM_YOLOLIKE_BOX_OBJECTS, sl.OBJECT_DETECTION_MODEL.CUSTOM_RFDETRLIKE_BOX_OBJECTS or
+        /// sl.OBJECT_DETECTION_MODEL.CUSTOM_BOX_OBJECTS_AUTODETECT, and saves the result for re-use. Optimizing a model can take several minutes,
+        /// so this is meant to be called once when installing or deploying your application, rather than on its critical path.
+        /// <param name="customOnnxFile">Path to the ONNX file to optimize. Use the same value as ObjectDetectionParameters.customOnnxFile.</param>
+        /// <param name="customOnnxDynamicInputShape">Input resolution to optimize the model for. Use the same value as ObjectDetectionParameters.customOnnxDynamicInputShape, otherwise the optimized model cannot be re-used and the model is optimized again at runtime. A model with a fixed input resolution keeps its own: this is then only used to identify the optimized model.</param>
+        /// <param name="gpu_id">ID of the GPU on which the model will run. The optimized model is specific to it.</param>
+        /// <returns>An sl.ERROR_CODE that indicates the type of error.</returns>
+        public static sl.ERROR_CODE OptimizeCustomAIModel(string customOnnxFile, sl.Resolution customOnnxDynamicInputShape, int gpu_id = 0)
+        {
+            return (sl.ERROR_CODE)dllz_optimize_custom_AI_model(customOnnxFile, customOnnxDynamicInputShape, gpu_id);
+        }
+
+        /// <summary>
+        /// Optimize a custom object detection ONNX model ahead of time, for the default 512x512 input resolution.
+        /// </summary>
+        /// <param name="customOnnxFile">Path to the ONNX file to optimize. Use the same value as ObjectDetectionParameters.customOnnxFile.</param>
+        /// <param name="gpu_id">ID of the GPU on which the model will run. The optimized model is specific to it.</param>
+        /// <returns>An sl.ERROR_CODE that indicates the type of error.</returns>
+        public static sl.ERROR_CODE OptimizeCustomAIModel(string customOnnxFile, int gpu_id = 0)
+        {
+            return OptimizeCustomAIModel(customOnnxFile, new sl.Resolution(512, 512), gpu_id);
         }
 
         /// <summary>
@@ -3457,7 +3711,13 @@ namespace sl
             {
                 return new ObjectDetectionParameters();
             }
+            
+            IntPtr groupNamePtr = Marshal.ReadIntPtr(p, (int)Marshal.OffsetOf(typeof(ObjectDetectionParameters), "fusedObjectsGroupName"));
+            IntPtr onnxFilePtr = Marshal.ReadIntPtr(p, (int)Marshal.OffsetOf(typeof(ObjectDetectionParameters), "customOnnxFile"));
             ObjectDetectionParameters parameters = (ObjectDetectionParameters)Marshal.PtrToStructure(p, typeof(ObjectDetectionParameters));
+            dllz_free(groupNamePtr);
+            dllz_free(onnxFilePtr);
+            dllz_free(p);
 
             return parameters;
         }
@@ -3477,6 +3737,7 @@ namespace sl
                 return new BodyTrackingParameters();
             }
             BodyTrackingParameters parameters = (BodyTrackingParameters)Marshal.PtrToStructure(p, typeof(BodyTrackingParameters));
+            dllz_free(p);
 
             return parameters;
         }
@@ -3538,6 +3799,7 @@ namespace sl
             {
                 objs = (sl.Objects)Marshal.PtrToStructure(p, typeof(sl.Objects));
                 Marshal.FreeHGlobal(p);
+                FreeObjectMasks(ref objs);
                 return err;
             }
             else
@@ -3577,6 +3839,7 @@ namespace sl
             {
                 objs = (sl.Objects)Marshal.PtrToStructure(p, typeof(sl.Objects));
                 Marshal.FreeHGlobal(p);
+                FreeObjectMasks(ref objs);
                 return err;
             }
             else
@@ -3616,6 +3879,7 @@ namespace sl
             {
                 bodies = (sl.Bodies)Marshal.PtrToStructure(p, typeof(sl.Bodies));
                 Marshal.FreeHGlobal(p);
+                FreeBodyMasks(ref bodies);
                 return err;
             }
             else

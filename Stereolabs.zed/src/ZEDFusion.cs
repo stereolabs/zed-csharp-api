@@ -194,6 +194,7 @@ namespace sl
             /// <summary>
             /// If the GNSS should be enabled.
             /// </summary>
+            [MarshalAs(UnmanagedType.U1)]
             public bool enableGNSSFusion;
             /// <summary>
             /// GNSS calibration parameter. Determine target threshold for GNSS / VIO calibration.
@@ -221,6 +222,10 @@ namespace sl
             [MarshalAs(UnmanagedType.U1)]
             public bool SetGravityAsOrigin;
             /// <summary>
+            /// The camera whose pose the fused tracking is expressed in, or 0 for the fused frame.
+            /// </summary>
+            public CameraIdentifier trackingCameraID;
+            /// <summary>
             /// Constructor
             /// </summary>
             public sl_PositionalTrackingFusionParameters(PositionalTrackingFusionParameters positionalTrackingFusionParameters)
@@ -232,6 +237,7 @@ namespace sl
                 baseFootprintToBaselinkTranslation = positionalTrackingFusionParameters.baseFootprintToBaselinkTranslation;
                 baseFootprintToBaselinkRotation = positionalTrackingFusionParameters.baseFootprintToBaselinkRotation;
                 SetGravityAsOrigin = positionalTrackingFusionParameters.SetGravityAsOrigin;
+                trackingCameraID = positionalTrackingFusionParameters.trackingCameraID;
             }
         }
 
