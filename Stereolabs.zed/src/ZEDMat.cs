@@ -246,7 +246,11 @@ namespace sl
         /// <summary>
         /// 4-channel matrix of signed char
         /// </summary>
-        MAT_S8_C4
+        MAT_S8_C4,
+        /// <summary>
+        /// YUV 4:2:0 semi-planar data Y UVUVUV
+        /// </summary>
+        MAT_NV12
     };
 
     /// \ingroup Core_group

@@ -336,6 +336,14 @@ namespace sl
         /// The camera configuration exceeds available PHY CSI bandwidth (GMSL). Reduce resolution or FPS, or adjust hardware configuration.
         /// </summary>
         CAMERA_EXCEEDS_BANDWIDTH = 35,
+        /// <summary>
+        /// The data was discarded because of its timestamp: too old to be used. Check that it uses the same time reference as the camera, in nanoseconds, and send it as soon as it is measured.
+        /// </summary>
+        INVALID_TIMESTAMP = 36,
+        /// <summary>
+        /// The AI model needed by the requested depth mode or module is not on this host and could not be downloaded. Each AI model is downloaded at its first use: connect the host to the internet, or download the models beforehand with ZED Diagnostic.
+        /// </summary>
+        AI_MODEL_NOT_AVAILABLE = 37,
         /// @cond SHOWHIDDEN 
         LAST
         /// @endcond
@@ -571,10 +579,45 @@ namespace sl
         /// </summary>
         /// With sl.POSITIONAL_TRACKING_MODE.GEN_3 tracking runs on the CPU, so it does not compete with your own GPU
         /// workloads. Set this to sl.COMPUTE_PREFERENCE.PREFER_GPU to make tracking faster, reducing the per-frame time
-        /// of sl.Camera.Grab(), at the cost of using the GPU.
+        /// of sl.Camera.Grab(), at the cost of using the GPU, or to sl.COMPUTE_PREFERENCE.PREFER_ACCELERATORS (experimental)
+        /// to run part of it on the PVA of a Jetson, using less CPU.
         /// \note sl.POSITIONAL_TRACKING_MODE.GEN_1 computes depth and therefore uses the GPU whatever this is set to.
         public sl.COMPUTE_PREFERENCE computePreference = sl.COMPUTE_PREFERENCE.AUTO;
     }
+
+    /// \ingroup Core_group
+    /// <summary>
+    /// Structure representing a transformation: a translation and a rotation.
+    /// </summary>
+    /// \note The default value of this structure is not a valid transform, as its rotation is a zeroed quaternion.
+    /// Start from \ref Identity instead.
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Transform
+    {
+        /// <summary>
+        /// Translation part of the transform.
+        /// </summary>
+        public Vector3 translation;
+        /// <summary>
+        /// Rotation part of the transform.
+        /// </summary>
+        public Quaternion rotation;
+
+        /// <summary>
+        /// Creates a transform from a translation and a rotation.
+        /// </summary>
+        public Transform(Vector3 translation, Quaternion rotation)
+        {
+            this.translation = translation;
+            this.rotation = rotation;
+        }
+
+        /// <summary>
+        /// The identity transform: no translation and no rotation.
+        /// </summary>
+        public static Transform Identity => new Transform(Vector3.Zero, Quaternion.Identity);
+    }
+
     /// \ingroup PositionalTracking_group
     /// <summary>
     /// Structure containing positional tracking data giving the position and orientation of the camera in 3D space.
@@ -774,7 +817,204 @@ namespace sl
         VISUAL_INERTIAL_GNSS = 4,
         VISUAL_GNSS = 5,
         INERTIAL_GNSS = 6,
-        UNAVAILABLE = 7
+        UNAVAILABLE = 7,
+        MOTION_PRIOR = 8
+    }
+
+    ///\ingroup PositionalTracking_group
+    /// <summary>
+    /// Report how the motion given to sl.Camera.IngestMotionPrior() was used for the current image.
+    /// </summary>
+    public enum RELATIVE_POSE_FUSION_STATUS
+    {
+        /// <summary>
+        /// The motion prior is not used: no sample has been accepted through sl.Camera.IngestMotionPrior() yet in
+        /// this session, or the session does not run sl.POSITIONAL_TRACKING_MODE.GEN_3.
+        /// </summary>
+        OFF = 0,
+        /// <summary>
+        /// The motion prior was used for this image.
+        /// </summary>
+        OK = 1,
+        /// <summary>
+        /// No motion prior was received for this image, only the images were used. Occasional values are expected and harmless.
+        /// </summary>
+        MISSING = 2,
+        /// <summary>
+        /// A motion prior was available but did not cover this image's time interval, so the pose was estimated from
+        /// the images alone. Occasional occurrences are harmless.
+        /// </summary>
+        /// \note Also reported when a gap leaves too much of the interval uncovered (one missed sample is tolerated,
+        /// a hole several samples long is not), or when the samples are not chained: a sample whose
+        /// sl.RelativePoseData.startTimestamp is not the sl.RelativePoseData.endTimestamp of the previous one.
+        /// \note Reported on every frame means either the samples are not chained, or the two clocks do not agree.
+        /// For the latter, check that your timestamps come from the same time reference as
+        /// sl.Camera.GetCameraTimeStamp(), in nanoseconds.
+        OUT_OF_SYNC = 3,
+        /// <summary>
+        /// The motion prior disagreed with what the images show and was discarded for this image. Persistent values
+        /// usually mean a wrong mounting transform, a wrong sign convention, or an uncertainty that is set too low.
+        /// </summary>
+        REJECTED = 4,
+        /// <summary>
+        /// The motion prior for this image had not arrived yet, because the source is slower than the camera or its
+        /// samples arrive after the image: it was not applied to this image, but it is used to correct the
+        /// trajectory over a longer stretch once it arrives. Expected on most images with such a source.
+        /// </summary>
+        DEFERRED = 5
+    }
+
+    ///\ingroup PositionalTracking_group
+    /// <summary>
+    /// Flags selecting which degrees of freedom of a sl.RelativePoseData are measured.
+    /// </summary>
+    /// Combine them with the bitwise OR operator. An axis that is not listed is treated as completely unknown: the
+    /// ZED SDK ignores the corresponding row and column of sl.RelativePoseData.covariance and lets the images alone
+    /// determine that axis.
+    /// \note The order of the flags is also the order of the rows and columns of sl.RelativePoseData.covariance.
+    /// \note X, Y and Z are the axes of your motion source itself, and
+    /// the rotation of sl.RelativePoseData.sensorTransform says where they point. A wheel odometry measuring
+    /// forward, sideways and heading motion therefore declares <c>TX | TY | RZ</c>.
+    [Flags]
+    public enum POSE_AXIS : uint
+    {
+        /// <summary>
+        /// No axis.
+        /// </summary>
+        NONE = 0,
+        /// <summary>
+        /// Translation along the X axis.
+        /// </summary>
+        TX = 1 << 0,
+        /// <summary>
+        /// Translation along the Y axis.
+        /// </summary>
+        TY = 1 << 1,
+        /// <summary>
+        /// Translation along the Z axis.
+        /// </summary>
+        TZ = 1 << 2,
+        /// <summary>
+        /// Rotation about the X axis.
+        /// </summary>
+        RX = 1 << 3,
+        /// <summary>
+        /// Rotation about the Y axis.
+        /// </summary>
+        RY = 1 << 4,
+        /// <summary>
+        /// Rotation about the Z axis.
+        /// </summary>
+        RZ = 1 << 5,
+        /// <summary>
+        /// The three translation axes.
+        /// </summary>
+        TRANSLATION = TX | TY | TZ,
+        /// <summary>
+        /// The three rotation axes.
+        /// </summary>
+        ROTATION = RX | RY | RZ,
+        /// <summary>
+        /// All six degrees of freedom.
+        /// </summary>
+        ALL = TRANSLATION | ROTATION
+    }
+
+    ///\ingroup PositionalTracking_group
+    /// <summary>
+    /// Structure containing the motion measured by your motion source over one time interval, to be used by the
+    /// positional tracking as a prior through sl.Camera.IngestMotionPrior().
+    /// </summary>
+    /// Use it to give wheel odometry, an external visual-inertial system or the difference between two consecutive
+    /// GNSS fixes to the ZED SDK. The motion prior constrains how far the camera is allowed to have moved between two
+    /// images; the images still determine the final pose.
+    /// \note The following conventions are fixed and cannot be configured:
+    /// \note - The motion is the pose of your motion source at \ref endTimestamp expressed in the frame that same
+    /// source was in at \ref startTimestamp, the same direction as the pose of sl.Camera.GetPosition().
+    /// \note - The motion is expressed along the axes of your motion source, exactly as that source measures it, in
+    /// the unit selected in sl.InitParameters.coordinateUnits. Where those axes point is described only by the
+    /// rotation of \ref sensorTransform.
+    /// \note - \ref covariance is ordered [tx, ty, tz, rx, ry, rz], the same order and quantities as
+    /// sl.Pose.pose_covariance, so translation first, then the rotation as a rotation vector in radians, <b>not</b>
+    /// Euler angles.
+    /// \note - \ref covariance describes the error of the motion in the frame the source started the interval in,
+    /// and <b>not</b> along the axes the source ends up on.
+    /// \note - Translation variances are in coordinate units squared, rotation variances in radians squared, and the
+    /// translation/rotation blocks in coordinate units times radians.
+    [StructLayout(LayoutKind.Sequential)]
+    public struct RelativePoseData
+    {
+        /// <summary>
+        /// Beginning of the time interval this motion was measured over, in nanoseconds.
+        /// </summary>
+        /// Set it to the \ref endTimestamp of the sample you ingested previously, so that consecutive samples follow
+        /// each other without a gap. For your very first sample, set it to the instant your source started measuring
+        /// that increment.
+        /// \note Same time reference as \ref endTimestamp, and earlier than it. It cannot be left at 0.
+        public ulong startTimestamp;
+        /// <summary>
+        /// End of the time interval this motion was measured over, in nanoseconds.
+        /// </summary>
+        /// It must use the same time reference as sl.Camera.GetCameraTimeStamp().
+        public ulong endTimestamp;
+        /// <summary>
+        /// Motion of your motion source between \ref startTimestamp and \ref endTimestamp.
+        /// </summary>
+        /// Give it exactly as your source measures it, along its own axes: the ZED SDK moves it into the camera frame
+        /// using \ref sensorTransform. Only the parts selected by \ref measuredAxes are read.
+        /// \note Its rotation must be a valid rotation even if no rotation axis is measured: start from
+        /// sl.Transform.Identity, as the default value of a Transform is not a valid transform.
+        public Transform motion;
+        /// <summary>
+        /// Degrees of freedom that your motion source actually measures.
+        /// </summary>
+        /// A sample that declares no axis (sl.POSE_AXIS.NONE) is rejected by sl.Camera.IngestMotionPrior().
+        /// \note Wheel encoders measure forward, sideways and heading motion only, and should not claim the other
+        /// three. Declaring an axis that the source does not measure is the most common reason for a motion prior to
+        /// degrade the tracking instead of improving it.
+        public POSE_AXIS measuredAxes;
+        /// <summary>
+        /// Uncertainty of the motion, row-major 6x6 matrix ordered [tx, ty, tz, rx, ry, rz]. Must hold 36 values.
+        /// </summary>
+        /// Only the rows and columns selected by \ref measuredAxes are read, which keeps the correlations between the
+        /// measured axes. The remaining entries can be left at 0.
+        /// \n The part that is read must be symmetric and describe a real uncertainty. Values too small to be
+        /// physically achievable are raised to a minimum by the ZED SDK.
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 36)]
+        public float[] covariance;
+        /// <summary>
+        /// Whether this sample reports that the camera did not move at all.
+        /// </summary>
+        /// Set it together with a small but non-zero \ref covariance. It is what allows the ZED SDK to hold the
+        /// position perfectly still while your vehicle is stopped.
+        [MarshalAs(UnmanagedType.U1)]
+        public bool isStationary;
+        /// <summary>
+        /// Where your motion source is mounted, relative to the camera.
+        /// </summary>
+        /// Set the pose of the source (the wheel odometry frame, the external tracker, ...) in the camera frame: its
+        /// translation is where the source sits, its rotation is how the axes it measures along are oriented. The ZED
+        /// SDK then brings \ref motion and \ref covariance into the camera frame for you, so you fill them exactly as
+        /// your source produces them.
+        /// \n Use sl.Transform.Identity when the source already reports the motion of the camera itself, along the
+        /// camera axes. It must always be set: the default value of a Transform is not a valid transform, and the
+        /// sample is then refused.
+        /// \note Expressed in the coordinate system selected in sl.InitParameters, its translation in the unit selected there.
+        /// \note A rotation never mirrors an axis, so your source must have the same <b>handedness</b> as the coordinate
+        /// system you selected (Unity is left-handed). Otherwise convert the motion and its uncertainty before
+        /// ingesting it, as a mirroring transform makes sl.Camera.IngestMotionPrior() refuse the sample.
+        /// \note Getting the rotation wrong is the most likely reason for the motion prior to be rejected, which sl.PositionalTrackingStatus.relativePoseFusionStatus reports.
+        public Transform sensorTransform;
+        /// <summary>
+        /// How far this motion is allowed to disagree with the images before it is discarded, as a multiple of the
+        /// uncertainty given in \ref covariance.
+        /// </summary>
+        /// Lower values trust the images more, higher values trust the motion prior more. 3.0 is a good starting point.
+        /// \note Must be strictly positive, otherwise sl.Camera.IngestMotionPrior() refuses the sample: it cannot be
+        /// left at 0. To never discard the motion, set a large value.
+        /// \note When several samples cover the same image or keyframe interval, the lowest value applies.
+        /// \note Discarded motion is reported through sl.PositionalTrackingStatus.relativePoseFusionStatus.
+        public float rejectionThreshold;
     }
 
     ///\ingroup PositionalTracking_group
@@ -796,6 +1036,10 @@ namespace sl
         /// Represents the current state of positional tracking fusion.
         /// </summary>
         public POSITIONAL_TRACKING_FUSION_STATUS trackingFusionStatus;
+        /// <summary>
+        /// Represents how the motion given to sl.Camera.IngestMotionPrior() was used for the current image.
+        /// </summary>
+        public RELATIVE_POSE_FUSION_STATUS relativePoseFusionStatus;
 
     }
 
@@ -841,7 +1085,11 @@ namespace sl
         /// Use GPU acceleration wherever it is available, which makes tracking faster and lowers the per-frame time
         /// of sl.Camera.Grab(). Falls back to the CPU by itself if the GPU cannot be used.
         /// </summary>
-        PREFER_GPU
+        PREFER_GPU,
+        /// <summary>
+        /// Experimental. Run work on the device's dedicated accelerators where there are some, leaving the CPU and the GPU free, and decide the rest as sl.COMPUTE_PREFERENCE.AUTO. For positional tracking, sl.POSITIONAL_TRACKING_MODE.GEN_3 then runs its image preprocessing and feature tracking on the PVA of a Jetson AGX Orin or Orin NX (JetPack 6 or 7.2) or of a Jetson Thor (JetPack 7.2), for the same poses as on the CPU: it uses less CPU, and can add latency (about 2 ms per frame with JetPack 7.2). Elsewhere it is sl.COMPUTE_PREFERENCE.AUTO.
+        /// </summary>
+        PREFER_ACCELERATORS
     }
 
     /// \ingroup PositionalTracking_group
@@ -1582,7 +1830,13 @@ namespace sl
         /// No internal depth computation. The depth (or disparity) is provided for each frame with
         /// Camera.IngestCustomDepth(), between Camera.Read() and Camera.Grab().
         /// </summary>
-        CUSTOM
+        CUSTOM,
+        /// <summary>
+        /// Most accurate Neural disparity estimation.\n Requires AI module.
+        /// \n With sl.DEPTH_PRECISION.FP16 (the default) it gives its most detailed depth; with sl.DEPTH_PRECISION.INT8 it takes up to about half the time and measures as close to the camera.
+        /// \note Much heavier than NEURAL_PLUS, with up to about 2.1 GB of GPU memory in FP16 and 1.2 GB in INT8: meant for high-end GPUs (e.g. Jetson AGX Thor) or offline processing.
+        /// </summary>
+        NEURAL_MAX
     };
 
     ///\ingroup Depth_group
@@ -1594,14 +1848,49 @@ namespace sl
     public enum DEPTH_PRECISION
     {
         /// <summary>
-        /// Half-precision neural depth (default).
+        /// Half-precision neural depth (default). With sl.DEPTH_MODE.NEURAL_MAX: its most detailed depth.
         /// </summary>
         FP16,
         /// <summary>
-        /// Explicit-quantization (Q/DQ) INT8 neural depth.
-        /// \n Best-effort: falls back to FP16 if the selected sl.DEPTH_MODE ships no INT8 model or the platform lacks fast INT8.
+        /// 8-bit neural depth inference: faster and with a lower memory footprint, at an accuracy cost.
+        /// \n sl.DEPTH_MODE.NEURAL, sl.DEPTH_MODE.NEURAL_PLUS, sl.DEPTH_MODE.NEURAL_LIGHT and sl.DEPTH_MODE.NEURAL_MAX provide 8-bit models.
+        /// sl.DEPTH_MODE.NEURAL_MAX and sl.DEPTH_MODE.NEURAL_LIGHT use FP8 on Jetson Thor, DGX Spark and RTX 40 and RTX 50 series GPUs, which is more accurate, and INT8 on the others; sl.DEPTH_MODE.NEURAL and sl.DEPTH_MODE.NEURAL_PLUS use INT8. The other depth modes run in FP16.
+        /// \n With sl.DEPTH_MODE.NEURAL_MAX, FP16 gives the most detailed depth and INT8 takes up to about half the time; on those GPUs both run in FP8.
+        /// \n Always safe to set: the SDK falls back to FP16, and says so in the log, when the depth mode or the GPU does not support INT8.
         /// </summary>
-        INT8
+        INT8,
+        /// <summary>
+        /// Neither of the above.\n Only ever returned by Camera.GetInitParameters(), never set by the user: the depth engine runs at a precision that has no sl.DEPTH_PRECISION value (e.g. on the DLA).
+        /// </summary>
+        LAST
+    };
+
+    ///\ingroup Depth_group
+    /// <summary>
+    /// Lists the processors that can run the neural depth network.
+    /// </summary>
+    /// \note For more info, read about the ZED SDK C++ enum it mirrors:
+    /// <a href="https://www.stereolabs.com/docs/api/group__Depth__group.html">DEPTH_COMPUTE_DEVICE</a>
+    public enum DEPTH_COMPUTE_DEVICE
+    {
+        /// <summary>
+        /// The processor that gives the best depth performance, currently the GPU (default).
+        /// </summary>
+        AUTO,
+        /// <summary>
+        /// The GPU.
+        /// </summary>
+        GPU,
+        /// <summary>
+        /// Experimental. A Deep Learning Accelerator core of a Jetson AGX Orin or Orin NX with JetPack 6 (the Jetson Orin Nano has no DLA): the network runs on the DLA instead of the GPU.
+        /// \n Only for sl.DEPTH_MODE.NEURAL_LIGHT; the network runs at its own precision, InitParameters.depthPrecision is ignored and Camera.GetInitParameters() reports it as sl.DEPTH_PRECISION.LAST. Where it cannot be used, the depth runs on the GPU (sl.ERROR_CODE.CONFIGURATION_FALLBACK from Camera.Open()).
+        /// </summary>
+        DLA,
+        /// <summary>
+        /// Experimental. The Programmable Vision Accelerator of a Jetson AGX Orin or Orin NX with JetPack 6 or 7.2, or of a Jetson Thor with JetPack 7.2 (the Jetson Orin Nano has none): the network runs on the PVA instead of the GPU.
+        /// \n Only for sl.DEPTH_MODE.NEURAL_LIGHT; the network runs at its own precision, which Camera.GetInitParameters() reports (sl.DEPTH_PRECISION.LAST when it has no sl.DEPTH_PRECISION value). With another depth mode, or where it cannot be used, the depth runs on the GPU (sl.ERROR_CODE.CONFIGURATION_FALLBACK from Camera.Open()).
+        /// </summary>
+        PVA
     };
 
     ///\ingroup Depth_group
@@ -1948,10 +2237,11 @@ namespace sl
         /// <summary>
         /// sl.DEPTH_PRECISION used for neural depth inference.
         ///
-        /// Only applies to the neural depth modes (sl.DEPTH_MODE.NEURAL_LIGHT, sl.DEPTH_MODE.NEURAL and sl.DEPTH_MODE.NEURAL_PLUS).
-        /// \n Set it to \ref DEPTH_PRECISION "sl.DEPTH_PRECISION.INT8" to request explicit-quantization (Q/DQ) INT8 inference.
-        /// \n Default: \ref DEPTH_PRECISION "sl.DEPTH_PRECISION.FP16"
-        /// \note Best-effort: the SDK silently falls back to FP16 if the selected depth mode ships no INT8 model or if the platform lacks fast INT8.
+        /// Default: \ref DEPTH_PRECISION "sl.DEPTH_PRECISION.FP16"
+        /// \n Set it to \ref DEPTH_PRECISION "sl.DEPTH_PRECISION.INT8" to request 8-bit inference, which is faster and uses less memory, at an accuracy cost.
+        /// sl.DEPTH_MODE.NEURAL, sl.DEPTH_MODE.NEURAL_PLUS, sl.DEPTH_MODE.NEURAL_LIGHT and sl.DEPTH_MODE.NEURAL_MAX provide 8-bit models (sl.DEPTH_MODE.NEURAL_MAX and sl.DEPTH_MODE.NEURAL_LIGHT in FP8 on Jetson Thor, DGX Spark and RTX 40 and RTX 50 series GPUs, in INT8 on the others); the other depth modes run in FP16.
+        /// \n With sl.DEPTH_MODE.NEURAL_MAX, FP16 gives the most detailed depth and INT8 takes up to about half the time; on those GPUs both run in FP8.
+        /// \n Always safe to set: the SDK falls back to FP16, and says so in the log, when the depth mode or the GPU does not support INT8. Camera.GetInitParameters() reports the precision actually in use, which may differ from the one requested here: sl.DEPTH_PRECISION.LAST when the depth runs at a precision that has no value here, such as on the DLA or the PVA (depthComputeDevice). With sl.DEPTH_MODE.NEURAL_MAX it reports the precision requested and the log gives the precision the GPU runs it at; likewise sl.DEPTH_MODE.NEURAL_LIGHT in INT8 on the GPUs running it in FP8.
         /// </summary>
         public sl.DEPTH_PRECISION depthPrecision;
         /// <summary>
@@ -1969,6 +2259,43 @@ namespace sl
         /// \n Default: false (disabled)
         /// </summary>
         public bool allowDepthCudaGraph;
+        /// <summary>
+        /// Processor that runs the neural depth network.
+        ///
+        /// \n Default: \ref DEPTH_COMPUTE_DEVICE "sl.DEPTH_COMPUTE_DEVICE.AUTO", the processor that gives the best depth performance (currently the GPU).
+        /// \n Experimental: sl.DEPTH_COMPUTE_DEVICE.DLA and sl.DEPTH_COMPUTE_DEVICE.PVA run sl.DEPTH_MODE.NEURAL_LIGHT on an accelerator of a Jetson, which leaves the GPU to your application: the network runs on the accelerator, small steps around it still run on the GPU.
+        /// The DLA is available on a Jetson AGX Orin or Orin NX with JetPack 6 (the Jetson Orin Nano has no DLA), the PVA on a Jetson AGX Orin or Orin NX with JetPack 6 or 7.2 and on a Jetson Thor with JetPack 7.2 (the Jetson Orin Nano has no PVA).
+        /// Where the accelerator cannot be used (none on this device, none available, its model unavailable), the depth runs on the GPU instead: \ref Camera.Open() returns sl.ERROR_CODE.CONFIGURATION_FALLBACK, the log says why, and Camera.GetInitParameters() reports sl.DEPTH_COMPUTE_DEVICE.GPU.
+        /// \note With sl.DEPTH_COMPUTE_DEVICE.DLA, Camera.Open() fails with sl.ERROR_CODE.INVALID_FUNCTION_PARAMETERS for any depth mode other than sl.DEPTH_MODE.NEURAL_LIGHT (or sl.DEPTH_MODE.NONE). With sl.DEPTH_COMPUTE_DEVICE.PVA, another depth mode runs on the GPU, as above.
+        /// \note The DLA model is downloaded on first use, like the other AI models, then prepared for the device: the first Camera.Open() takes a few minutes, the next ones do not.
+        /// \note A DLA has room for a limited number of depth models for the whole system, other applications included. Cameras of one application can share a model; otherwise each needs room of its own, so a Jetson Orin with two DLAs may run as few as two such cameras. When no DLA has room, the depth of that camera runs on the GPU, as above.
+        /// \note Several cameras can compute their depth on the PVA at once, and other applications can use it too. They share it, so the depth takes longer and its time can vary from frame to frame: a warning says so when the PVA is already in use as the camera starts on it. If the PVA fails during the session, the depth runs on the GPU from that frame on: Camera.Grab() returns sl.ERROR_CODE.CONFIGURATION_FALLBACK once and Camera.GetInitParameters() reports sl.DEPTH_COMPUTE_DEVICE.GPU.
+        /// </summary>
+        public sl.DEPTH_COMPUTE_DEVICE depthComputeDevice;
+        /// <summary>
+        /// Requested full-scale range of the accelerometer.
+        ///
+        /// The range in use is reported by the accelerometer parameters of the camera information.
+        /// \note Only the ZED X family supports it, with ZED X driver 1.5.0 or later. Other cameras, and older drivers, keep their default range.
+        /// \n Default: \ref sl.ACCELEROMETER_RANGE.DEFAULT "DEFAULT" (camera default, ±12 g on ZED X cameras)
+        /// </summary>
+        public ACCELEROMETER_RANGE imuAccelerometerRange;
+        /// <summary>
+        /// Requested full-scale range of the gyroscope.
+        ///
+        /// \note Same availability as \ref imuAccelerometerRange.
+        /// \n Default: \ref sl.GYROSCOPE_RANGE.DEFAULT "DEFAULT" (camera default, ±1000 deg/s on ZED X cameras)
+        /// </summary>
+        public GYROSCOPE_RANGE imuGyroscopeRange;
+        /// <summary>
+        /// Requested IMU sampling rate.
+        ///
+        /// Sets the rate of the gyroscope, and so of the IMU data.
+        /// \ref sl.IMU_SAMPLING_RATE.OFF "OFF" opens the camera without its IMU (no IMU data, motion sensors reported unavailable).
+        /// \note 400 Hz needs ZED X driver 1.5.0 or later. Otherwise the IMU runs at 200 Hz.
+        /// \n Default: \ref sl.IMU_SAMPLING_RATE.DEFAULT "DEFAULT" (camera default, 200 Hz on ZED X cameras)
+        /// </summary>
+        public IMU_SAMPLING_RATE imuSamplingRate;
         /// <summary>
         /// Minimum depth distance to be returned, measured in the sl.UNIT defined in \ref coordinateUnits.
         ///
@@ -2083,7 +2410,8 @@ namespace sl
         /// <li><b>Linux</b>: <i>/usr/local/zed/settings/</i></li> 
         /// <li><b>Windows</b>: <i>C:/ProgramData/stereolabs/settings</i></li></ul>
         /// 
-        /// \note If a path is specified and no file has been found, the ZED SDK will search the settings file in the default directory.
+        /// \note The path is a directory. The trailing separator is optional: both "/home/user/settings" and "/home/user/settings/" are accepted.
+        /// \note If a path is specified and no file has been found, the ZED SDK will search the settings file in the default directory and report it with a warning in the SDK log.
         /// \note An automatic download of the settings file (through <b>ZED Explorer</b> or the installer) will still download the files on the default path.
         /// </summary>
         public string optionalSettingsPath = "";
@@ -2285,6 +2613,10 @@ namespace sl
             this.depthMode = DEPTH_MODE.NEURAL;
             this.depthPrecision = DEPTH_PRECISION.FP16;
             this.allowDepthCudaGraph = false;
+            this.depthComputeDevice = DEPTH_COMPUTE_DEVICE.AUTO;
+            this.imuAccelerometerRange = ACCELEROMETER_RANGE.DEFAULT;
+            this.imuGyroscopeRange = GYROSCOPE_RANGE.DEFAULT;
+            this.imuSamplingRate = IMU_SAMPLING_RATE.DEFAULT;
             this.depthMinimumDistance = -1;
             this.depthMaximumDistance = -1;
             this.cameraImageFlip = FLIP_MODE.OFF;
@@ -3183,12 +3515,12 @@ namespace sl
         NORMALS_RIGHT_GRAY,
         /// <summary>
         /// Left NV12 rectified image (YUV 4:2:0 semi-planar).
-        ///\n Type: sl.MAT_TYPE.NV12.
+        ///\n Type: sl.MAT_TYPE.MAT_NV12.
         /// </summary>
         LEFT_NV12,
         /// <summary>
         /// Right NV12 rectified image (YUV 4:2:0 semi-planar).
-        ///\n Type: sl.MAT_TYPE.NV12.
+        ///\n Type: sl.MAT_TYPE.MAT_NV12.
         /// </summary>
         RIGHT_NV12
     };
@@ -3347,10 +3679,18 @@ namespace sl
         /// AE anti-banding mode.
         /// Affected value should be between 0 and 3.
         /// 0: OFF, 1: AUTO, 2: 50Hz, 3: 60Hz.
-        /// Default value is 0 (OFF).
+        /// Default value is 1 (AUTO).
         /// \note Only available for non-HDR GMSL cameras (e.g. ZED X, ZED X Mini, ZED X One GS, etc.).
         /// </summary>
         AE_ANTIBANDING,
+        /// <summary>
+        /// Color correction matrix, converting the sensor RGB values to linear sRGB.
+        /// Apply a 3x3 matrix with the overloaded \ref Camera.SetCameraSettings(VIDEO_SETTINGS,Matrix3x3) "SetCameraSettings()",
+        /// and go back to the color correction of the camera with \ref Camera.SetCameraSettings(VIDEO_SETTINGS,int) "SetCameraSettings()" and -1.
+        /// On a live camera, \ref Camera.GetCameraSettings(VIDEO_SETTINGS) "GetCameraSettings()" returns 1 while a matrix set by the application is in use, 0 otherwise.
+        /// \note Only available for non-HDR GMSL cameras (e.g. ZED X, ZED X Mini, ZED X One GS, etc.).
+        /// </summary>
+        COLOR_CORRECTION_MATRIX,
         ///@cond SHOWHIDDEN
         LAST
         ///@endcond
@@ -3406,6 +3746,86 @@ namespace sl
         /// free-running hardware counters or other devices that are not time-disciplined by the host.
         /// </summary>
         MONOTONIC_RAW_CLOCK
+    };
+
+    ///\ingroup  Sensors_group
+    /// <summary>
+    /// Lists the IMU sampling rates that can be requested in \ref InitParameters.imuSamplingRate.
+    /// </summary>
+    public enum IMU_SAMPLING_RATE
+    {
+        /// <summary>
+        /// Camera default (200 Hz on ZED X cameras).
+        /// </summary>
+        DEFAULT,
+        /// <summary>
+        /// 200 Hz.
+        /// </summary>
+        HZ_200,
+        /// <summary>
+        /// 400 Hz.
+        /// </summary>
+        HZ_400,
+        /// <summary>
+        /// IMU not opened: the camera runs without motion sensors.
+        /// </summary>
+        OFF
+    };
+
+    ///\ingroup  Sensors_group
+    /// <summary>
+    /// Lists the accelerometer full-scale ranges that can be requested in \ref InitParameters.imuAccelerometerRange.
+    /// </summary>
+    public enum ACCELEROMETER_RANGE
+    {
+        /// <summary>
+        /// Camera default (±12 g on ZED X cameras).
+        /// </summary>
+        DEFAULT,
+        /// <summary>
+        /// ±3 g.
+        /// </summary>
+        G_3,
+        /// <summary>
+        /// ±6 g.
+        /// </summary>
+        G_6,
+        /// <summary>
+        /// ±12 g.
+        /// </summary>
+        G_12,
+        /// <summary>
+        /// ±24 g.
+        /// </summary>
+        G_24
+    };
+
+    ///\ingroup  Sensors_group
+    /// <summary>
+    /// Lists the gyroscope full-scale ranges that can be requested in \ref InitParameters.imuGyroscopeRange.
+    /// </summary>
+    public enum GYROSCOPE_RANGE
+    {
+        /// <summary>
+        /// Camera default (±1000 deg/s on ZED X cameras).
+        /// </summary>
+        DEFAULT,
+        /// <summary>
+        /// ±250 deg/s.
+        /// </summary>
+        DPS_250,
+        /// <summary>
+        /// ±500 deg/s.
+        /// </summary>
+        DPS_500,
+        /// <summary>
+        /// ±1000 deg/s.
+        /// </summary>
+        DPS_1000,
+        /// <summary>
+        /// ±2000 deg/s.
+        /// </summary>
+        DPS_2000
     };
 
     ///\ingroup  Video_group
@@ -5950,9 +6370,28 @@ namespace sl
         NEURAL_PLUS_DEPTH,
         /// <summary>
         /// Related to sl.DEPTH_MODE.NEURAL with sl.DEPTH_PRECISION.INT8.
-        /// Separate artifact and engine from NEURAL_DEPTH: optimizing one does not optimize the other.
+        /// Uses the model file of NEURAL_DEPTH, with an engine of its own: optimizing one does not optimize the other.
         /// </summary>
         NEURAL_DEPTH_INT8,
+        /// <summary>
+        /// Related to sl.DEPTH_MODE.NEURAL_LIGHT with sl.DEPTH_PRECISION.INT8.
+        /// A model of its own, in the model file of NEURAL_LIGHT_DEPTH, with an engine of its own: optimizing one does not optimize the other.
+        /// </summary>
+        NEURAL_LIGHT_DEPTH_INT8,
+        /// <summary>
+        /// Related to sl.DEPTH_MODE.NEURAL_MAX
+        /// </summary>
+        NEURAL_MAX_DEPTH,
+        /// <summary>
+        /// Related to sl.DEPTH_MODE.NEURAL_PLUS with sl.DEPTH_PRECISION.INT8.
+        /// Uses the model file of NEURAL_PLUS_DEPTH, with an engine of its own: optimizing one does not optimize the other.
+        /// </summary>
+        NEURAL_PLUS_DEPTH_INT8,
+        /// <summary>
+        /// Related to sl.DEPTH_MODE.NEURAL_MAX with sl.DEPTH_PRECISION.INT8.
+        /// Uses the model file of NEURAL_MAX_DEPTH, with an engine of its own: optimizing one does not optimize the other.
+        /// </summary>
+        NEURAL_MAX_DEPTH_INT8,
         ///@cond SHOWHIDDEN
         LAST
         ///@endcond
