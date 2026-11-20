@@ -389,6 +389,9 @@ namespace sl
         [DllImport(nameDll, EntryPoint = "sl_set_roi_for_aec_agc")]
         private static extern ERROR_CODE dllz_set_roi_for_aec_agc(int id, int side, ref Rect roi, bool reset);
 
+        [DllImport(nameDll, EntryPoint = "sl_set_camera_settings_color_matrix")]
+        private static extern ERROR_CODE dllz_set_camera_settings_color_matrix(int id, int mode, ref Matrix3x3 matrix);
+
         [DllImport(nameDll, EntryPoint = "sl_get_roi_for_aec_agc")]
         private static extern ERROR_CODE dllz_get_roi_for_aec_agc(int id, int side, ref Rect roi);
 
@@ -539,6 +542,9 @@ namespace sl
 
         [DllImport(nameDll, EntryPoint = "sl_set_imu_prior_orientation")]
         private static extern int dllz_set_imu_prior_orientation(int cameraID, Quaternion rotation);
+
+        [DllImport(nameDll, EntryPoint = "sl_ingest_motion_prior")]
+        private static extern int dllz_ingest_motion_prior(int cameraID, ref RelativePoseData motionPrior);
 
         [DllImport(nameDll, EntryPoint = "sl_get_imu_orientation")]
         private static extern int dllz_get_internal_imu_orientation(int cameraID, ref Quaternion rotation, int reference_time);
@@ -1048,6 +1054,23 @@ namespace sl
             public bool allowDepthCudaGraph;
 
             /// <summary>
+            /// Processor that runs the neural depth network.
+            /// </summary>
+            public sl.DEPTH_COMPUTE_DEVICE depthComputeDevice;
+            /// <summary>
+            /// Requested full-scale range of the accelerometer.
+            /// </summary>
+            public sl.ACCELEROMETER_RANGE imuAccelerometerRange;
+            /// <summary>
+            /// Requested full-scale range of the gyroscope.
+            /// </summary>
+            public sl.GYROSCOPE_RANGE imuGyroscopeRange;
+            /// <summary>
+            /// Requested IMU sampling rate.
+            /// </summary>
+            public sl.IMU_SAMPLING_RATE imuSamplingRate;
+
+            /// <summary>
             /// Copy constructor.
             /// </summary>
             /// <param name="init"></param>
@@ -1061,6 +1084,10 @@ namespace sl
                 depthMode = init.depthMode;
                 depthPrecision = init.depthPrecision;
                 allowDepthCudaGraph = init.allowDepthCudaGraph;
+                depthComputeDevice = init.depthComputeDevice;
+                imuAccelerometerRange = init.imuAccelerometerRange;
+                imuGyroscopeRange = init.imuGyroscopeRange;
+                imuSamplingRate = init.imuSamplingRate;
                 depthMinimumDistance = init.depthMinimumDistance;
                 depthMaximumDistance = init.depthMaximumDistance;
                 cameraImageFlip = (int)init.cameraImageFlip;
@@ -1430,6 +1457,10 @@ namespace sl
                 depthMode = sl_parameters.depthMode,
                 depthPrecision = sl_parameters.depthPrecision,
                 allowDepthCudaGraph = sl_parameters.allowDepthCudaGraph,
+                depthComputeDevice = sl_parameters.depthComputeDevice,
+                imuAccelerometerRange = sl_parameters.imuAccelerometerRange,
+                imuGyroscopeRange = sl_parameters.imuGyroscopeRange,
+                imuSamplingRate = sl_parameters.imuSamplingRate,
                 cameraImageFlip = (FLIP_MODE)sl_parameters.cameraImageFlip,
                 enableImageEnhancement = sl_parameters.enableImageEnhancement,
                 enableRightSideMeasure = sl_parameters.enableRightSideMeasure,
@@ -1545,10 +1576,15 @@ namespace sl
         /// <param name="settings">The setting to be set.</param>
         /// <param name="minvalue">The min value of the range to set.</param>
         /// <param name="maxvalue">The min value of the range to set.</param>
-        public void SetCameraSettings(VIDEO_SETTINGS settings, int minvalue, int maxvalue)
+        /// <returns>sl.ERROR_CODE.SUCCESS if the camera applied the range.
+        /// sl.ERROR_CODE.INVALID_FUNCTION_PARAMETERS if the setting is not a range setting, if it is not available on this camera model, or if minvalue is greater than maxvalue.
+        /// sl.ERROR_CODE.INVALID_FUNCTION_CALL if the input is an SVO file.
+        /// sl.ERROR_CODE.CAMERA_NOT_INITIALIZED if the camera is no longer available (disconnected, stream closed).
+        /// sl.ERROR_CODE.FAILURE if the camera refused the range.</returns>
+        public sl.ERROR_CODE SetCameraSettings(VIDEO_SETTINGS settings, int minvalue, int maxvalue)
         {
             AssertCameraIsReady();
-            dllz_set_camera_settings_min_max(CameraID, (int)settings, minvalue, maxvalue);
+            return dllz_set_camera_settings_min_max(CameraID, (int)settings, minvalue, maxvalue);
         }
 
         /// <summary>
@@ -1570,10 +1606,15 @@ namespace sl
         /// </summary>
         /// <param name="settings">The setting to be set.</param>
         /// <param name="value">The value to set. Default: auto mode</param>
-        public void SetCameraSettings(VIDEO_SETTINGS settings, int value)
+        /// <returns>sl.ERROR_CODE.SUCCESS if the camera applied the setting.
+        /// sl.ERROR_CODE.INVALID_FUNCTION_PARAMETERS if the setting does not exist on this camera model or if the value is out of range. Use IsCameraSettingSupported() to know what is accepted.
+        /// sl.ERROR_CODE.INVALID_FUNCTION_CALL if the input is an SVO file (only VIDEO_SETTINGS.SHARPNESS can be changed during playback, the other settings are part of the recorded images).
+        /// sl.ERROR_CODE.CAMERA_NOT_INITIALIZED if the camera is no longer available (disconnected, stream closed).
+        /// sl.ERROR_CODE.FAILURE if the camera refused the setting.</returns>
+        public sl.ERROR_CODE SetCameraSettings(VIDEO_SETTINGS settings, int value)
         {
             AssertCameraIsReady();
-            dllz_set_camera_settings(CameraID, (int)settings, value);
+            return dllz_set_camera_settings(CameraID, (int)settings, value);
         }
 
         /// <summary>
@@ -1596,7 +1637,11 @@ namespace sl
         /// <param name="side">sl.SIDE on which to be applied for AEC/AGC computation.</param>
         /// <param name="roi">Rect that defines the target to be applied for AEC/AGC computation. Must be given according to camera resolution.</param>
         /// <param name="reset">Cancel the manual ROI and reset it to the full image.</param>
-        /// <returns>An sl.ERROR_CODE to indicate if the method was successful.</returns>
+        /// <returns>sl.ERROR_CODE.SUCCESS if the camera applied the region.
+        /// sl.ERROR_CODE.INVALID_FUNCTION_PARAMETERS if roi does not fit in the current image resolution.
+        /// sl.ERROR_CODE.INVALID_FUNCTION_CALL if the input is an SVO file.
+        /// sl.ERROR_CODE.CAMERA_NOT_INITIALIZED if the camera is no longer available (disconnected, stream closed).
+        /// sl.ERROR_CODE.FAILURE if settings is not VIDEO_SETTINGS.AEC_AGC_ROI or if the camera refused the region.</returns>
         /// <remarks>
         /// A ROI larger than the image, or smaller than the minimum size the camera accepts, is rejected and the previously set ROI stays in use.
         /// Check this method's return code to know whether the ROI was applied: GetCameraSettings() reports the still-active ROI with
@@ -1629,6 +1674,48 @@ namespace sl
                 return dllz_get_roi_for_aec_agc(CameraID, (int)side, ref roi);
             else
                 return ERROR_CODE.FAILURE;
+        }
+
+        /// <summary>
+        /// Overloaded method for VIDEO_SETTINGS.COLOR_CORRECTION_MATRIX which applies a color correction matrix.
+        /// </summary>
+        /// <remarks>
+        /// The color correction matrix converts the sensor RGB values of each pixel to linear sRGB, before gamma correction: each row gives
+        /// one output channel (red, green, blue) as a weighted sum of the sensor red, green and blue values. A matrix set with this method
+        /// replaces the color correction of the camera until it is brought back with SetCameraSettings(VIDEO_SETTINGS.COLOR_CORRECTION_MATRIX, -1).
+        /// Use it to apply a matrix computed for your camera and lighting, for example from images of a color chart.
+        ///
+        /// \code
+        /// // Apply a color correction matrix computed for this camera
+        /// sl.Matrix3x3 matrix = new sl.Matrix3x3();
+        /// matrix.m = new float[9] { 1.8f, -0.5f, -0.3f,
+        ///                          -0.2f,  1.6f, -0.4f,
+        ///                           0.0f, -0.6f,  1.6f };
+        /// zed.SetCameraSettings(sl.VIDEO_SETTINGS.COLOR_CORRECTION_MATRIX, matrix);
+        ///
+        /// // Go back to the color correction of the camera
+        /// zed.SetCameraSettings(sl.VIDEO_SETTINGS.COLOR_CORRECTION_MATRIX, -1);
+        /// \endcode
+        ///
+        /// \note Works only if the camera is open in LIVE or STREAM mode on a non-HDR GMSL camera (e.g. ZED X, ZED X Mini, ZED X One GS).
+        /// Over a stream, the matrix is applied by the sending camera.
+        /// \note The matrix is applied to both the left and right sensors.
+        /// \note While a matrix set with this method is in use, VIDEO_SETTINGS.SATURATION has no effect.
+        /// </remarks>
+        /// <param name="settings">Must be set at VIDEO_SETTINGS.COLOR_CORRECTION_MATRIX.</param>
+        /// <param name="matrix">The color correction matrix to apply, in row-major order (9 values).</param>
+        /// <returns>sl.ERROR_CODE.SUCCESS if the camera applied the matrix.
+        /// sl.ERROR_CODE.INVALID_FUNCTION_PARAMETERS if settings is not VIDEO_SETTINGS.COLOR_CORRECTION_MATRIX, if the matrix does not hold 9 values
+        /// or if the camera does not support it.
+        /// sl.ERROR_CODE.INVALID_FUNCTION_CALL if the input is an SVO file.
+        /// sl.ERROR_CODE.CAMERA_NOT_INITIALIZED if the camera is no longer available (disconnected, stream closed).
+        /// sl.ERROR_CODE.FAILURE if the camera refused the matrix.</returns>
+        public ERROR_CODE SetCameraSettings(VIDEO_SETTINGS settings, Matrix3x3 matrix)
+        {
+            AssertCameraIsReady();
+            if (matrix.m == null || matrix.m.Length != 9)
+                return ERROR_CODE.INVALID_FUNCTION_PARAMETERS;
+            return dllz_set_camera_settings_color_matrix(CameraID, (int)settings, ref matrix);
         }
 
         /// <summary>
@@ -2401,6 +2488,48 @@ namespace sl
         public ERROR_CODE SetIMUOrientationPrior(ref Quaternion rotation)
         {
             return (sl.ERROR_CODE)dllz_set_imu_prior_orientation(CameraID, rotation);
+        }
+
+        /// <summary>
+        /// Gives the positional tracking a motion prior: the motion measured by your motion source.
+        /// </summary>
+        /// Use it to help the tracking with wheel odometry, an external visual-inertial system or the difference
+        /// between two consecutive GNSS fixes. Each sample describes how the camera moved over one time interval,
+        /// together with how uncertain that motion is and which axes the source actually measures.
+        ///
+        /// Call it before Grab(). Samples are matched to an image by timestamp, so it can be called from the thread
+        /// that reads your motion source, and several times between two Grab() calls. A missing sample is never an
+        /// error: the tracking uses the images alone for that image.
+        ///
+        /// Feed the samples back to back: the interval each one covers must start where the previous one ended, as
+        /// they are joined together to describe the motion between two images. A short gap is filled in for you, a
+        /// longer one makes the motion unusable for that image and is reported as
+        /// sl.RELATIVE_POSE_FUSION_STATUS.OUT_OF_SYNC.
+        /// \note A source faster than the camera is used on every image. A slower one is used to correct the
+        /// trajectory over longer stretches, not each image. In both cases the timestamps must use the same clock
+        /// as the images.
+        /// \note A sample that arrives after the image it covers was grabbed is not lost: it is used the same way as a
+        /// slower source, provided it arrives within 2 seconds. Samples given out of order are accepted too.
+        /// \note There is nothing to enable: the motion prior is used from the first sample on. Requires
+        /// sl.POSITIONAL_TRACKING_MODE.GEN_3.
+        /// How the motion was used for the last grabbed image is reported through
+        /// sl.PositionalTrackingStatus.relativePoseFusionStatus.
+        /// <param name="motionPrior">Motion measured over one time interval, with its uncertainty.</param>
+        /// <returns>sl.ERROR_CODE.SUCCESS if the motion was accepted.
+        /// \n sl.ERROR_CODE.INVALID_FUNCTION_CALL if the positional tracking is not enabled, or is enabled with a
+        /// mode other than sl.POSITIONAL_TRACKING_MODE.GEN_3.
+        /// \n sl.ERROR_CODE.INVALID_FUNCTION_PARAMETERS if either timestamp is left at 0 or they are not ordered, if no
+        /// axis is declared measured, if the covariance does not hold 36 values, if the motion or the uncertainty
+        /// of the declared axes cannot be used, if sl.RelativePoseData.sensorTransform is not a valid position and
+        /// orientation (its rotation must describe axes of the same handedness as the coordinate system selected in
+        /// sl.InitParameters), or if sl.RelativePoseData.rejectionThreshold is not greater than 0.
+        /// \n sl.ERROR_CODE.INVALID_TIMESTAMP if the sample ends more than 2 seconds before the last grabbed image: it
+        /// was discarded.</returns>
+        public sl.ERROR_CODE IngestMotionPrior(ref RelativePoseData motionPrior)
+        {
+            if (motionPrior.covariance == null || motionPrior.covariance.Length != 36)
+                return sl.ERROR_CODE.INVALID_FUNCTION_PARAMETERS;
+            return (sl.ERROR_CODE)dllz_ingest_motion_prior(CameraID, ref motionPrior);
         }
 
         /// <summary>
